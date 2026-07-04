@@ -1,0 +1,1175 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-04T23:10:50.080Z",
+  "root": "nvidiarouter",
+  "specs_dir": "specs",
+  "spec_count": 11,
+  "entity_count": 104,
+  "links": [
+    {
+      "entity_id": "code:class:105cf3fd45f1a7e0",
+      "entity_name": "Settings",
+      "entity_kind": "class",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: settings, class, settings"
+      ]
+    },
+    {
+      "entity_id": "code:class:a3c57c0496b830ae",
+      "entity_name": "TaskType",
+      "entity_kind": "class",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: class, enum"
+      ]
+    },
+    {
+      "entity_id": "code:function:7a9f676f748508cd",
+      "entity_name": "config",
+      "entity_kind": "function",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: config, def, config"
+      ]
+    },
+    {
+      "entity_id": "code:function:7a9f676f748508cd",
+      "entity_name": "config",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: config, def, config"
+      ]
+    },
+    {
+      "entity_id": "code:function:7a9f676f748508cd",
+      "entity_name": "config",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: config, def, config"
+      ]
+    },
+    {
+      "entity_id": "code:function:7a9f676f748508cd",
+      "entity_name": "config",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: config, def, config"
+      ]
+    },
+    {
+      "entity_id": "code:function:7a9f676f748508cd",
+      "entity_name": "config",
+      "entity_kind": "function",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: config, config"
+      ]
+    },
+    {
+      "entity_id": "code:function:8b6d1206638c1ce9",
+      "entity_name": "embeddings",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:8b6d1206638c1ce9",
+      "entity_name": "embeddings",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:8b6d1206638c1ce9",
+      "entity_name": "embeddings",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:b3f3976d1de07f72",
+      "entity_name": "log_requests",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:b3f3976d1de07f72",
+      "entity_name": "log_requests",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:b3f3976d1de07f72",
+      "entity_name": "log_requests",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:b628d07a8faa43b3",
+      "entity_name": "_display_banner",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Intent"
+      ]
+    },
+    {
+      "entity_id": "code:function:dad23137bc0c0e06",
+      "entity_name": "signal_handler",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, frame"
+      ]
+    },
+    {
+      "entity_id": "code:function:dad23137bc0c0e06",
+      "entity_name": "signal_handler",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, sig"
+      ]
+    },
+    {
+      "entity_id": "code:function:dad23137bc0c0e06",
+      "entity_name": "signal_handler",
+      "entity_kind": "function",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, sig"
+      ]
+    },
+    {
+      "entity_id": "code:function:e1d920ff34c491f8",
+      "entity_name": "chat_completions",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:e1d920ff34c491f8",
+      "entity_name": "chat_completions",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:e1d920ff34c491f8",
+      "entity_name": "chat_completions",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:e54ff5a4dea6ef94",
+      "entity_name": "version",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: version, def, version"
+      ]
+    },
+    {
+      "entity_id": "code:function:e54ff5a4dea6ef94",
+      "entity_name": "version",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: version, def, version"
+      ]
+    },
+    {
+      "entity_id": "code:function:e54ff5a4dea6ef94",
+      "entity_name": "version",
+      "entity_kind": "function",
+      "spec_filename": "CODING_STANDARDS.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: version, version"
+      ]
+    },
+    {
+      "entity_id": "code:function:e54ff5a4dea6ef94",
+      "entity_name": "version",
+      "entity_kind": "function",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: version, version"
+      ]
+    },
+    {
+      "entity_id": "code:function:fb023e925a1a44c3",
+      "entity_name": "stop",
+      "entity_kind": "function",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: stop, def, stop"
+      ]
+    },
+    {
+      "entity_id": "code:function:fb023e925a1a44c3",
+      "entity_name": "stop",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: stop, def, stop"
+      ]
+    },
+    {
+      "entity_id": "code:function:fe01ce679dafc55c",
+      "entity_name": "global_exception_handler",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:fe01ce679dafc55c",
+      "entity_name": "global_exception_handler",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:fe01ce679dafc55c",
+      "entity_name": "global_exception_handler",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, request"
+      ]
+    },
+    {
+      "entity_id": "code:method:2e6ca761bd91652f",
+      "entity_name": "_initialize_default_models",
+      "entity_kind": "method",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:4f711b9fbce38838",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:6b18a2d9410fa72d",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, self, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6b18a2d9410fa72d",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6b18a2d9410fa72d",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6b18a2d9410fa72d",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6b18a2d9410fa72d",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6b18a2d9410fa72d",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:9d94787d2c5d62ab",
+      "entity_name": "models",
+      "entity_kind": "method",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:bd0df8b282ac6e59",
+      "entity_name": "get_routing_stats",
+      "entity_kind": "method",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:f27775aec38024d3",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:fdcf19f747e3f2bf",
+      "entity_name": "analyze_request",
+      "entity_kind": "method",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.83,
+      "reasons": [
+        "matched tokens: def, self, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:fdcf19f747e3f2bf",
+      "entity_name": "analyze_request",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.83,
+      "reasons": [
+        "matched tokens: def, list, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:fdcf19f747e3f2bf",
+      "entity_name": "analyze_request",
+      "entity_kind": "method",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:fdcf19f747e3f2bf",
+      "entity_name": "analyze_request",
+      "entity_kind": "method",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:fdcf19f747e3f2bf",
+      "entity_name": "analyze_request",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:fdcf19f747e3f2bf",
+      "entity_name": "analyze_request",
+      "entity_kind": "method",
+      "spec_filename": "GLOBAL_SECURITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, dict"
+      ]
+    },
+    {
+      "entity_id": "code:method:fdcf19f747e3f2bf",
+      "entity_name": "analyze_request",
+      "entity_kind": "method",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, list"
+      ]
+    },
+    {
+      "entity_id": "code:method:fdcf19f747e3f2bf",
+      "entity_name": "analyze_request",
+      "entity_kind": "method",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:fefe528210da56f2",
+      "entity_name": "select_best_model",
+      "entity_kind": "method",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:route:47d995ee62216d36",
+      "entity_name": "POST /v1/embeddings",
+      "entity_kind": "route",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: post, post"
+      ]
+    },
+    {
+      "entity_id": "code:route:47d995ee62216d36",
+      "entity_name": "POST /v1/embeddings",
+      "entity_kind": "route",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: post, post"
+      ]
+    },
+    {
+      "entity_id": "code:route:5b0640d5531e57be",
+      "entity_name": "POST /v1/chat/completions",
+      "entity_kind": "route",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
+      ]
+    },
+    {
+      "entity_id": "code:route:92ffa30d75feb624",
+      "entity_name": "GET /v1/models",
+      "entity_kind": "route",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:92ffa30d75feb624",
+      "entity_name": "GET /v1/models",
+      "entity_kind": "route",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:92ffa30d75feb624",
+      "entity_name": "GET /v1/models",
+      "entity_kind": "route",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:92ffa30d75feb624",
+      "entity_name": "GET /v1/models",
+      "entity_kind": "route",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:92ffa30d75feb624",
+      "entity_name": "GET /v1/models",
+      "entity_kind": "route",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:92ffa30d75feb624",
+      "entity_name": "GET /v1/models",
+      "entity_kind": "route",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:92ffa30d75feb624",
+      "entity_name": "GET /v1/models",
+      "entity_kind": "route",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:92ffa30d75feb624",
+      "entity_name": "GET /v1/models",
+      "entity_kind": "route",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:92ffa30d75feb624",
+      "entity_name": "GET /v1/models",
+      "entity_kind": "route",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d01cd1217da24d22",
+      "entity_name": "GET /",
+      "entity_kind": "route",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.84,
+      "reasons": [
+        "route path appears in spec",
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d01cd1217da24d22",
+      "entity_name": "GET /",
+      "entity_kind": "route",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.84,
+      "reasons": [
+        "route path appears in spec",
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d01cd1217da24d22",
+      "entity_name": "GET /",
+      "entity_kind": "route",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.84,
+      "reasons": [
+        "route path appears in spec",
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d01cd1217da24d22",
+      "entity_name": "GET /",
+      "entity_kind": "route",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.84,
+      "reasons": [
+        "route path appears in spec",
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d01cd1217da24d22",
+      "entity_name": "GET /",
+      "entity_kind": "route",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.84,
+      "reasons": [
+        "route path appears in spec",
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d01cd1217da24d22",
+      "entity_name": "GET /",
+      "entity_kind": "route",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.84,
+      "reasons": [
+        "route path appears in spec",
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d01cd1217da24d22",
+      "entity_name": "GET /",
+      "entity_kind": "route",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d01cd1217da24d22",
+      "entity_name": "GET /",
+      "entity_kind": "route",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d01cd1217da24d22",
+      "entity_name": "GET /",
+      "entity_kind": "route",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d1f3b351542c3194",
+      "entity_name": "GET /ready",
+      "entity_kind": "route",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d1f3b351542c3194",
+      "entity_name": "GET /ready",
+      "entity_kind": "route",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d1f3b351542c3194",
+      "entity_name": "GET /ready",
+      "entity_kind": "route",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d1f3b351542c3194",
+      "entity_name": "GET /ready",
+      "entity_kind": "route",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d1f3b351542c3194",
+      "entity_name": "GET /ready",
+      "entity_kind": "route",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d1f3b351542c3194",
+      "entity_name": "GET /ready",
+      "entity_kind": "route",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d1f3b351542c3194",
+      "entity_name": "GET /ready",
+      "entity_kind": "route",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d1f3b351542c3194",
+      "entity_name": "GET /ready",
+      "entity_kind": "route",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d1f3b351542c3194",
+      "entity_name": "GET /ready",
+      "entity_kind": "route",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d557e3b89823bf43",
+      "entity_name": "GET /health",
+      "entity_kind": "route",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d557e3b89823bf43",
+      "entity_name": "GET /health",
+      "entity_kind": "route",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d557e3b89823bf43",
+      "entity_name": "GET /health",
+      "entity_kind": "route",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d557e3b89823bf43",
+      "entity_name": "GET /health",
+      "entity_kind": "route",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d557e3b89823bf43",
+      "entity_name": "GET /health",
+      "entity_kind": "route",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d557e3b89823bf43",
+      "entity_name": "GET /health",
+      "entity_kind": "route",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d557e3b89823bf43",
+      "entity_name": "GET /health",
+      "entity_kind": "route",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d557e3b89823bf43",
+      "entity_name": "GET /health",
+      "entity_kind": "route",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:route:d557e3b89823bf43",
+      "entity_name": "GET /health",
+      "entity_kind": "route",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: get, get"
+      ]
+    }
+  ],
+  "unlinked_entities": [
+    {
+      "id": "code:function:cda79bced3bddff2",
+      "kind": "function",
+      "path": "nvidia_smartroute/gateway/server.py",
+      "name": "startup_event",
+      "signature": "async def startup_event():",
+      "start_line": 125
+    },
+    {
+      "id": "code:function:3e21cb405ee29fb2",
+      "kind": "function",
+      "path": "nvidia_smartroute/gateway/server.py",
+      "name": "shutdown_event",
+      "signature": "async def shutdown_event():",
+      "start_line": 137
+    },
+    {
+      "id": "code:function:c98141c1e6467bec",
+      "kind": "function",
+      "path": "nvidia_smartroute/gateway/server.py",
+      "name": "health_check",
+      "signature": "async def health_check():",
+      "start_line": 153
+    },
+    {
+      "id": "code:function:c5ba1ae00dc55509",
+      "kind": "function",
+      "path": "nvidia_smartroute/gateway/server.py",
+      "name": "root",
+      "signature": "async def root():",
+      "start_line": 166
+    },
+    {
+      "id": "code:function:ddbfe37e4b54bc40",
+      "kind": "function",
+      "path": "nvidia_smartroute/gateway/server.py",
+      "name": "readiness_check",
+      "signature": "async def readiness_check():",
+      "start_line": 184
+    },
+    {
+      "id": "code:class:0933b279a56416ef",
+      "kind": "class",
+      "path": "nvidia_smartroute/gateway/server.py",
+      "name": "NIMClient",
+      "signature": "class NIMClient:",
+      "start_line": 206
+    },
+    {
+      "id": "code:function:50515c6b43eeecb5",
+      "kind": "function",
+      "path": "nvidia_smartroute/gateway/server.py",
+      "name": "record_performance",
+      "signature": "def record_performance():",
+      "start_line": 538
+    },
+    {
+      "id": "code:function:168fc8f3870305e9",
+      "kind": "function",
+      "path": "nvidia_smartroute/gateway/server.py",
+      "name": "list_models",
+      "signature": "async def list_models():",
+      "start_line": 657
+    },
+    {
+      "id": "code:class:1aaa7b347fd23a0d",
+      "kind": "class",
+      "path": "nvidia_smartroute/routing/router.py",
+      "name": "ModelCapability",
+      "signature": "class ModelCapability:",
+      "start_line": 37
+    },
+    {
+      "id": "code:class:345e8258a95a0432",
+      "kind": "class",
+      "path": "nvidia_smartroute/routing/router.py",
+      "name": "RoutingDecision",
+      "signature": "class RoutingDecision:",
+      "start_line": 71
+    },
+    {
+      "id": "code:class:236c74a5ca48ee37",
+      "kind": "class",
+      "path": "nvidia_smartroute/routing/router.py",
+      "name": "CapabilityAnalyzer",
+      "signature": "class CapabilityAnalyzer:",
+      "start_line": 81
+    },
+    {
+      "id": "code:class:35ffe567b4b7f557",
+      "kind": "class",
+      "path": "nvidia_smartroute/routing/router.py",
+      "name": "ModelRegistry",
+      "signature": "class ModelRegistry:",
+      "start_line": 222
+    },
+    {
+      "id": "code:class:c1ba9f916c3b2a54",
+      "kind": "class",
+      "path": "nvidia_smartroute/routing/router.py",
+      "name": "RequestRouter",
+      "signature": "class RequestRouter:",
+      "start_line": 336
+    },
+    {
+      "id": "code:function:5e507883a30f96bd",
+      "kind": "function",
+      "path": "nvidia_smartroute/cli.py",
+      "name": "status",
+      "signature": "def status():",
+      "start_line": 81
+    },
+    {
+      "id": "code:method:e315da054dcd0271",
+      "kind": "method",
+      "path": "nvidia_smartroute/config.py",
+      "name": "validate_api_key",
+      "signature": "def validate_api_key(cls, v):",
+      "start_line": 86
+    },
+    {
+      "id": "code:function:a988903d0fec0f5c",
+      "kind": "function",
+      "path": "nvidia_smartroute/config.py",
+      "name": "get_settings",
+      "signature": "def get_settings() -> Settings:",
+      "start_line": 94
+    },
+    {
+      "id": "code:function:984bb3bb607973da",
+      "kind": "function",
+      "path": "tests/test_basic.py",
+      "name": "test_health_endpoint",
+      "signature": "def test_health_endpoint():",
+      "start_line": 11
+    },
+    {
+      "id": "code:function:85da3eda8251e568",
+      "kind": "function",
+      "path": "tests/test_basic.py",
+      "name": "test_readiness_endpoint",
+      "signature": "def test_readiness_endpoint():",
+      "start_line": 22
+    },
+    {
+      "id": "code:function:963891bb7240b1a2",
+      "kind": "function",
+      "path": "tests/test_basic.py",
+      "name": "test_root_endpoint",
+      "signature": "def test_root_endpoint():",
+      "start_line": 34
+    },
+    {
+      "id": "code:function:fb87655ea59e0380",
+      "kind": "function",
+      "path": "tests/test_basic.py",
+      "name": "test_settings_import",
+      "signature": "def test_settings_import():",
+      "start_line": 45
+    },
+    {
+      "id": "code:function:64b11ba132389b03",
+      "kind": "function",
+      "path": "tests/test_basic.py",
+      "name": "test_version_import",
+      "signature": "def test_version_import():",
+      "start_line": 53
+    },
+    {
+      "id": "code:function:b4179593a58850cf",
+      "kind": "function",
+      "path": "tests/test_routing.py",
+      "name": "test_task_type_detection",
+      "signature": "def test_task_type_detection():",
+      "start_line": 9
+    },
+    {
+      "id": "code:function:ba0079184eea4ea3",
+      "kind": "function",
+      "path": "tests/test_routing.py",
+      "name": "test_model_selection",
+      "signature": "def test_model_selection():",
+      "start_line": 63
+    },
+    {
+      "id": "code:function:5a9f0a123412c65d",
+      "kind": "function",
+      "path": "tests/test_routing.py",
+      "name": "test_routing_decision",
+      "signature": "def test_routing_decision():",
+      "start_line": 92
+    },
+    {
+      "id": "code:function:0dbccdd47374da26",
+      "kind": "function",
+      "path": "tests/test_routing.py",
+      "name": "route_request",
+      "signature": "async def route_request():",
+      "start_line": 98
+    },
+    {
+      "id": "code:function:c5da4ef805d9b254",
+      "kind": "function",
+      "path": "tests/test_routing.py",
+      "name": "test_routing_stats",
+      "signature": "def test_routing_stats():",
+      "start_line": 114
+    },
+    {
+      "id": "code:function:b942df1d953a9dd6",
+      "kind": "function",
+      "path": "tests/test_routing.py",
+      "name": "make_requests",
+      "signature": "async def make_requests():",
+      "start_line": 120
+    }
+  ],
+  "aliases": [],
+  "coverage": {
+    "governed_entity_count": 52,
+    "linked_entity_count": 25,
+    "unlinked_entity_count": 27,
+    "coverage_ratio": 0.4808,
+    "linked_by_kind": {
+      "function": 9,
+      "route": 6,
+      "method": 8,
+      "class": 2
+    },
+    "unlinked_by_kind": {
+      "function": 20,
+      "class": 6,
+      "method": 1
+    }
+  },
+  "drift": {
+    "score": 0.5192,
+    "severity": "high",
+    "signals": [
+      "27 of 52 governable code entities have no local spec link",
+      "11 local spec documents scanned"
+    ]
+  },
+  "embedding_profile": {
+    "default_scope": [
+      "route",
+      "schema",
+      "command",
+      "config",
+      "class",
+      "function",
+      "method"
+    ],
+    "recommended_fields": [
+      "kind",
+      "path",
+      "name",
+      "signature",
+      "metadata",
+      "linked spec filename",
+      "linked spec sections"
+    ],
+    "notes": "Embed concise structural summaries for code entities separately from full spec-text embeddings."
+  }
+}

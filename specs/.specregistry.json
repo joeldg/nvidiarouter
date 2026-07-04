@@ -1,0 +1,87 @@
+{
+  "project_type": "CLI Tool / Developer Tooling",
+  "project": null,
+  "channel": "stable",
+  "fetched_at": "2026-07-04T20:03:21.139Z",
+  "specs": [
+    {
+      "filename": "AGENT_OPERATING_RULES.md",
+      "version": "1.0.0",
+      "project_type": "Global",
+      "scope": "global",
+      "sha256": "83d1011a0b7ce4de30bba37e82010fbb128356e5a2888862e0fa0efd7e04b44e"
+    },
+    {
+      "filename": "CODING_STANDARDS.md",
+      "version": "1.0.0",
+      "project_type": "Global",
+      "scope": "global",
+      "sha256": "df5ab4efb98c790338ed1a5ecde725a52dc0189be6743fde3d5eef6e576622b9"
+    },
+    {
+      "filename": "GLOBAL_SECURITY.md",
+      "version": "1.0.0",
+      "project_type": "Global",
+      "scope": "global",
+      "sha256": "390746940cf191408d995478a82a0a8da86053f64b2d4a4e2ce07502626e5212"
+    },
+    {
+      "filename": "IMPLEMENTATION_EVIDENCE.md",
+      "version": "1.0.0",
+      "project_type": "Global",
+      "scope": "global",
+      "sha256": "46ae4611369a2e8b0f15afbb2313300e887d98d5c64fa0c7426a7a7c11790a2e"
+    },
+    {
+      "filename": "PROJECT_PROFILE.md",
+      "version": "1.0.0",
+      "project_type": "Global",
+      "scope": "global",
+      "sha256": "7912854537467925382e34f780fe86984090d3fcc3b27875b1b62ecce4f182f7"
+    },
+    {
+      "filename": "SDD_OPERATING_MODEL.md",
+      "version": "1.0.0",
+      "project_type": "Global",
+      "scope": "global",
+      "sha256": "30296740dcb41bd91f4a22390c799d91bd7dac032d9b889683615648e838e20d"
+    },
+    {
+      "filename": "SECURITY_AND_SECRETS.md",
+      "version": "1.0.0",
+      "project_type": "Global",
+      "scope": "global",
+      "sha256": "e825a19516f227ccf86b631c26eba3e3d1c50e2e8c22c003806a9018ce0cd470"
+    },
+    {
+      "filename": "SPEC_AUTHORING_STANDARD.md",
+      "version": "1.0.0",
+      "project_type": "Global",
+      "scope": "global",
+      "sha256": "ec7cf6f8e49b85d7ac246bc07ae7eb3664d11aed82c3372d8f49d27c646e9585"
+    },
+    {
+      "filename": "SPEC_GOVERNANCE.md",
+      "version": "1.0.0",
+      "project_type": "Global",
+      "scope": "global",
+      "sha256": "cc5a491e26515352235066535e750f48cdc79efc1268ffb4ffaf03879fcd1a6a"
+    },
+    {
+      "filename": "TOKENOMICS.md",
+      "version": "1.0.0",
+      "project_type": "Global",
+      "scope": "global",
+      "sha256": "783e0da8d0c5ded729a6d43318e218cae48bd245b3c6813fd74a4b1977a8379e"
+    },
+    {
+      "filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "version": "1.0.0",
+      "project_type": "Global",
+      "scope": "global",
+      "sha256": "f616c339ba94f0b7bc54f8c7c75ec26a22cb6e31ca79789a2e06b3010539130c"
+    }
+  ],
+  "signature": "9yBdEBH71IDMYG8lQOxCkXu1d0PRIKc1SUy2hIoKuPJdLqEvf6TnV7ROrqbN83TzRm+qwiowvR8Z5seCq+nQBQ==",
+  "signature_alg": "ed25519"
+}

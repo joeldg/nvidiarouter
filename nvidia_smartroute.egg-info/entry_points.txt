@@ -1,0 +1,2 @@
+[console_scripts]
+nvidia-smartroute = nvidia_smartroute.cli:main

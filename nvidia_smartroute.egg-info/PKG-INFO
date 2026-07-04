@@ -1,0 +1,86 @@
+Metadata-Version: 2.4
+Name: nvidia-smartroute
+Version: 0.1.0
+Summary: NVIDIA-SmartRoute-CLI: OpenAI-compatible API gateway for NVIDIA NIM with dynamic agent scaling
+Author-email: NVIDIA-SmartRoute-CLI Developer <dev@example.com>
+License: MIT
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: typer[all]>=0.9.0
+Requires-Dist: fastapi>=0.100.0
+Requires-Dist: uvicorn[standard]>=0.27.0
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: pydantic-settings>=2.0.0
+Requires-Dist: httpx>=0.25.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: textual>=0.40.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: loguru>=0.7.0
+Requires-Dist: structlog>=23.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: httpx>=0.25.0; extra == "dev"
+Requires-Dist: pytest-mock>=3.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+
+# NVIDIA-SmartRoute-CLI
+
+A CLI application that provides an OpenAI-compatible API gateway for NVIDIA NIM models with dynamic agent scaling and a rich terminal user interface.
+
+## Features
+
+- **Unified OpenAI-Compatible API Gateway**: Listens on port 9000 (`0.0.0.0:9000`) and intercepts `/v1/chat/completions` and `/v1/embeddings` requests
+- **Intelligent Request Routing**: Dynamically analyzes incoming requests to determine required capabilities (math, code, vision, etc.) and routes to the best-suited NVIDIA NIM model
+- **Dynamic Agent Autoscale Engine**: Automatically spawns specialized sub-agents (Code Writer, Code Tester, etc.) for complex multi-step tasks
+- **Rich Terminal User Interface (TUI)**: Real-time dashboard showing metrics, active connections, model performance, and routing logs
+- **Secure Design**: No hardcoded secrets, follows security best practices
+- **Observable**: Comprehensive logging, metrics, and health checks
+
+## Installation
+
+```bash
+pip install nvidia-smartroute
+```
+
+## Usage
+
+```bash
+# Start the API gateway server
+nvidia-smartroute start
+
+# Check server status
+nvidia-smartroute status
+
+# View current configuration
+nvidia-smartroute config show
+
+# Stop the server
+nvidia-smartroute stop
+```
+
+## Development Setup
+
+```bash
+# Clone repository
+git clone https://github.com/joeldg/nvidiarouter.git
+cd nvidiarouter
+
+# Install development dependencies
+pip install -e ".[dev]"
+
+# Copy environment template
+cp .env.example .env
+# Edit .env with your NVIDIA API credentials
+```
+
+## Governance Notice
+
+This project is developed under SpecRegistry governance principles. All implementation work traces to governed specifications from the SpecRegistry.
+
+For more information about the governance framework, see:
+- [SPECREGISTRY.md](./SPECREGISTRY.md)
+- [AGENTS.md](./AGENTS.md)

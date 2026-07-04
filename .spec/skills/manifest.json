@@ -1,0 +1,83 @@
+{
+  "source": "specregistry",
+  "installed_at": "2026-07-04T20:03:29.087Z",
+  "skills": [
+    {
+      "id": "builtin-collect-delivery-evidence",
+      "slug": "collect-delivery-evidence",
+      "name": "Collect delivery evidence",
+      "description": "Record the tests, checks, and operational evidence that support a completed change.",
+      "risk_level": "safe"
+    },
+    {
+      "id": "builtin-evaluate-quality-model",
+      "slug": "evaluate-quality-model",
+      "name": "Evaluate the quality model",
+      "description": "Run the external QUALITY.md evaluation loop against this project's governed quality rubric, if one exists.",
+      "risk_level": "safe"
+    },
+    {
+      "id": "builtin-load-governed-specs",
+      "slug": "load-governed-specs",
+      "name": "Load governed specs",
+      "description": "Load the current global, project-type, and project-scoped specifications before implementation work.",
+      "risk_level": "safe"
+    },
+    {
+      "id": "builtin-plan-from-specs",
+      "slug": "plan-from-specs",
+      "name": "Plan from specs",
+      "description": "Turn governed requirements into an implementation plan and acceptance evidence.",
+      "risk_level": "safe"
+    },
+    {
+      "id": "builtin-propose-not-publish",
+      "slug": "propose-not-publish",
+      "name": "Propose, do not self-approve",
+      "description": "Propose changes to governed specs through review; never approve or publish your own change.",
+      "risk_level": "safe"
+    },
+    {
+      "id": "builtin-register-task-session",
+      "slug": "register-task-session",
+      "name": "Register the task session",
+      "description": "Open a governed agent session with begin_task before doing non-trivial implementation work.",
+      "risk_level": "safe"
+    },
+    {
+      "id": "builtin-report-spec-problems",
+      "slug": "report-spec-problems",
+      "name": "Report spec problems",
+      "description": "Report ambiguity, contradiction, or outdated guidance instead of guessing around it.",
+      "risk_level": "safe"
+    },
+    {
+      "id": "builtin-resolve-uncovered-guidance",
+      "slug": "resolve-uncovered-guidance",
+      "name": "Resolve uncovered guidance",
+      "description": "Pull governed guidance before writing in a language or domain the loaded specs do not cover.",
+      "risk_level": "safe"
+    },
+    {
+      "id": "builtin-run-compliance-loop",
+      "slug": "run-compliance-loop",
+      "name": "Run the compliance loop",
+      "description": "Confirm objective compliance before claiming a task is complete, and keep working until it passes.",
+      "risk_level": "safe"
+    },
+    {
+      "id": "builtin-search-spec-context",
+      "slug": "search-spec-context",
+      "name": "Search spec context",
+      "description": "Find focused governing sections without injecting the entire spec set into context.",
+      "risk_level": "safe"
+    },
+    {
+      "id": "builtin-verify-conformance",
+      "slug": "verify-conformance",
+      "name": "Verify conformance",
+      "description": "Check implementation results against the current governed specification set.",
+      "risk_level": "safe"
+    }
+  ]
+}
