@@ -101,14 +101,14 @@ class CapabilityAnalyzer:
         # Check for code-related keywords
         code_indicators = [
             "function", "class", "def ", "return ", "if ", "for ", "while ",
-            "import ", "from ", from ", "== ", "!= ", "< ", "> ", "+ ", "- ", "* ", "/ ",
+            "import ", "from ", "== ", "!=", "< ", "> ", "+ ", "- ", "* ", "/",
             "python", "javascript", "java", "cpp", "c#", "ruby", "php", "html",
             "css", "sql", "api", "endpoint", "variable", "loop", "array"
         ]
         
         # Check for code generation indicators
         code_gen_indicators = [
-            "write a function", "create a class", "implement", "code to",
+            "write a", "create a", "implement", "code to",
             "program", "script", "build a", "make a", "develop"
         ]
         
@@ -119,10 +119,10 @@ class CapabilityAnalyzer:
         
         # Check for code explanation indicators
         code_exp_indicators = [
-            "explain", "what does this code do", "how does this work",
-            "walk through", "break down"
+            "what does this code do", "how does this code work",
+            "walk through this code", "break down this code",
+            "explain this code", "explain the code", "code explanation"
         ]
-        
         # Check for code review indicators
         code_rev_indicators = [
             "review", "check for errors", "debug", "fix", "improve",
@@ -166,7 +166,7 @@ class CapabilityAnalyzer:
         
         # Score each category
         code_score = sum(1 for indicator in code_indicators if indicator in full_text)
-        code_gen_score = sum(1 for indicator in code_gen_indicators if indicator in full_text)
+        code_gen_score = sum(2 for indicator in code_gen_indicators if indicator in full_text)
         code_comp_score = sum(1 for indicator in code_comp_indicators if indicator in full_text)
         code_exp_score = sum(1 for indicator in code_exp_indicators if indicator in full_text)
         code_rev_score = sum(1 for indicator in code_rev_indicators if indicator in full_text)
@@ -189,6 +189,7 @@ class CapabilityAnalyzer:
             "summarization": sum_score,
             "chat": 1  # Default baseline
         }
+        print("Scores:", scores)
         
         # Find the category with the highest score
         max_category = max(scores, key=scores.get)
@@ -367,7 +368,7 @@ class RequestRouter:
         request_id = str(int(time.time() * 1000))  # Simple request ID
         
         # Analyze the request to determine task type
-        task_type = self.capability_analyzer.analyze_request(matches)
+        task_type = self.capability_analyzer.analyze_request(messages)
         
         # If a specific model is requested, use it if available
         selected_model = None
