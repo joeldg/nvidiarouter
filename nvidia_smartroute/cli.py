@@ -553,7 +553,7 @@ def discover(  # noqa: C901
     from rich.table import Table
 
     from nvidia_smartroute import discovery
-    from nvidia_smartroute.model_catalog import is_embedding_model, rank_by_capability
+    from nvidia_smartroute.model_catalog import is_routable, rank_by_capability
 
     # Throttle to stay under the per-key rate limit (with a little headroom).
     if delay < 0:
@@ -573,7 +573,7 @@ def discover(  # noqa: C901
         console.print(f"[red]Failed to fetch catalog: {exc}[/red]")
         raise typer.Exit(code=1)
     if not include_embeddings:
-        catalog = [m for m in catalog if not is_embedding_model(m)]
+        catalog = [m for m in catalog if is_routable(m)]
     if limit:
         catalog = catalog[:limit]
     est = f"  ~{len(catalog) * delay / 60:.1f} min at {delay:.1f}s/probe" if probe else ""

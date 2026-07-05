@@ -57,9 +57,15 @@ _CURATED: Dict[str, Dict[str, Any]] = {
     "meta/llama-3.2-11b-vision-instruct": {"parameters_b": 11},
 }
 
-_VISION_HINTS = ("vision", "vlm", "-vl-", "neva", "pixtral", "internvl", "kosmos")
-_CODE_HINTS = ("coder", "codestral", "codegemma", "starcoder", "code-", "-code")
+_VISION_HINTS = ("vision", "vlm", "-vl-", "-vl8", "neva", "pixtral", "internvl", "kosmos")
+_CODE_HINTS = ("coder", "codestral", "codegemma", "starcoder", "codellama", "code-", "-code")
 _EMBED_HINTS = ("embed", "embedqa", "rerank")
+# Specialized / non-chat models that should not be general routing targets:
+# guardrails, safety/PII classifiers, reward models, image generators, etc.
+_EXCLUDE_HINTS = (
+    "guard", "safety", "topic-control", "reward", "gliner", "-pii", "content-safety",
+    "calibration", "diffusion", "rerank", "moderation",
+)
 _SIZE_RE = re.compile(r"(\d+(?:\.\d+)?)\s*b(?:\b|-|_|$)", re.IGNORECASE)
 
 
@@ -81,6 +87,15 @@ def is_embedding_model(model_id: str) -> bool:
 
 
 # @spec[PROJECT_PROFILE.md#Requirements]
+def is_routable(model_id: str) -> bool:
+    """False for embeddings and specialized non-chat models (guard/safety/etc.)."""
+    mid = model_id.lower()
+    if is_embedding_model(mid):
+        return False
+    return not any(h in mid for h in _EXCLUDE_HINTS)
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
 def infer_capability(model_id: str) -> Dict[str, Any]:
     """Return ModelCapability kwargs for a model ID (curated + inferred)."""
     mid = model_id.lower()
@@ -90,16 +105,21 @@ def infer_capability(model_id: str) -> Dict[str, Any]:
     is_vision = any(h in mid for h in _VISION_HINTS)
     is_code = any(h in mid for h in _CODE_HINTS)
 
+    params_b = curated.get("parameters_b") or _extract_params_b(model_id)
+
     if "tasks" in curated:
         tasks = list(curated["tasks"])
     elif is_vision:
         tasks = [TaskType.VISION]
     elif is_code:
-        tasks = list(_CODE_TASKS)
+        tasks = list(_CODE_TASKS) + [TaskType.CHAT]
     else:
+        # Capable general models (>=7B) also handle code well, so they can serve
+        # code tasks — otherwise code requests would have no home once discovery
+        # overrides the built-in defaults.
         tasks = list(_GENERAL_TASKS)
-
-    params_b = curated.get("parameters_b") or _extract_params_b(model_id)
+        if params_b >= 7:
+            tasks += _CODE_TASKS
     # Larger models are treated as higher-quality by default; small = faster.
     quality = min(0.75 + params_b / 800.0, 0.98) if params_b else 0.82
 

@@ -1043,6 +1043,31 @@ def test_infer_capability_curated_and_inferred():
 
     assert is_embedding_model("nvidia/nv-embedqa-e5-v5") is True
 
+    # Large general models also handle code (so code tasks have a home).
+    big = infer_capability("mistralai/mistral-large-3-675b-instruct-2512")
+    assert TaskType.CODE_GENERATION in big["supported_tasks"]
+    assert TaskType.CHAT in big["supported_tasks"]
+    # Tiny models stay chat-only.
+    tiny = infer_capability("google/gemma-2-2b-it")
+    assert TaskType.CODE_GENERATION not in tiny["supported_tasks"]
+
+
+def test_is_routable_excludes_specialized_models():
+    from nvidia_smartroute.model_catalog import is_routable
+
+    assert is_routable("moonshotai/kimi-k2.6") is True
+    assert is_routable("meta/llama-3.1-70b-instruct") is True
+    # Guardrails, safety/PII classifiers, reward, embeddings, image-gen: excluded.
+    for mid in [
+        "meta/llama-guard-4-12b",
+        "nvidia/llama-3.1-nemoguard-8b-content-safety",
+        "nvidia/gliner-pii",
+        "google/diffusiongemma-26b-a4b-it",
+        "nvidia/nv-embedqa-e5-v5",
+        "nvidia/nemotron-4-340b-reward",
+    ]:
+        assert is_routable(mid) is False, mid
+
 
 def test_capability_serialize_roundtrip():
     from nvidia_smartroute.discovery import serialize, deserialize
