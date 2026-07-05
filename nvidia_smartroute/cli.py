@@ -263,6 +263,99 @@ def config():
         console.print(f"{key}: {value}")
 
 
+# @spec[PROJECT_PROFILE.md#Requirements]
+def _probe_model(model_id: str, headers: dict) -> str:
+    """Send a 1-token chat request to check a model is servable for this account."""
+    import httpx
+
+    try:
+        resp = httpx.post(
+            f"{settings.nvidia_nim_base_url}/chat/completions",
+            headers=headers,
+            json={"model": model_id, "messages": [{"role": "user", "content": "hi"}],
+                  "max_tokens": 1},
+            timeout=30.0,
+        )
+        if resp.status_code == 200:
+            return "[green]servable[/green]"
+        if resp.status_code == 404:
+            return "[red]not available (404)[/red]"
+        if resp.status_code == 401:
+            return "[red]unauthorized (401)[/red]"
+        return f"[yellow]HTTP {resp.status_code}[/yellow]"
+    except Exception as exc:
+        return f"[red]error: {type(exc).__name__}[/red]"
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+@app.command()
+def doctor(
+    probe_models: bool = typer.Option(
+        True, "--probe-models/--no-probe-models",
+        help="Send a tiny request to each registered model to confirm it's servable",
+    ),
+):
+    """Diagnose configuration, upstream connectivity, and model availability."""
+    import httpx
+    from rich.table import Table
+
+    from nvidia_smartroute.routing.router import router
+
+    console.print("[blue bold]NVIDIA SmartRoute — Doctor[/blue bold]\n")
+
+    # 1) Configuration
+    keys = settings.api_keys
+    console.print("[bold]Configuration[/bold]")
+    console.print(f"  API keys configured : {len(keys)}")
+    console.print(f"  Base URL            : {settings.nvidia_nim_base_url}")
+    console.print(f"  Gateway bind        : {settings.host}:{settings.port}")
+    console.print(f"  Per-key rate limit  : {settings.rate_limit_per_key}/min")
+    if not keys:
+        console.print("  [red]No API key configured — set NVIDIA_API_KEY in .env[/red]")
+        raise typer.Exit(code=1)
+
+    headers = {"Authorization": f"Bearer {keys[0]}", "Accept": "application/json"}
+
+    # 2) Connectivity
+    console.print("\n[bold]Connectivity[/bold]")
+    try:
+        resp = httpx.get(
+            f"{settings.nvidia_nim_base_url}/models", headers=headers, timeout=15.0
+        )
+        resp.raise_for_status()
+        catalog = {m["id"] for m in resp.json().get("data", [])}
+        console.print(f"  [green]OK[/green] — reached NIM ({len(catalog)} models in catalog)")
+    except Exception as exc:
+        console.print(f"  [red]FAILED[/red] — {exc}")
+        raise typer.Exit(code=1)
+
+    # 3) Registered model availability
+    console.print("\n[bold]Registered models[/bold]")
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Model")
+    table.add_column("In catalog")
+    table.add_column("Servable" if probe_models else "Status")
+    unservable = 0
+    for model_id in router.model_registry.models:
+        in_catalog = "[green]yes[/green]" if model_id in catalog else "[yellow]no[/yellow]"
+        if probe_models:
+            status = _probe_model(model_id, headers)
+            if "servable" not in status:
+                unservable += 1
+        else:
+            status = "[dim]skipped[/dim]"
+        table.add_row(model_id, in_catalog, status)
+    console.print(table)
+
+    if probe_models and unservable:
+        console.print(
+            f"\n[yellow]{unservable} registered model(s) are not servable for this "
+            f"account — routing will fall back to the others.[/yellow]"
+        )
+        raise typer.Exit(code=1)
+    console.print("\n[green]Doctor complete — all good.[/green]")
+
+
 # @spec[PROJECT_PROFILE.md#Token Budget Class]
 @app.command()
 def version():
