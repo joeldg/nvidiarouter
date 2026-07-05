@@ -122,8 +122,9 @@ Differentiators:
       cost-aware routing, daily budget cap (503 when exhausted).
 - [x] Adaptive routing (epsilon-greedy bandit): learns best model per task from
       real outcomes (success + latency) and shifts traffic over time.
-- [ ] Web dashboard + prompt playground: browser UI over /metrics, live routing
-      viz, and a "why did this route here" explainer (scores + confidence).
+- [x] Web dashboard + prompt playground at /dashboard: live chart, model table,
+      routing log, and a "why did this route here" explainer (/explain endpoint).
+      TUI gains a requests/sec sparkline; fixed total_requests counting polling.
 - [ ] Horizontal scale via Redis: shared cache / rate-limit / key-budget /
       circuit state so N replicas share one budget pool behind a load balancer.
 

@@ -34,8 +34,9 @@ engine, multi-key rotation for throughput, and a rich terminal dashboard.
   `tool_calls` responses are returned unchanged.
 - **Resilience** — inbound rate limiting, upstream retry/backoff, configurable
   timeouts, optional inbound API-key auth.
-- **Rich TUI dashboard** — live throughput, active connections, per-model
-  performance, per-key budget, and routing logs. Can auto-start the gateway.
+- **Dashboards** — a rich terminal TUI (with a requests/sec sparkline) *and* a
+  browser dashboard at `/dashboard` with a live chart, model table, routing log,
+  and a **prompt playground** that explains *why* each request routed where it did.
 - **Observable** — structured logging (structlog), `/metrics`, health/readiness.
 
 ## Installation
@@ -64,6 +65,11 @@ nvidia-smartroute version
 
 `dashboard` starts the gateway automatically if it isn't running and stops it on
 exit; pass `--no-start-gateway` to disable that.
+
+Prefer a browser? With the gateway running, open **`http://localhost:9000/dashboard`**
+for a live web view (charts, model table, routing log) plus a **playground** that
+shows the routing decision — task scores, confidence, selected model, cache/
+fallback, latency, tokens, and cost — for any prompt you type.
 
 ### Discover and evaluate models
 

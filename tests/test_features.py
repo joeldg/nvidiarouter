@@ -65,6 +65,10 @@ def test_metrics_tracker_records_and_snapshots():
     tracker.connection_opened()
     tracker.connection_opened()
     tracker.connection_closed()
+    # total_requests is bumped separately (real API traffic), not by the
+    # connection gauge — so health/metrics polling doesn't inflate it.
+    tracker.note_request()
+    tracker.note_request()
     tracker.record_latency("m1", 100.0)
     tracker.record_latency("m1", 300.0)
     tracker.record_tokens("m1", 50)
@@ -305,6 +309,26 @@ def test_api_key_auth_enforced_on_v1(monkeypatch):
     assert client.post("/v1/chat/completions", json=body, headers={"Authorization": "Bearer secret123"}).status_code == 200
     # Health is never gated
     assert client.get("/health").status_code == 200
+
+
+def test_health_polling_does_not_inflate_total_requests(monkeypatch):
+    from unittest.mock import AsyncMock
+    import nvidia_smartroute.gateway.server as srv
+
+    monkeypatch.setattr(srv.settings, "enable_rate_limit", False)
+    srv.metrics.reset()
+    monkeypatch.setattr(
+        srv.nim_client, "chat_completions",
+        AsyncMock(return_value={"choices": [{"index": 0, "message": {"role": "assistant", "content": "ok"}, "finish_reason": "stop"}]}),
+    )
+    client = TestClient(srv.app)
+    for _ in range(5):
+        client.get("/health")
+        client.get("/metrics")
+    assert client.get("/metrics").json()["total_requests"] == 0  # polling doesn't count
+    client.post("/v1/chat/completions", json={"messages": [{"role": "user", "content": "hi"}]})
+    assert client.get("/metrics").json()["total_requests"] == 1  # only the API call
+    srv.metrics.reset()
 
 
 def test_health_endpoint_not_rate_limited(monkeypatch):
@@ -880,6 +904,17 @@ def test_budget_unlimited_allows():
     assert b.snapshot()["daily_budget_usd"] is None
 
 
+def test_metrics_records_max_throughput():
+    from nvidia_smartroute.metrics import MetricsTracker
+
+    m = MetricsTracker()
+    m.record_throughput("x", 50.0)
+    m.record_throughput("x", 120.0)
+    m.record_throughput("x", 80.0)  # lower than peak — ignored
+    snap = {r["model_id"]: r for r in m.snapshot()["models"]}
+    assert snap["x"]["max_tps"] == 120.0
+
+
 def test_metrics_records_cost():
     from nvidia_smartroute.metrics import MetricsTracker
 
@@ -1047,6 +1082,47 @@ def test_registry_loads_discovered_file(tmp_path, monkeypatch):
     reg = ModelRegistry()
     assert "moonshotai/kimi-k2-instruct" in reg.models  # discovered model registered
     assert "meta/llama-3.1-8b-instruct" in reg.models   # defaults still present
+
+
+# --- Web dashboard + playground -------------------------------------------
+
+def test_dashboard_page_served():
+    from nvidia_smartroute.gateway.server import app
+
+    r = TestClient(app).get("/dashboard")
+    assert r.status_code == 200
+    assert "text/html" in r.headers["content-type"]
+    assert "NVIDIA SmartRoute" in r.text
+    assert "Route &amp; Explain" in r.text  # playground present
+
+
+def test_explain_returns_routing_detail(monkeypatch):
+    from unittest.mock import AsyncMock
+    import nvidia_smartroute.gateway.server as srv
+
+    monkeypatch.setattr(srv.settings, "enable_rate_limit", False)
+    monkeypatch.setattr(
+        srv.nim_client, "chat_completions",
+        AsyncMock(return_value={
+            "choices": [{"index": 0, "message": {"role": "assistant", "content": "391"}, "finish_reason": "stop"}],
+            "usage": {"prompt_tokens": 10, "completion_tokens": 2, "total_tokens": 12},
+        }),
+    )
+    r = TestClient(srv.app).post("/explain", json={"messages": [{"role": "user", "content": "What is 17 * 23?"}]})
+    assert r.status_code == 200
+    d = r.json()
+    assert d["answer"] == "391"
+    assert d["routing"]["task_type"] == "mathematics"
+    assert "mathematics" in d["routing"]["scores"]
+    assert d["routing"]["selected_model"]
+    assert d["cost_usd"] >= 0
+    assert d["latency_ms"] >= 0
+
+
+def test_explain_requires_prompt():
+    from nvidia_smartroute.gateway.server import app
+
+    assert TestClient(app).post("/explain", json={}).status_code == 400
 
 
 if __name__ == "__main__":

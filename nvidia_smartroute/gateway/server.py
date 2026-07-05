@@ -14,7 +14,7 @@ from typing import Optional, Dict, List, AsyncGenerator, Union, Deque
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import asyncio
@@ -30,6 +30,7 @@ from ..circuit import breaker
 from ..concurrency import gate, QueueFullError
 from ..cost import budget, compute_cost
 from ..bandit import adaptive_router, reward_from
+from ..web import DASHBOARD_HTML
 from .. import logging_config  # noqa: F401  (configures structlog on import)
 
 # Structured logging (unified with the router/agent layers).
@@ -206,8 +207,12 @@ async def log_requests(request: Request, call_next):
     # Add request ID to request state for tracing
     request.state.request_id = request_id
 
-    # Track active connections for the live dashboard.
+    # Track active connections for the live dashboard. Only count real API
+    # traffic (/v1/*) toward total requests — not health/metrics polling, which
+    # would otherwise tick up once per dashboard refresh.
     metrics.connection_opened()
+    if request.url.path.startswith("/v1/"):
+        metrics.note_request()
     try:
         # Process request
         response = await call_next(request)
@@ -285,11 +290,101 @@ async def root():
         "version": "0.1.0",
         "endpoints": {
             "docs": "/docs",
+            "dashboard": "/dashboard",
             "health": "/health",
             "chat_completions": "/v1/chat/completions",
             "embeddings": "/v1/embeddings",
             "models": "/v1/models"
         }
+    }
+
+
+# Web dashboard + playground (self-contained HTML)
+# @spec[PROJECT_PROFILE.md#Requirements]
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_page():
+    """Serve the live web dashboard + prompt playground."""
+    return HTMLResponse(content=DASHBOARD_HTML)
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+@app.post("/explain")
+async def explain(request: Request):
+    """Route a prompt and return the answer *plus* why it routed that way."""
+    request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
+    body = await request.json()
+    messages = body.get("messages") or (
+        [{"role": "user", "content": body["prompt"]}] if body.get("prompt") else []
+    )
+    if not messages or not any(m.get("content") for m in messages):
+        raise HTTPException(
+            status_code=400,
+            detail={"error": {"message": "messages or prompt required",
+                              "type": "invalid_request_error", "code": 400}},
+        )
+    max_tokens = body.get("max_tokens", 200)
+    temperature = body.get("temperature", 0.2)
+
+    messages = await _inline_remote_images(messages)
+    classification = router.capability_analyzer.classify(messages)
+    decision = await router.route_request(
+        messages=messages, model=body.get("model"),
+        max_tokens=max_tokens, temperature=temperature,
+    )
+    selected = decision.selected_model
+    if not selected:
+        raise HTTPException(
+            status_code=503,
+            detail={"error": {"message": "No suitable model for the task",
+                              "type": "service_unavailable", "code": 503}},
+        )
+    if not budget.allow():
+        raise HTTPException(
+            status_code=503,
+            detail={"error": {"message": "Daily budget exceeded",
+                              "type": "budget_exceeded", "code": 503}},
+        )
+
+    started = time.time()
+    try:
+        data, used_model, fell_back = await _complete_with_fallback(
+            decision.task_type, selected, messages, max_tokens, temperature, {}
+        )
+    except KeyPoolExhaustedError:
+        raise HTTPException(
+            status_code=503,
+            detail={"error": {"message": "All API keys are rate-limited",
+                              "type": "rate_limit_exceeded", "code": 503}},
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail={"error": {"message": str(e) or repr(e),
+                              "type": "upstream_error", "code": 502}},
+        )
+
+    choice = (data.get("choices") or [{}])[0]
+    answer = (choice.get("message") or {}).get("content")
+    usage = data.get("usage") or {}
+    cost = compute_cost(
+        used_model, int(usage.get("prompt_tokens") or 0),
+        int(usage.get("completion_tokens") or 0),
+    )
+    return {
+        "answer": answer,
+        "routing": {
+            "task_type": classification.task_type.value,
+            "confidence": classification.confidence,
+            "scores": classification.scores,
+            "selected_model": used_model.model_id,
+            "parameters_b": used_model.parameters_b,
+            "fell_back": fell_back,
+            "reasoning": decision.reasoning,
+        },
+        "usage": usage,
+        "cost_usd": round(cost, 6),
+        "latency_ms": round((time.time() - started) * 1000.0, 1),
+        "request_id": request_id,
     }
 
 
@@ -729,6 +824,14 @@ def _record_cost(model, usage: dict) -> None:
 
 
 # @spec[PROJECT_PROFILE.md#Requirements]
+def _record_throughput(model_id: str, usage: dict, latency_ms: float) -> None:
+    """Record per-request generation throughput (tokens/sec) as a peak."""
+    completion = int(usage.get("completion_tokens") or usage.get("total_tokens") or 0)
+    if completion and latency_ms > 0:
+        metrics.record_throughput(model_id, completion / (latency_ms / 1000.0))
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
 def _record_stream_usage(model_id: str, usage: dict) -> None:
     """Record tokens + cost for a streamed response (usage in the final chunk)."""
     if not usage or not usage.get("total_tokens"):
@@ -800,6 +903,7 @@ async def _complete_with_fallback(  # noqa: C901
             if isinstance(usage, dict) and usage.get("total_tokens"):
                 metrics.record_tokens(model.model_id, int(usage["total_tokens"]))
                 _record_cost(model, usage)
+                _record_throughput(model.model_id, usage, latency_ms)
             if settings.circuit_breaker_enabled:
                 breaker.record_success(model.model_id)
             adaptive_router.record(task, model.model_id, reward_from(True, latency_ms))
@@ -1029,14 +1133,16 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
                 response_data["_agents"] = orchestrated["agents"]
                 response_headers["X-Autoscaled"] = "true"
                 response_headers["X-Agent-Count"] = str(len(orchestrated["agents"]))
-                metrics.record_latency(
-                    selected_model.model_id, (time.time() - nim_start) * 1000.0
-                )
+                autoscale_latency_ms = (time.time() - nim_start) * 1000.0
+                metrics.record_latency(selected_model.model_id, autoscale_latency_ms)
                 metrics.record_tokens(
                     selected_model.model_id,
                     int(orchestrated["usage"].get("total_tokens") or 0),
                 )
                 _record_cost(selected_model, orchestrated["usage"])
+                _record_throughput(
+                    selected_model.model_id, orchestrated["usage"], autoscale_latency_ms
+                )
             else:
                 # Call the selected model, failing over to the next-best model
                 # for the task on hard upstream errors (404 / 5xx / transport).
