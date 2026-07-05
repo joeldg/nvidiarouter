@@ -7,6 +7,7 @@ import base64
 import time
 import uuid
 import json
+from pathlib import Path
 from collections import deque, defaultdict
 from contextlib import asynccontextmanager
 from typing import Optional, Dict, List, AsyncGenerator, Union, Deque
@@ -26,6 +27,7 @@ from ..agents import autoscale_engine
 from ..keypool import key_pool, KeyPool, KeyPoolExhaustedError, _mask as _mask_key
 from ..cache import response_cache, make_key
 from ..circuit import breaker
+from ..concurrency import gate, QueueFullError
 from .. import logging_config  # noqa: F401  (configures structlog on import)
 
 # Structured logging (unified with the router/agent layers).
@@ -41,19 +43,62 @@ http_client: Optional[httpx.AsyncClient] = None
 background_tasks = set()
 
 
+# @spec[PROJECT_PROFILE.md#Requirements]
+def _load_metrics() -> None:
+    """Restore persisted metrics on startup, if enabled and present."""
+    if not settings.persist_metrics:
+        return
+    path = Path(settings.metrics_file)
+    if not path.exists():
+        return
+    try:
+        metrics.load(json.loads(path.read_text()))
+        logger.info("metrics restored", file=str(path))
+    except Exception as e:  # pragma: no cover - defensive
+        logger.warning("failed to restore metrics", error=str(e) or repr(e))
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+def _save_metrics() -> None:
+    """Persist metrics counters to disk, if enabled."""
+    if not settings.persist_metrics:
+        return
+    try:
+        Path(settings.metrics_file).write_text(json.dumps(metrics.dump()))
+    except Exception as e:  # pragma: no cover - defensive
+        logger.warning("failed to persist metrics", error=str(e) or repr(e))
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+async def _periodic_metrics_save() -> None:
+    """Background task: persist metrics on an interval."""
+    while True:
+        await asyncio.sleep(settings.metrics_save_interval)
+        _save_metrics()
+
+
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialise and tear down the shared HTTP client."""
+    """Initialise and tear down the shared HTTP client and background tasks."""
     global http_client
     http_client = httpx.AsyncClient(
         timeout=httpx.Timeout(settings.request_timeout, connect=10.0),
         limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
     )
     logger.info("HTTP client initialized for NVIDIA NIM API")
+
+    _load_metrics()
+    saver: Optional[asyncio.Task] = None
+    if settings.persist_metrics:
+        saver = asyncio.create_task(_periodic_metrics_save())
+
     try:
         yield
     finally:
+        if saver:
+            saver.cancel()
+        _save_metrics()
         if http_client:
             await http_client.aclose()
         for task in list(background_tasks):
@@ -282,6 +327,7 @@ async def get_metrics():
     snapshot["api_keys"] = key_pool.snapshot()
     snapshot["cache"] = response_cache.snapshot()
     snapshot["circuits"] = breaker.snapshot()
+    snapshot["concurrency"] = gate.snapshot()
     return snapshot
 
 
@@ -890,7 +936,28 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             "X-Routing-Confidence": str(routing_decision.confidence),
         }
 
-        # Non-streaming response
+        # Non-streaming response.
+        # Backpressure: bound concurrent upstream requests; shed load when the
+        # queue is full or the wait exceeds the timeout.
+        acquired = False
+        if settings.enable_concurrency_limit:
+            try:
+                await gate.acquire()
+                acquired = True
+            except QueueFullError:
+                raise HTTPException(
+                    status_code=503,
+                    headers={"Retry-After": "1"},
+                    detail={
+                        "error": {
+                            "message": "Server busy; please retry shortly",
+                            "type": "overloaded",
+                            "code": 503,
+                            "request_id": request_id,
+                        }
+                    },
+                )
+
         nim_start = time.time()
         try:
             # Dynamic Agent Autoscale Engine: complex multi-step code tasks are
@@ -971,6 +1038,9 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
                     }
                 }
             )
+        finally:
+            if acquired:
+                gate.release()
     except HTTPException:
         # Already-formed HTTP errors (e.g. 503 key exhaustion) pass through.
         raise

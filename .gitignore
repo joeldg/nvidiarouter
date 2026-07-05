@@ -156,3 +156,4 @@ logs
 # Runtime PID file
 *.pid
 .nvidia-smartroute.pid
+.nvidia-smartroute-metrics.json

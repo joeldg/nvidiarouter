@@ -787,5 +787,64 @@ def test_fallback_skips_open_circuit(monkeypatch):
     srv.breaker.reset()
 
 
+# --- Persistent metrics ---------------------------------------------------
+
+def test_metrics_dump_load_roundtrip():
+    from nvidia_smartroute.metrics import MetricsTracker
+
+    m = MetricsTracker()
+    m.record_latency("x/y", 100.0)
+    m.record_latency("x/y", 200.0)
+    m.record_tokens("x/y", 42)
+    m.record_error("x/y")
+
+    restored = MetricsTracker()
+    restored.load(m.dump())
+    row = {r["model_id"]: r for r in restored.snapshot()["models"]}["x/y"]
+    assert row["request_count"] == 2
+    assert row["total_tokens"] == 42
+    assert row["error_count"] == 1
+    assert row["avg_latency_ms"] == 150.0
+
+
+# --- Concurrency gate / backpressure --------------------------------------
+
+def test_concurrency_gate_sheds_load_when_full():
+    from nvidia_smartroute.concurrency import ConcurrencyGate, QueueFullError
+
+    async def run():
+        g = ConcurrencyGate(max_inflight=1, max_queued=0, timeout=1.0)
+        await g.acquire()  # takes the only slot
+        assert g.inflight == 1
+        with pytest.raises(QueueFullError):  # queue full -> shed load
+            await g.acquire()
+        g.release()
+        await g.acquire()  # slot free again
+        g.release()
+
+    asyncio.run(run())
+
+
+def test_concurrency_gate_queues_then_proceeds():
+    from nvidia_smartroute.concurrency import ConcurrencyGate
+
+    async def run():
+        g = ConcurrencyGate(max_inflight=1, max_queued=4, timeout=2.0)
+        await g.acquire()
+
+        async def waiter():
+            await g.acquire()
+            g.release()
+            return True
+
+        task = asyncio.create_task(waiter())
+        await asyncio.sleep(0.01)  # let the waiter enqueue
+        assert g.snapshot()["queued"] == 1
+        g.release()  # free the slot; the waiter proceeds
+        assert await task is True
+
+    asyncio.run(run())
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

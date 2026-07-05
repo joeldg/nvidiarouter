@@ -156,6 +156,45 @@ class MetricsTracker:
                 "routing_log": list(self._routing_log),
             }
 
+    # -- persistence ------------------------------------------------------
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    def dump(self) -> Dict[str, Any]:
+        """Serialise durable counters (per-model + totals) for persistence."""
+        with self._lock:
+            return {
+                "total_requests": self._total_requests,
+                "models": [
+                    {
+                        "model_id": m.model_id,
+                        "request_count": m.request_count,
+                        "error_count": m.error_count,
+                        "total_tokens": m.total_tokens,
+                        "latencies_ms": list(m.latencies_ms),
+                        "last_latency_ms": m.last_latency_ms,
+                        "first_seen": m.first_seen,
+                        "last_used": m.last_used,
+                    }
+                    for m in self._models.values()
+                ],
+            }
+
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    def load(self, data: Dict[str, Any]) -> None:
+        """Restore counters from a `dump()` payload (uptime stays process-local)."""
+        with self._lock:
+            self._total_requests = int(data.get("total_requests", 0))
+            for md in data.get("models", []):
+                model = ModelMetrics(model_id=md["model_id"])
+                model.request_count = int(md.get("request_count", 0))
+                model.error_count = int(md.get("error_count", 0))
+                model.total_tokens = int(md.get("total_tokens", 0))
+                for sample in list(md.get("latencies_ms", []))[-50:]:
+                    model.latencies_ms.append(float(sample))
+                model.last_latency_ms = float(md.get("last_latency_ms", 0.0))
+                model.first_seen = float(md.get("first_seen", time.time()))
+                model.last_used = float(md.get("last_used", 0.0))
+                self._models[model.model_id] = model
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     def reset(self) -> None:
         """Clear all recorded metrics (primarily for tests)."""

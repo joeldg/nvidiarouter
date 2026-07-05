@@ -23,6 +23,9 @@ engine, multi-key rotation for throughput, and a rich terminal dashboard.
   fails over to the next-best model for the task.
 - **Circuit breaker** — a repeatedly-failing model is taken out of rotation,
   then probed back in after a cooldown.
+- **Backpressure** — a concurrency gate bounds simultaneous upstream requests
+  and queues bursts, shedding load (503) when the queue is full.
+- **Persistent metrics** — counters optionally survive restarts.
 - **Tool / function calling** — `tools`/`tool_choice` pass through and
   `tool_calls` responses are returned unchanged.
 - **Resilience** — inbound rate limiting, upstream retry/backoff, configurable
@@ -104,6 +107,8 @@ All settings are environment variables (see [.env.example](./.env.example)):
 | `ENABLE_CACHE` / `MODEL_CACHE_TTL` | `True` / `300` | Response cache + TTL (s) |
 | `ENABLE_MODEL_FALLBACK` / `MAX_MODEL_FALLBACKS` | `True` / `2` | Fail over to next-best model |
 | `CIRCUIT_BREAKER_ENABLED` / `CIRCUIT_FAILURE_THRESHOLD` | `True` / `3` | Take failing models out of rotation |
+| `MAX_INFLIGHT_REQUESTS` / `MAX_QUEUED_REQUESTS` | `32` / `64` | Concurrency gate + queue depth |
+| `PERSIST_METRICS` / `METRICS_FILE` | `False` / … | Persist metrics across restarts |
 | `REQUIRE_API_KEY` / `GATEWAY_API_KEYS` | `False` / – | Optional inbound client auth |
 | `AUTOSCALE_SEQUENTIAL` | `True` | Run sub-agents one at a time (free-tier safe) |
 | `DEFAULT_EMBEDDING_MODEL` | `nvidia/nv-embedqa-e5-v5` | Embeddings model |

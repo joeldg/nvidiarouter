@@ -145,6 +145,39 @@ class Settings(BaseSettings):
         default=30, ge=1, description="Cooldown before probing a tripped model"
     )
 
+    # Metrics persistence (survive restarts)
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    persist_metrics: bool = Field(
+        default=False, description="Persist metrics counters to disk across restarts"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    metrics_file: str = Field(
+        default=".nvidia-smartroute-metrics.json",
+        description="Path to the persisted metrics file",
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    metrics_save_interval: int = Field(
+        default=60, ge=5, description="Seconds between periodic metrics saves"
+    )
+
+    # Concurrency / backpressure (smooths bursts against upstream rate limits)
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    enable_concurrency_limit: bool = Field(
+        default=True, description="Bound concurrent upstream requests with a queue"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    max_inflight_requests: int = Field(
+        default=32, ge=1, description="Max simultaneous upstream chat requests"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    max_queued_requests: int = Field(
+        default=64, ge=0, description="Max requests waiting for a slot before 503"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    queue_timeout: float = Field(
+        default=30.0, gt=0, description="Max seconds to wait for a slot before 503"
+    )
+
     # TUI settings
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     tui_refresh_rate: float = Field(

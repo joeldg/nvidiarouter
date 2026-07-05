@@ -80,6 +80,14 @@ Living checklist of what's done, what's in progress, and what's deferred.
 - [x] Comprehensive README refresh (features, endpoints, config table, scaling,
       Docker, dev).
 
+## Done — backpressure + persistent metrics (10th pass)
+
+- [x] Concurrency gate with bounded queue (backpressure): caps simultaneous
+      upstream requests, queues bursts, sheds load (503 "overloaded") when full
+      or the wait times out. Loop-safe lazy semaphore. Snapshot in `/metrics`.
+- [x] Persistent metrics: optional dump/load of per-model counters to disk on a
+      timer + on shutdown, restored on startup (`PERSIST_METRICS`).
+
 ## Done — circuit breaker (9th pass)
 
 - [x] Per-model circuit breaker: trip open after N consecutive hard failures,
