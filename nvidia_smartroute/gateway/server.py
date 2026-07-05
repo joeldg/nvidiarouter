@@ -1224,6 +1224,7 @@ async def list_models(source: str = "router"):
                 "owned_by": model.provider,
                 # Router-specific metadata (non-standard extensions).
                 "supported_tasks": [t.value for t in model.supported_tasks],
+                "parameters_b": model.parameters_b,
                 "context_window": model.context_window,
                 "supports_vision": model.supports_vision,
                 "supports_streaming": model.supports_streaming,

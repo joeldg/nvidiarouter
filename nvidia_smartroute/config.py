@@ -89,6 +89,13 @@ class Settings(BaseSettings):
         description="Exploration rate for adaptive routing (0..1)",
     )
     # @spec[PROJECT_PROFILE.md#Requirements]
+    # Discovered models file (written by `nvidia-smartroute discover`). When
+    # present, the router loads these on top of the built-in defaults.
+    models_file: str = Field(
+        default="discovered_models.json",
+        description="Path to discovered model capabilities (optional)",
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
     default_embedding_model: str = Field(
         default="nvidia/nv-embedqa-e5-v5",
         description="Model used for /v1/embeddings when none is specified",
