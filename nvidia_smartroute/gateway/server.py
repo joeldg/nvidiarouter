@@ -3,11 +3,14 @@
 FastAPI server for NVIDIA-SmartRoute-CLI providing OpenAI-compatible endpoints.
 """
 
+import base64
 import logging
 import time
 import uuid
 import json
-from typing import Optional, Dict, Any, List, AsyncGenerator, Union
+from collections import deque, defaultdict
+from contextlib import asynccontextmanager
+from typing import Optional, Dict, Any, List, AsyncGenerator, Union, Deque
 from datetime import datetime
 
 import uvicorn
@@ -26,6 +29,37 @@ from ..agents import autoscale_engine
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 logger = logging.getLogger(__name__)
 
+# HTTP client for NVIDIA NIM API (initialised in the lifespan handler).
+# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+http_client: Optional[httpx.AsyncClient] = None
+
+# Background task set retained for shutdown cleanup.
+# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+background_tasks = set()
+
+
+# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialise and tear down the shared HTTP client."""
+    global http_client
+    http_client = httpx.AsyncClient(
+        timeout=httpx.Timeout(settings.request_timeout, connect=10.0),
+        limits=httpx.Limits(max_connections=100, max_keepalive_connections=20),
+    )
+    logger.info("HTTP client initialized for NVIDIA NIM API")
+    try:
+        yield
+    finally:
+        if http_client:
+            await http_client.aclose()
+        for task in list(background_tasks):
+            task.cancel()
+        if background_tasks:
+            await asyncio.gather(*background_tasks, return_exceptions=True)
+        logger.info("Application shutting down")
+
+
 # Create FastAPI app
 # @spec[PROJECT_PROFILE.md#Token Budget Class]
 app = FastAPI(
@@ -34,6 +68,7 @@ app = FastAPI(
     version="0.1.0",
     docs_url="/docs" if not settings.debug else None,
     redoc_url="/redoc" if not settings.debug else None,
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -49,13 +84,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# HTTP client for NVIDIA NIM API
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-http_client: Optional[httpx.AsyncClient] = None
 
-# Background task for updating model performance
+# Inbound rate limiter (sliding window per client IP, applied to /v1/*).
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-background_tasks = set()
+_rate_windows: Dict[str, Deque[float]] = defaultdict(deque)
+
+
+@app.middleware("http")
+async def rate_limit(request: Request, call_next):
+    """Enforce a per-client sliding-window rate limit on /v1/* endpoints."""
+    if settings.enable_rate_limit and request.url.path.startswith("/v1/"):
+        client = request.client.host if request.client else "unknown"
+        now = time.time()
+        window = _rate_windows[client]
+        cutoff = now - settings.rate_limit_window
+        while window and window[0] < cutoff:
+            window.popleft()
+        if len(window) >= settings.rate_limit_requests:
+            retry_after = int(window[0] + settings.rate_limit_window - now) + 1
+            return JSONResponse(
+                status_code=429,
+                headers={"Retry-After": str(retry_after)},
+                content={
+                    "error": {
+                        "message": "Rate limit exceeded",
+                        "type": "rate_limit_exceeded",
+                        "code": 429,
+                    }
+                },
+            )
+        window.append(now)
+    return await call_next(request)
 
 
 # Middleware for request logging and timing
@@ -127,34 +186,6 @@ async def global_exception_handler(request: Request, exc: Exception):
             }
         },
     )
-
-
-# Startup and shutdown events
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-@app.on_event("startup")
-async def startup_event():
-    """Initialize HTTP client on startup."""
-    global http_client
-    http_client = httpx.AsyncClient(
-        timeout=httpx.Timeout(settings.request_timeout, connect=10.0),
-        limits=httpx.Limits(max_connections=100, max_keepalive_connections=20)
-    )
-    logger.info("HTTP client initialized for NVIDIA NIM API")
-
-
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Clean up HTTP client on shutdown."""
-    global http_client
-    if http_client:
-        await http_client.aclose()
-    # Cancel any remaining background tasks
-    for task in background_tasks:
-        task.cancel()
-    if background_tasks:
-        await asyncio.gather(*background_tasks, return_exceptions=True)
-    logger.info("Application shutting down")
 
 
 # Health check endpoint
@@ -235,12 +266,45 @@ class NIMClient:
         }
         if api_key:
             self.headers["Authorization"] = f"Bearer {api_key}"
-    
+
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    async def _post_with_retries(self, url: str, payload: dict) -> dict:
+        """POST with exponential backoff on 429 / 5xx, honoring Retry-After."""
+        attempts = settings.upstream_max_retries + 1
+        last_exc: Optional[Exception] = None
+        for attempt in range(attempts):
+            response = await http_client.post(url, json=payload, headers=self.headers)
+            if response.status_code < 400:
+                return response.json()
+            # Retry only on rate limiting / transient server errors.
+            if response.status_code == 429 or response.status_code >= 500:
+                if attempt < attempts - 1:
+                    retry_after = response.headers.get("Retry-After")
+                    if retry_after and retry_after.isdigit():
+                        delay = float(retry_after)
+                    else:
+                        delay = settings.upstream_backoff_base * (2 ** attempt)
+                    logger.warning(
+                        "upstream %s; retrying in %.1fs (attempt %d/%d)",
+                        response.status_code, delay, attempt + 1, attempts,
+                    )
+                    await asyncio.sleep(delay)
+                    continue
+            # Non-retryable, or retries exhausted: raise the standard error.
+            try:
+                response.raise_for_status()
+            except Exception as exc:
+                last_exc = exc
+                raise
+        if last_exc:
+            raise last_exc
+        raise RuntimeError("request failed without a response")
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     async def chat_completions(
-        self, 
-        model: str, 
-        messages: list, 
+        self,
+        model: str,
+        messages: list,
         stream: bool = False,
         max_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
@@ -252,20 +316,17 @@ class NIMClient:
             "messages": messages,
             "stream": stream
         }
-        
+
         if max_tokens is not None:
             payload["max_tokens"] = max_tokens
         if temperature is not None:
             payload["temperature"] = temperature
-        
+
         # Add any additional parameters
         payload.update(kwargs)
-        
+
         url = f"{self.base_url}/chat/completions"
-        
-        response = await http_client.post(url, json=payload, headers=self.headers)
-        response.raise_for_status()
-        return response.json()
+        return await self._post_with_retries(url, payload)
     
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     async def embeddings(
@@ -282,11 +343,8 @@ class NIMClient:
         }
         
         url = f"{self.base_url}/embeddings"
-        
-        response = await http_client.post(url, json=payload, headers=self.headers)
-        response.raise_for_status()
-        return response.json()
-    
+        return await self._post_with_retries(url, payload)
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     async def models(self) -> dict:
         """Get available models from NVIDIA NIM."""
@@ -377,12 +435,15 @@ async def stream_chat_completion(
     **kwargs
 ) -> AsyncGenerator[str, None]:
     """Stream a chat completion from NVIDIA NIM."""
+    start = time.time()
+    errored = False
     try:
-        async for line in await _stream_nim_request(
+        async for line in _stream_nim_request(
             model, messages, True, max_tokens, temperature, **kwargs
         ):
             yield line
     except Exception as e:
+        errored = True
         logger.error(f"Error in stream_chat_completion: {e}")
         # Yield an error chunk in OpenAI format
         error_chunk = {
@@ -395,6 +456,11 @@ async def stream_chat_completion(
         }
         yield f"data: {json.dumps(error_chunk)}\n\n"
     finally:
+        # Record latency for the streaming path (tokens aren't tallied here).
+        if errored:
+            metrics.record_error(model)
+        else:
+            metrics.record_latency(model, (time.time() - start) * 1000.0)
         yield "data: [DONE]\n\n"
 
 
@@ -458,6 +524,54 @@ async def _stream_nim_request(
                         yield f"data: {json.dumps({'choices': [{'delta': {'content': data}}]})}\n\n"
 
 
+# Auto-inline remote images (NVIDIA vision NIM requires base64, not URLs)
+# @spec[PROJECT_PROFILE.md#Requirements]
+async def _fetch_as_data_url(url: str) -> Optional[str]:
+    """Fetch a remote image and return it as a base64 data URL, or None."""
+    try:
+        resp = await http_client.get(
+            url, headers={"User-Agent": "Mozilla/5.0"}, follow_redirects=True
+        )
+        resp.raise_for_status()
+        data = resp.content
+        if len(data) > settings.image_fetch_max_bytes:
+            logger.warning("remote image too large (%d bytes); leaving as URL", len(data))
+            return None
+        mime = (resp.headers.get("Content-Type", "image/jpeg").split(";")[0].strip()
+                or "image/jpeg")
+        return f"data:{mime};base64," + base64.b64encode(data).decode()
+    except Exception as e:
+        logger.warning("failed to inline remote image %s: %s", url, e)
+        return None
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+async def _inline_remote_images(messages: list) -> list:
+    """Replace remote image_url parts with inlined base64 data URLs."""
+    if not settings.inline_remote_images:
+        return messages
+    result = []
+    for msg in messages:
+        content = msg.get("content")
+        if isinstance(content, list):
+            new_content = []
+            for part in content:
+                if (
+                    isinstance(part, dict)
+                    and part.get("type") == "image_url"
+                    and isinstance(part.get("image_url"), dict)
+                ):
+                    url = part["image_url"].get("url", "")
+                    if isinstance(url, str) and url.startswith(("http://", "https://")):
+                        data_url = await _fetch_as_data_url(url)
+                        if data_url:
+                            part = {**part, "image_url": {**part["image_url"], "url": data_url}}
+                new_content.append(part)
+            msg = {**msg, "content": new_content}
+        result.append(msg)
+    return result
+
+
 # Record request performance in background
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 async def _record_request_performance(
@@ -519,6 +633,9 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             }
         )
         
+        # Inline any remote image URLs (NVIDIA vision NIM needs base64 data URLs).
+        messages = await _inline_remote_images(messages)
+
         # Route the request to determine the best model
         routing_decision: RoutingDecision = await router.route_request(
             messages=messages,

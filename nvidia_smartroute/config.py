@@ -96,7 +96,11 @@ class Settings(BaseSettings):
         default="X-API-Key", description="Header name for API key authentication"
     )
 
-    # Rate limiting
+    # Rate limiting (inbound, applied to /v1/* endpoints)
+    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    enable_rate_limit: bool = Field(
+        default=True, description="Enforce inbound rate limiting on /v1/* endpoints"
+    )
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     rate_limit_requests: int = Field(
         default=100, description="Number of requests allowed per time window"
@@ -104,6 +108,25 @@ class Settings(BaseSettings):
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     rate_limit_window: int = Field(
         default=60, description="Time window for rate limiting in seconds"
+    )
+
+    # Upstream resilience
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    upstream_max_retries: int = Field(
+        default=3, ge=0, description="Retries on upstream 429/5xx with backoff"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    upstream_backoff_base: float = Field(
+        default=0.5, gt=0, description="Base seconds for exponential backoff"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    inline_remote_images: bool = Field(
+        default=True,
+        description="Fetch remote image URLs and inline them as base64 for vision",
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    image_fetch_max_bytes: int = Field(
+        default=5_000_000, gt=0, description="Max size of a fetched remote image"
     )
 
     model_config = SettingsConfigDict(

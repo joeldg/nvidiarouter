@@ -143,14 +143,6 @@ class CapabilityAnalyzer:
         if has_image:
             return TaskType.VISION
         
-        # Check for code-related keywords
-        code_indicators = [
-            "function", "class", "def ", "return ", "if ", "for ", "while ",
-            "import ", "from ", "== ", "!=", "< ", "> ", "+ ", "- ", "* ", "/",
-            "python", "javascript", "java", "cpp", "c#", "ruby", "php", "html",
-            "css", "sql", "api", "endpoint", "variable", "loop", "array"
-        ]
-        
         # Check for code generation indicators
         code_gen_indicators = [
             "write a", "create a", "implement", "code to",
@@ -212,7 +204,6 @@ class CapabilityAnalyzer:
         ]
         
         # Score each category
-        code_score = sum(1 for indicator in code_indicators if indicator in full_text)
         code_gen_score = sum(2 for indicator in code_gen_indicators if indicator in full_text)
         code_comp_score = sum(1 for indicator in code_comp_indicators if indicator in full_text)
         code_exp_score = sum(1 for indicator in code_exp_indicators if indicator in full_text)

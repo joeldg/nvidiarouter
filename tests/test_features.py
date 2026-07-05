@@ -214,5 +214,134 @@ def test_chat_completion_autoscales_multistep_code(monkeypatch):
     assert {a["role"] for a in resp.json()["_agents"]} == {"writer", "tester", "reviewer"}
 
 
+# --- Inbound rate limiting ------------------------------------------------
+
+def test_rate_limit_returns_429(monkeypatch):
+    from unittest.mock import AsyncMock
+    import nvidia_smartroute.gateway.server as srv
+
+    monkeypatch.setattr(srv.settings, "rate_limit_requests", 2)
+    monkeypatch.setattr(srv.settings, "rate_limit_window", 60)
+    monkeypatch.setattr(srv.settings, "enable_rate_limit", True)
+    srv._rate_windows.clear()
+    monkeypatch.setattr(
+        srv.nim_client,
+        "chat_completions",
+        AsyncMock(return_value={"choices": [{"index": 0, "message": {"role": "assistant", "content": "ok"}, "finish_reason": "stop"}]}),
+    )
+    client = TestClient(srv.app)
+    body = {"messages": [{"role": "user", "content": "hi"}]}
+    codes = [client.post("/v1/chat/completions", json=body).status_code for _ in range(3)]
+    assert codes[0] == 200 and codes[1] == 200
+    assert codes[2] == 429
+    srv._rate_windows.clear()
+
+
+def test_health_endpoint_not_rate_limited(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+
+    monkeypatch.setattr(srv.settings, "rate_limit_requests", 1)
+    monkeypatch.setattr(srv.settings, "enable_rate_limit", True)
+    srv._rate_windows.clear()
+    client = TestClient(srv.app)
+    # /health is outside /v1/* and must never be limited.
+    assert all(client.get("/health").status_code == 200 for _ in range(5))
+
+
+# --- Upstream retry / backoff ---------------------------------------------
+
+def test_post_with_retries_recovers_from_429(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+
+    class FakeResp:
+        def __init__(self, status, body=None):
+            self.status_code = status
+            self.headers = {}
+            self._body = body or {}
+        def json(self):
+            return self._body
+        def raise_for_status(self):
+            if self.status_code >= 400:
+                raise RuntimeError(f"HTTP {self.status_code}")
+
+    seq = [FakeResp(429), FakeResp(503), FakeResp(200, {"ok": True})]
+
+    class FakeClient:
+        async def post(self, url, json=None, headers=None):
+            return seq.pop(0)
+
+    monkeypatch.setattr(srv, "http_client", FakeClient())
+    monkeypatch.setattr(srv.settings, "upstream_max_retries", 3)
+    monkeypatch.setattr(srv.settings, "upstream_backoff_base", 0.0)
+
+    result = asyncio.run(srv.nim_client._post_with_retries("http://x/chat", {"model": "m"}))
+    assert result == {"ok": True}
+    assert seq == []  # all three responses consumed
+
+
+def test_post_with_retries_raises_on_4xx(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+
+    class FakeResp:
+        status_code = 400
+        headers = {}
+        def json(self): return {}
+        def raise_for_status(self): raise RuntimeError("HTTP 400")
+
+    class FakeClient:
+        async def post(self, url, json=None, headers=None):
+            return FakeResp()
+
+    monkeypatch.setattr(srv, "http_client", FakeClient())
+    monkeypatch.setattr(srv.settings, "upstream_max_retries", 3)
+    with pytest.raises(RuntimeError):
+        asyncio.run(srv.nim_client._post_with_retries("http://x/chat", {"model": "m"}))
+
+
+# --- Remote image inlining ------------------------------------------------
+
+def test_inline_remote_images_replaces_url(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+    from unittest.mock import AsyncMock
+
+    monkeypatch.setattr(srv.settings, "inline_remote_images", True)
+    monkeypatch.setattr(srv, "_fetch_as_data_url", AsyncMock(return_value="data:image/png;base64,AAAA"))
+
+    messages = [{"role": "user", "content": [
+        {"type": "text", "text": "what is this"},
+        {"type": "image_url", "image_url": {"url": "https://example.com/x.png"}},
+    ]}]
+    out = asyncio.run(srv._inline_remote_images(messages))
+    img_part = out[0]["content"][1]
+    assert img_part["image_url"]["url"].startswith("data:image/png;base64,")
+    # A data URL should be left untouched (no fetch).
+    already = [{"role": "user", "content": [{"type": "image_url", "image_url": {"url": "data:image/png;base64,ZZ"}}]}]
+    out2 = asyncio.run(srv._inline_remote_images(already))
+    assert out2[0]["content"][0]["image_url"]["url"] == "data:image/png;base64,ZZ"
+
+
+# --- Streaming metrics ----------------------------------------------------
+
+def test_streaming_records_latency(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+
+    async def fake_stream(model, messages, stream, max_tokens=None, temperature=None, **kwargs):
+        yield 'data: {"choices":[{"delta":{"content":"hi"}}]}\n\n'
+
+    monkeypatch.setattr(srv, "_stream_nim_request", fake_stream)
+    srv.metrics.reset()
+
+    async def consume():
+        chunks = []
+        async for c in srv.stream_chat_completion("m/x", [{"role": "user", "content": "hi"}], "rid"):
+            chunks.append(c)
+        return chunks
+
+    chunks = asyncio.run(consume())
+    assert chunks[-1] == "data: [DONE]\n\n"
+    assert srv.metrics.get_avg_latency_ms("m/x") is not None
+    srv.metrics.reset()
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
