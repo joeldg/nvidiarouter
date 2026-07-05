@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-04T23:10:50.080Z",
+  "generated_at": "2026-07-04T23:39:51.517Z",
   "root": "nvidiarouter",
   "specs_dir": "specs",
   "spec_count": 11,
@@ -1002,7 +1002,7 @@
       "path": "nvidia_smartroute/routing/router.py",
       "name": "ModelRegistry",
       "signature": "class ModelRegistry:",
-      "start_line": 222
+      "start_line": 223
     },
     {
       "id": "code:class:c1ba9f916c3b2a54",
@@ -1010,7 +1010,7 @@
       "path": "nvidia_smartroute/routing/router.py",
       "name": "RequestRouter",
       "signature": "class RequestRouter:",
-      "start_line": 336
+      "start_line": 337
     },
     {
       "id": "code:function:5e507883a30f96bd",
