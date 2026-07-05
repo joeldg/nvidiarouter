@@ -451,8 +451,8 @@ def test_streaming_records_usage_from_chunk(monkeypatch):
         async def __aenter__(self): return self
         async def __aexit__(self, *a): return False
         async def aiter_lines(self):
-            async for l in fake_line_stream():
-                yield l
+            async for chunk in fake_line_stream():
+                yield chunk
 
     class FakeHTTP:
         def stream(self, *a, **k): return FakeStreamResp()
@@ -606,7 +606,6 @@ def test_embeddings_requires_input():
 
 
 def test_embeddings_defaults_model_and_records_metrics(monkeypatch):
-    from unittest.mock import AsyncMock
     import nvidia_smartroute.gateway.server as srv
 
     captured = {}

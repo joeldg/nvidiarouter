@@ -3,10 +3,8 @@
 Command-line interface for NVIDIA-SmartRoute-CLI.
 """
 
-import asyncio
 import signal
 import sys
-from typing import Optional
 import uvicorn
 
 import typer

@@ -3,8 +3,6 @@
 Model capability routing and NVIDIA NIM integration for NVIDIA-SmartRoute-CLI.
 """
 
-import asyncio
-import json
 import re
 import time
 from typing import Dict, List, Optional, Tuple, Any
@@ -44,27 +42,27 @@ class ModelCapability:
     name: str
     provider: str
     version: str
-    
+
     # Task types this model excels at
     supported_tasks: List[TaskType] = field(default_factory=list)
-    
+
     # Performance characteristics
     latency_ms: int = 0  # Average latency in milliseconds
     throughput_tps: float = 0.0  # Tokens per second
     cost_per_token: float = 0.0  # Cost per token (if applicable)
-    
+
     # Quality scores (0.0 to 1.0)
     quality_score: float = 0.0
     reliability_score: float = 0.0
-    
+
     # Context window size
     context_window: int = 4096
-    
+
     # Specialized capabilities
     supports_streaming: bool = False
     supports_function_calling: bool = False
     supports_vision: bool = False
-    
+
     # Metadata
     description: str = ""
     tags: List[str] = field(default_factory=list)
@@ -238,7 +236,7 @@ class CapabilityAnalyzer:
         return " ".join(texts), has_image
 
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-    def classify(self, messages: List[Dict[str, Any]]) -> Classification:
+    def classify(self, messages: List[Dict[str, Any]]) -> Classification:  # noqa: C901
         """
         Classify a request into a task type with a confidence score.
 
@@ -302,11 +300,11 @@ class CapabilityAnalyzer:
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 class ModelRegistry:
     """Registry of available models."""
-    
+
     def __init__(self):
         self.models: Dict[str, ModelCapability] = {}
         self._initialize_default_models()
-    
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     def _initialize_default_models(self):
         """Initialize with default NVIDIA NIM models (build.nvidia.com IDs).
@@ -400,7 +398,7 @@ class ModelRegistry:
             description="Meta Llama 3.2 90B Vision for image understanding",
             tags=["vision", "multimodal", "image-analysis"],
         )
-    
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     def get_model(self, model_id: str) -> Optional[ModelCapability]:
         """
@@ -418,10 +416,10 @@ class ModelRegistry:
     def select_best_model(self, task_type: TaskType) -> Optional[ModelCapability]:
         """
         Select the best model for a given task type.
-        
+
         Args:
             task_type: The task type to find a model for
-            
+
         Returns:
             ModelCapability: The best model for the task, or None if no suitable model
         """
@@ -430,18 +428,18 @@ class ModelRegistry:
             model for model in self.models.values()
             if task_type in model.supported_tasks
         ]
-        
+
         if not suitable_models:
             # Fallback to general models (CHAT task type)
             suitable_models = [
                 model for model in self.models.values()
                 if TaskType.CHAT in model.supported_tasks
             ]
-        
+
         if not suitable_models:
             # Last resort: use any available model
             suitable_models = list(self.models.values())
-        
+
         if not suitable_models:
             return None
 
@@ -474,12 +472,12 @@ class ModelRegistry:
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 class RequestRouter:
     """Main router that combines capability analysis and model selection."""
-    
+
     def __init__(self):
         self.capability_analyzer = CapabilityAnalyzer()
         self.model_registry = ModelRegistry()
         self._decision_history: List[Dict[str, Any]] = []
-    
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     async def route_request(
         self,
@@ -491,20 +489,20 @@ class RequestRouter:
     ) -> RoutingDecision:
         """
         Route a request to the most appropriate model based on the task.
-        
+
         Args:
             messages: The conversation messages
             model: Optional specific model to use
             max_tokens: Maximum tokens to generate
             temperature: Sampling temperature
             **kwargs: Additional parameters
-            
+
         Returns:
             RoutingDecision: The routing decision with selected model and reasoning
         """
         start_time = time.time()
         request_id = str(int(time.time() * 1000))  # Simple request ID
-        
+
         # Analyze the request to determine task type (with a confidence score).
         classification = self.capability_analyzer.classify(messages)
         task_type = classification.task_type
@@ -528,12 +526,12 @@ class RequestRouter:
 
         if not selected_model:
             confidence = min(confidence, 0.5)
-        
+
         # Generate reasoning
         reasoning = f"Selected {selected_model.name if selected_model else 'no model'} for {task_type.value} task"
         if selected_model and selected_model.supported_tasks:
             reasoning += f" based on capabilities: {', '.join([t.value for t in selected_model.supported_tasks])}"
-        
+
         # Create the decision
         decision = RoutingDecision(
             request_id=request_id,
@@ -557,18 +555,18 @@ class RequestRouter:
             "decision": decision,
             "processing_time": time.time() - start_time
         })
-        
+
         # Keep only the last 100 decisions
         if len(self._decision_history) > 100:
             self._decision_history = self._decision_history[-100:]
-        
+
         return decision
-    
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     def get_routing_stats(self) -> dict:
         """
         Get routing statistics.
-        
+
         Returns:
             dict: Statistics about routing decisions
         """
@@ -580,32 +578,32 @@ class RequestRouter:
                 "average_confidence": 0.0,
                 "recent_decisions": []
             }
-        
+
         # Count by task type
         task_type_counts = {}
         model_usage = {}
         total_confidence = 0.0
-        
+
         for entry in self._decision_history:
             decision = entry["decision"]
             task_type = decision.task_type
             model_id = decision.selected_model.model_id if decision.selected_model else None
             confidence = decision.confidence
-            
+
             # Count task types
             task_type_str = task_type.value if hasattr(task_type, 'value') else str(task_type)
             task_type_counts[task_type_str] = task_type_counts.get(task_type_str, 0) + 1
-            
+
             # Count model usage
             if model_id:
                 model_usage[model_id] = model_usage.get(model_id, 0) + 1
-            
+
             # Sum confidence for average
             total_confidence += confidence
-        
+
         # Calculate average confidence
         avg_confidence = total_confidence / len(self._decision_history) if self._decision_history else 0.0
-        
+
         # Get recent decisions (last 5)
         recent_decisions = []
         for entry in self._decision_history[-5:]:
@@ -615,7 +613,7 @@ class RequestRouter:
             if model_info and model_info.model_id:
                 model_tasks = [t.value for t in model_info.supported_tasks] if model_info.supported_tasks else []
                 model_str = f"{model_info.model_id} ({','.join(model_tasks)})" if model_tasks else model_info.model_id
-            
+
             recent_decisions.append({
                 "request_id": decision.request_id,
                 "timestamp": entry["timestamp"],
@@ -623,7 +621,7 @@ class RequestRouter:
                 "model": model_str,
                 "confidence": round(decision.confidence, 2)
             })
-        
+
         return {
             "total_decisions": len(self._decision_history),
             "task_type_distribution": task_type_counts,

@@ -9,11 +9,10 @@ import uuid
 import json
 from collections import deque, defaultdict
 from contextlib import asynccontextmanager
-from typing import Optional, Dict, Any, List, AsyncGenerator, Union, Deque
-from datetime import datetime
+from typing import Optional, Dict, List, AsyncGenerator, Union, Deque
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Header, Request, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
@@ -22,7 +21,7 @@ import structlog
 
 from ..config import settings
 from ..metrics import metrics
-from ..routing.router import router, TaskType, RoutingDecision
+from ..routing.router import router, RoutingDecision
 from ..agents import autoscale_engine
 from ..keypool import key_pool, KeyPool, KeyPoolExhaustedError, _mask as _mask_key
 from .. import logging_config  # noqa: F401  (configures structlog on import)
@@ -154,7 +153,7 @@ async def log_requests(request: Request, call_next):
     """Log incoming requests and their processing time."""
     request_id = str(uuid.uuid4())
     start_time = time.time()
-    
+
     # Add request ID to request state for tracing
     request.state.request_id = request_id
 
@@ -168,7 +167,7 @@ async def log_requests(request: Request, call_next):
 
     # Calculate processing time
     process_time = time.time() - start_time
-    
+
     # Log request details
     logger.info(
         "request completed",
@@ -179,11 +178,11 @@ async def log_requests(request: Request, call_next):
         process_time=round(process_time, 4),
         client_host=request.client.host if request.client else None,
     )
-    
+
     # Add custom headers
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Process-Time"] = str(process_time)
-    
+
     return response
 
 
@@ -200,7 +199,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         exception_message=str(exc),
         exc_info=True,
     )
-    
+
     return JSONResponse(
         status_code=500,
         content={
@@ -252,12 +251,12 @@ async def readiness_check():
     """Readiness check endpoint."""
     # Check HTTP client readiness
     http_ready = http_client is not None and not http_client.is_closed
-    
+
     # TODO: Add actual NVIDIA API connectivity check
     nvidia_api_ready = key_pool.has_keys()
-    
+
     status = "ready" if (http_ready and nvidia_api_ready) else "not_ready"
-    
+
     return {
         "status": status,
         "timestamp": time.time(),
@@ -394,7 +393,7 @@ class NIMClient:
 
         url = f"{self.base_url}/chat/completions"
         return await self._post_with_retries(url, payload)
-    
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     async def embeddings(
         self,
@@ -436,8 +435,8 @@ nim_client = NIMClient(
 # Helper functions for response formatting
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 def format_chat_response(
-    content: str, 
-    model: str, 
+    content: str,
+    model: str,
     request_id: str,
     finish_reason: str = "stop"
 ) -> dict:
@@ -469,8 +468,8 @@ def format_chat_response(
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 def format_streaming_chunk(
-    content: str, 
-    model: str, 
+    content: str,
+    model: str,
     index: int = 0,
     finish_reason: Optional[str] = None
 ) -> dict:
@@ -488,17 +487,17 @@ def format_streaming_chunk(
             }
         ]
     }
-    
+
     if content:
         chunk["choices"][0]["delta"]["content"] = content
-    
+
     return chunk
 
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 async def stream_chat_completion(
-    model: str, 
-    messages: list, 
+    model: str,
+    messages: list,
     request_id: str,
     max_tokens: Optional[int] = None,
     temperature: Optional[float] = None,
@@ -535,9 +534,9 @@ async def stream_chat_completion(
 
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-async def _stream_nim_request(
-    model: str, 
-    messages: list, 
+async def _stream_nim_request(  # noqa: C901
+    model: str,
+    messages: list,
     stream: bool,
     max_tokens: Optional[int] = None,
     temperature: Optional[float] = None,
@@ -549,14 +548,14 @@ async def _stream_nim_request(
         "messages": messages,
         "stream": stream
     }
-    
+
     if max_tokens is not None:
         payload["max_tokens"] = max_tokens
     if temperature is not None:
         payload["temperature"] = temperature
-    
+
     payload.update(kwargs)
-    
+
     url = f"{settings.nvidia_nim_base_url}/chat/completions"
 
     # Rotate keys on 429 when opening the stream (can't retry mid-stream).
@@ -672,7 +671,7 @@ async def _record_request_performance(
     try:
         # Calculate response time
         response_time = time.time() - start_time
-        
+
         # Log performance metrics
         logger.info(
             "request performance recorded",
@@ -695,7 +694,7 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
     """OpenAI-compatible chat completions endpoint with intelligent routing."""
     start_time = time.time()
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
-    
+
     try:
         # Parse request body
         body = await request.json()
@@ -704,12 +703,12 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
         stream = body.get("stream", False)
         max_tokens = body.get("max_tokens")
         temperature = body.get("temperature")
-        
+
         # Remove parameters we handle/pass separately so they aren't forwarded
         # twice (as explicit args and again via **body_without_model).
         body_without_model = {k: v for k, v in body.items()
                              if k not in ["messages", "model", "stream", "max_tokens", "temperature"]}
-        
+
         logger.info(
             "chat completion request received",
             request_id=request_id,
@@ -717,7 +716,7 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             stream=stream,
             model_hint=model,
         )
-        
+
         # Inline any remote image URLs (NVIDIA vision NIM needs base64 data URLs).
         messages = await _inline_remote_images(messages)
 
@@ -729,7 +728,7 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             temperature=temperature,
             **body_without_model
         )
-        
+
         selected_model = routing_decision.selected_model
         if not selected_model:
             raise HTTPException(
@@ -743,7 +742,7 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
                     }
                 }
             )
-        
+
         # Log the routing decision
         logger.info(
             "routing decision",
@@ -753,7 +752,7 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             confidence=round(routing_decision.confidence, 2),
             reasoning=getattr(routing_decision, "reasoning", "N/A"),
         )
-        
+
         # Track performance in background
         background_tasks.add_task(
             _record_request_performance,
@@ -761,7 +760,7 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             routing_decision,
             start_time
         )
-        
+
         # If streaming is requested, return a streaming response
         if stream:
             return StreamingResponse(
@@ -783,7 +782,7 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
                     "X-Routing-Confidence": str(routing_decision.confidence)
                 }
             )
-        
+
         # Common tracing headers for the response.
         response_headers = {
             "X-Request-ID": request_id,

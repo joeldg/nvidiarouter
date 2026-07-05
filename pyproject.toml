@@ -70,8 +70,12 @@ target-version = ['py39']
 [tool.ruff]
 line-length = 88
 target-version = "py39"
+
+[tool.ruff.lint]
 select = ["E", "F", "W", "C90"]
-ignore = []
+# E501 (line length) is advisory here — keyword tables and long f-strings are
+# left readable rather than wrapped.
+ignore = ["E501"]
 
 [tool.mypy]
 python_version = "3.9"
