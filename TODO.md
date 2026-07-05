@@ -67,9 +67,17 @@ Living checklist of what's done, what's in progress, and what's deferred.
 - [x] Streaming token accounting: record usage from the final chunk when the
       client sets `stream_options.include_usage` (fixed cumulative-overcount bug).
 
+## Done — classifier rewrite (6th pass)
+
+- [x] Replace brittle keyword classifier with a weighted, word-boundary scorer:
+      per-task weighted rules, code-domain boost, arithmetic + vision structural
+      signals, deterministic tie-break priority, and a real confidence score
+      (surfaced via `classify()` and used in `route_request`). Fixes false
+      positives like "meaning"->maths and "calculate factorial"->maths.
+
 ## Backlog — future improvements
 
-- [ ] Replace brittle keyword classifier with weighted / embedding-based routing
 - [ ] Regenerate `.spec/code-map.json` & `code-trace.json` for new modules
 - [ ] Autoscale over the streaming path (currently non-streaming only)
 - [ ] Embeddings: task-aware routing (query vs passage) if multiple embed models
+- [ ] Optional embedding-based routing strategy (higher accuracy, adds latency)

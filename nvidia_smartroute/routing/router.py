@@ -82,8 +82,126 @@ class RoutingDecision:
 
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+@dataclass
+class Classification:
+    """Result of analysing a request: the task type plus scoring detail."""
+    task_type: TaskType
+    confidence: float
+    scores: Dict[str, float]
+
+
+# Weighted keyword rules per task type.
+#
+# Each rule is (weight, kind, patterns):
+#   - kind "word":   matched on word boundaries (so "sum" != "summarize")
+#   - kind "phrase": matched as a substring (multi-word signals)
+# A pattern contributes its weight once if present (not once per occurrence).
+# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+_RULES: Dict[TaskType, List[Tuple[int, str, List[str]]]] = {
+    TaskType.CODE_GENERATION: [
+        (3, "phrase", ["write a", "create a", "build a", "make a", "generate a",
+                       "code to", "implement a", "write me a"]),
+        (2, "word", ["implement", "develop", "program", "script"]),
+    ],
+    TaskType.CODE_COMPLETION: [
+        (3, "phrase", ["complete the", "finish the", "continue the", "fill in",
+                       "what comes next", "complete this", "complete the following"]),
+        (2, "word", ["autocomplete", "complete", "finish", "continue"]),
+    ],
+    TaskType.CODE_EXPLANATION: [
+        (3, "phrase", ["what does this code", "how does this code",
+                       "walk through this code", "break down this code",
+                       "explain this code", "explain the code", "code explanation",
+                       "explain the following code", "what does this function"]),
+    ],
+    TaskType.CODE_REVIEW: [
+        (2, "word", ["review", "debug", "refactor", "lint", "optimize"]),
+        (2, "phrase", ["check for errors", "find bugs", "fix the bug", "code review"]),
+        (1, "word", ["fix", "improve"]),
+    ],
+    TaskType.CREATIVE_WRITING: [
+        (2, "word", ["story", "poem", "haiku", "novel", "narrative", "fiction",
+                     "fantasy", "lyrics", "screenplay", "dialogue"]),
+        (2, "phrase", ["write a story", "write a poem", "short story"]),
+        (1, "word", ["character", "plot", "imagine", "scene", "romance", "mystery"]),
+    ],
+    TaskType.REASONING: [
+        (3, "phrase", ["explain why", "why is", "why does", "how does",
+                       "what causes", "pros and cons"]),
+        (2, "word", ["analyze", "compare", "contrast", "evaluate", "assess",
+                     "examine", "reasoning"]),
+        (1, "word", ["impact", "advantages", "disadvantages", "benefits", "drawbacks"]),
+    ],
+    TaskType.MATHEMATICS: [
+        (2, "word", ["calculate", "compute", "solve", "equation", "formula",
+                     "derivative", "integral", "algebra", "geometry", "calculus",
+                     "trigonometry", "probability", "percentage", "fraction",
+                     "statistics", "factorial", "median", "variance"]),
+    ],
+    TaskType.TRANSLATION: [
+        (3, "word", ["translate", "translation"]),
+        (2, "phrase", ["in spanish", "in french", "in german", "in italian",
+                       "in portuguese", "in russian", "in chinese", "in japanese",
+                       "in korean", "in arabic", "in hindi", "to spanish",
+                       "to french", "to german", "to japanese"]),
+    ],
+    TaskType.SUMMARIZATION: [
+        (3, "word", ["summarize", "summary"]),
+        (2, "phrase", ["tl;dr", "in short", "sum up", "to summarize", "in summary",
+                       "key points", "give me an overview"]),
+        (1, "word", ["overview", "brief"]),
+    ],
+}
+
+# Code-domain vocabulary — a weak signal that a request is code-related. Adds a
+# small boost to every CODE_* task so e.g. "write a function to calculate X"
+# routes to code, not maths.
+# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+_CODE_DOMAIN = [
+    "python", "javascript", "typescript", "java", "kotlin", "swift", "rust",
+    "golang", "ruby", "php", "html", "css", "sql", "bash", "function", "class",
+    "method", "variable", "array", "loop", "api", "endpoint", "code", "def",
+    "import", "compile", "syntax", "algorithm", "recursion", "json", "regex",
+]
+_CODE_TASKS = [
+    TaskType.CODE_GENERATION,
+    TaskType.CODE_COMPLETION,
+    TaskType.CODE_EXPLANATION,
+    TaskType.CODE_REVIEW,
+]
+
+# Deterministic tie-break order (more specific tasks win ties).
+# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+_TASK_PRIORITY = [
+    TaskType.VISION,
+    TaskType.CODE_GENERATION,
+    TaskType.CODE_COMPLETION,
+    TaskType.CODE_REVIEW,
+    TaskType.CODE_EXPLANATION,
+    TaskType.MATHEMATICS,
+    TaskType.TRANSLATION,
+    TaskType.SUMMARIZATION,
+    TaskType.CREATIVE_WRITING,
+    TaskType.REASONING,
+    TaskType.CHAT,
+]
+
+_ARITHMETIC_RE = re.compile(r"\d+\s*[+\-*/^]\s*\d+")
+
+
+def _word_score(patterns: List[str], text: str) -> int:
+    """Number of patterns present as whole words."""
+    return sum(1 for p in patterns if re.search(r"\b" + re.escape(p) + r"\b", text))
+
+
+def _phrase_score(patterns: List[str], text: str) -> int:
+    """Number of patterns present as substrings."""
+    return sum(1 for p in patterns if p in text)
+
+
+# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 class CapabilityAnalyzer:
-    """Analyzes requests to determine task type."""
+    """Analyzes requests to determine task type via weighted keyword scoring."""
 
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     @staticmethod
@@ -120,144 +238,65 @@ class CapabilityAnalyzer:
         return " ".join(texts), has_image
 
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-    def analyze_request(self, messages: List[Dict[str, str]]) -> TaskType:
+    def classify(self, messages: List[Dict[str, Any]]) -> Classification:
         """
-        Analyze the request to determine the task type.
-        
-        Args:
-            messages: The conversation messages
-            
-        Returns:
-            TaskType: The detected task type
+        Classify a request into a task type with a confidence score.
+
+        Uses weighted, word-boundary keyword scoring plus structural signals
+        (image presence -> vision, arithmetic expressions -> maths) and a
+        code-domain boost so incidental keywords don't misroute code requests.
         """
         if not messages:
-            return TaskType.CHAT
+            return Classification(TaskType.CHAT, 0.4, {})
 
-        # Extract text and detect image parts. OpenAI multimodal messages carry
-        # `content` as a list of parts (text / image_url), so plain string
-        # joining would raise on those payloads.
         full_text, has_image = self._extract_content(messages)
-        full_text = full_text.lower()
+        text = full_text.lower()
 
         # A request carrying an image is a vision task regardless of the text.
         if has_image:
-            return TaskType.VISION
-        
-        # Check for code generation indicators
-        code_gen_indicators = [
-            "write a", "create a", "implement", "code to",
-            "program", "script", "build a", "make a", "develop"
-        ]
-        
-        # Check for code completion indicators
-        code_comp_indicators = [
-            "complete", "finish", "continue", "...", "what comes next"
-        ]
-        
-        # Check for code explanation indicators
-        code_exp_indicators = [
-            "what does this code do", "how does this code work",
-            "walk through this code", "break down this code",
-            "explain this code", "explain the code", "code explanation"
-        ]
-        # Check for code review indicators
-        code_rev_indicators = [
-            "review", "check for errors", "debug", "fix", "improve",
-            "optimize", "refactor", "lint"
-        ]
-        
-        # Check for creative writing indicators
-        creative_indicators = [
-            "story", "poem", "novel", "character", "plot", "setting", "narrative",
-            "describe", "imagine", "create", "write", "fiction", "fantasy",
-            "scifi", "mystery", "romance", "dialogue", "scene"
-        ]
-        
-        # Check for analytical thinking indicators
-        analysis_indicators = [
-            "analyze", "compare", "contrast", "evaluate", "assess", "examine",
-            "explain why", "how does", "what causes", "impact", "effect",
-            "pros and cons", "advantages", "disadvantages", "benefits", "drawbacks"
-        ]
-        
-        # Check for mathematics indicators
-        # Note: "sum" is intentionally omitted because it is a substring of
-        # "summarize"/"summary" and would misclassify summarization requests.
-        math_indicators = [
-            "calculate", "compute", "solve", "equation", "formula", "derivative",
-            "integral", "limit", "average", "median", "mode",
-            "statistics", "probability", "percentage", "fraction", "algebra",
-            "geometry", "trigonometry", "calculus"
-        ]
-        
-        # Check for translation indicators
-        trans_indicators = [
-            "translate", "translation", "in spanish", "in french", "in german",
-            "in italian", "in portuguese", "in russian", "in chinese", "in japanese",
-            "in korean", "in arabic", "in hindi"
-        ]
-        
-        # Check for summarization indicators
-        sum_indicators = [
-            "summarize", "summary", "brief", "overview", "tl;dr", "in short",
-            "to summarize", "in summary", "sum up"
-        ]
-        
-        # Score each category
-        code_gen_score = sum(2 for indicator in code_gen_indicators if indicator in full_text)
-        code_comp_score = sum(1 for indicator in code_comp_indicators if indicator in full_text)
-        code_exp_score = sum(1 for indicator in code_exp_indicators if indicator in full_text)
-        code_rev_score = sum(1 for indicator in code_rev_indicators if indicator in full_text)
-        creative_score = sum(1 for indicator in creative_indicators if indicator in full_text)
-        analysis_score = sum(1 for indicator in analysis_indicators if indicator in full_text)
-        math_score = sum(1 for indicator in math_indicators if indicator in full_text)
-        # Arithmetic expressions (e.g. "2+2", "10 * 3") are a strong math signal
-        if re.search(r"\d+\s*[+\-*/^]\s*\d+", full_text):
-            math_score += 2
-        trans_score = sum(1 for indicator in trans_indicators if indicator in full_text)
-        sum_score = sum(1 for indicator in sum_indicators if indicator in full_text)
-        
-        # Determine the highest scoring category
-        scores = {
-            "code_generation": code_gen_score,
-            "code_completion": code_comp_score,
-            "code_explanation": code_exp_score,
-            "code_review": code_rev_score,
-            "creative_writing": creative_score,
-            "reasoning": analysis_score,
-            "mathematics": math_score,
-            "translation": trans_score,
-            "summarization": sum_score,
-            "chat": 1  # Default baseline
-        }
-        logger.debug("capability scores", scores=scores)
+            return Classification(TaskType.VISION, 0.99, {"vision": 1.0})
 
-        # Find the category with the highest score
-        max_category = max(scores, key=scores.get)
-        max_score = scores[max_category]
-        
-        # Map to TaskType enum
-        if max_category == "code_generation" and max_score > 0:
-            return TaskType.CODE_GENERATION
-        elif max_category == "code_completion" and max_score > 0:
-            return TaskType.CODE_COMPLETION
-        elif max_category == "code_explanation" and max_score > 0:
-            return TaskType.CODE_EXPLANATION
-        elif max_category == "code_review" and max_score > 0:
-            return TaskType.CODE_REVIEW
-        elif max_category == "creative_writing" and max_score > 0:
-            return TaskType.CREATIVE_WRITING
-        elif max_category == "reasoning" and max_score > 0:
-            return TaskType.REASONING
-        elif max_category == "mathematics" and max_score > 0:
-            return TaskType.MATHEMATICS
-        elif max_category == "translation" and max_score > 0:
-            return TaskType.TRANSLATION
-        elif max_category == "summarization" and max_score > 0:
-            return TaskType.SUMMARIZATION
-        else:
-            # Default to chat
-            return TaskType.CHAT
+        # Score every task type from its weighted rules.
+        scores: Dict[TaskType, float] = {}
+        for task, rules in _RULES.items():
+            total = 0
+            for weight, kind, patterns in rules:
+                hits = (_word_score if kind == "word" else _phrase_score)(patterns, text)
+                total += weight * hits
+            if total:
+                scores[task] = total
+
+        # Structural: arithmetic expressions are a strong maths signal.
+        if _ARITHMETIC_RE.search(text):
+            scores[TaskType.MATHEMATICS] = scores.get(TaskType.MATHEMATICS, 0) + 3
+
+        # Code-domain boost: nudge all code tasks when code vocabulary appears.
+        domain = min(_word_score(_CODE_DOMAIN, text), 3)
+        if domain:
+            for task in _CODE_TASKS:
+                if task in scores or domain:
+                    scores[task] = scores.get(task, 0) + domain
+
+        if not scores or max(scores.values()) == 0:
+            return Classification(TaskType.CHAT, 0.4, {})
+
+        top_score = max(scores.values())
+        # Deterministic tie-break by priority order.
+        winners = [t for t in _TASK_PRIORITY if scores.get(t, 0) == top_score]
+        winner = winners[0] if winners else TaskType.CHAT
+
+        # Confidence: winner's share of total signal, with a margin bonus.
+        total_signal = sum(scores.values()) + 1  # +1 baseline for chat
+        confidence = min(0.99, max(0.4, top_score / total_signal + 0.1))
+
+        readable = {t.value: s for t, s in scores.items()}
+        logger.debug("capability scores", scores=readable, winner=winner.value)
+        return Classification(winner, round(confidence, 2), readable)
+
+    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    def analyze_request(self, messages: List[Dict[str, str]]) -> TaskType:
+        """Return just the detected task type (see ``classify`` for detail)."""
+        return self.classify(messages).task_type
 
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
@@ -466,25 +505,29 @@ class RequestRouter:
         start_time = time.time()
         request_id = str(int(time.time() * 1000))  # Simple request ID
         
-        # Analyze the request to determine task type
-        task_type = self.capability_analyzer.analyze_request(messages)
-        
+        # Analyze the request to determine task type (with a confidence score).
+        classification = self.capability_analyzer.classify(messages)
+        task_type = classification.task_type
+        confidence = classification.confidence
+
         # If a specific model is requested, use it if available
         selected_model = None
         if model:
             specific_model = self.model_registry.get_model(model)
             if specific_model:
                 selected_model = specific_model
+                # An explicit model choice is a certain routing decision.
+                confidence = 1.0
                 # Determine task type from the model's capabilities
                 if specific_model.supported_tasks:
                     task_type = specific_model.supported_tasks[0]
-        
+
         # If no specific model was requested or found, select the best model for the task
         if not selected_model:
             selected_model = self.model_registry.select_best_model(task_type)
-        
-        # Calculate confidence (simplified)
-        confidence = 0.8 if selected_model else 0.5
+
+        if not selected_model:
+            confidence = min(confidence, 0.5)
         
         # Generate reasoning
         reasoning = f"Selected {selected_model.name if selected_model else 'no model'} for {task_type.value} task"

@@ -3,7 +3,50 @@ Tests for the routing functionality.
 """
 
 import pytest
-from nvidia_smartroute.routing.router import RequestRouter, TaskType, ModelCapability
+from nvidia_smartroute.routing.router import (
+    RequestRouter,
+    CapabilityAnalyzer,
+    TaskType,
+    ModelCapability,
+)
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        # Code words present but it's clearly generation, not maths.
+        ("Write a Python function to calculate factorial", TaskType.CODE_GENERATION),
+        # Word-boundary matching: "meaning" must not trigger maths ("mean").
+        ("Summarize the meaning of this passage", TaskType.SUMMARIZATION),
+        ("What is 2+2?", TaskType.MATHEMATICS),
+        ("Explain why the sky is blue", TaskType.REASONING),
+        ("Review this code and fix the bugs", TaskType.CODE_REVIEW),
+        ("Translate this sentence to Japanese", TaskType.TRANSLATION),
+        ("Write a short story about a dragon", TaskType.CREATIVE_WRITING),
+        ("Complete the following code: def foo():", TaskType.CODE_COMPLETION),
+        ("What does this code do?", TaskType.CODE_EXPLANATION),
+        ("Hello, how are you today?", TaskType.CHAT),
+    ],
+)
+def test_classifier_robust_cases(text, expected):
+    analyzer = CapabilityAnalyzer()
+    result = analyzer.classify([{"role": "user", "content": text}])
+    assert result.task_type == expected
+    assert 0.0 < result.confidence <= 1.0
+
+
+def test_classifier_detects_vision_from_image_part():
+    analyzer = CapabilityAnalyzer()
+    messages = [{"role": "user", "content": [
+        {"type": "text", "text": "what is this"},
+        {"type": "image_url", "image_url": {"url": "data:image/png;base64,AAAA"}},
+    ]}]
+    assert analyzer.classify(messages).task_type == TaskType.VISION
+
+
+def test_classifier_empty_messages_default_chat():
+    analyzer = CapabilityAnalyzer()
+    assert analyzer.classify([]).task_type == TaskType.CHAT
 
 
 def test_task_type_detection():
