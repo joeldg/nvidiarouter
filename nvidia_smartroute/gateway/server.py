@@ -119,6 +119,34 @@ async def rate_limit(request: Request, call_next):
     return await call_next(request)
 
 
+# Inbound client API-key authentication (optional, applied to /v1/*).
+# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+@app.middleware("http")
+async def api_key_auth(request: Request, call_next):
+    """Require a valid client API key on /v1/* when auth is enabled."""
+    if settings.require_api_key and request.url.path.startswith("/v1/"):
+        allowed = settings.gateway_api_key_set
+        # Accept the key from the configured header or a Bearer token.
+        provided = request.headers.get(settings.api_key_header)
+        if not provided:
+            auth = request.headers.get("Authorization", "")
+            if auth.startswith("Bearer "):
+                provided = auth[len("Bearer "):].strip()
+        if not allowed or not provided or provided not in allowed:
+            return JSONResponse(
+                status_code=401,
+                headers={"WWW-Authenticate": settings.api_key_header},
+                content={
+                    "error": {
+                        "message": "Missing or invalid API key",
+                        "type": "authentication_error",
+                        "code": 401,
+                    }
+                },
+            )
+    return await call_next(request)
+
+
 # Middleware for request logging and timing
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 @app.middleware("http")
@@ -557,21 +585,31 @@ async def _stream_nim_request(
                 continue
 
             response.raise_for_status()
+            # Track the latest usage seen; upstream may send it cumulatively
+            # across chunks, so record it once at the end (not per chunk).
+            final_total_tokens = 0
             async for line in response.aiter_lines():
                 if not line.startswith("data: "):
                     continue
                 data = line[6:]  # Remove "data: " prefix
                 if data.strip() == "[DONE]":
+                    if final_total_tokens:
+                        metrics.record_tokens(model, final_total_tokens)
                     yield "data: [DONE]\n\n"
                     return
                 try:
                     # Parse the JSON data from NIM and forward it as-is.
                     json_data = json.loads(data)
+                    usage = json_data.get("usage") if isinstance(json_data, dict) else None
+                    if isinstance(usage, dict) and usage.get("total_tokens"):
+                        final_total_tokens = int(usage["total_tokens"])
                     yield f"data: {json.dumps(json_data)}\n\n"
                 except json.JSONDecodeError:
                     # If it's not JSON, wrap it in a basic chunk.
                     yield f"data: {json.dumps({'choices': [{'delta': {'content': data}}]})}\n\n"
-            # Stream completed successfully; stop the retry loop.
+            # Stream completed (no explicit [DONE]); record usage if seen.
+            if final_total_tokens:
+                metrics.record_tokens(model, final_total_tokens)
             return
 
 

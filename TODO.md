@@ -60,10 +60,16 @@ Living checklist of what's done, what's in progress, and what's deferred.
 - [x] Unify logging on structlog (`logging_config`); gateway fields now render;
       `LOG_JSON` for JSON output.
 
+## Done — backlog batch (5th pass)
+
+- [x] Inbound API-key auth on `/v1/*` (`REQUIRE_API_KEY` + `GATEWAY_API_KEYS`);
+      accepts `X-API-Key` header or `Authorization: Bearer`; health/metrics exempt.
+- [x] Streaming token accounting: record usage from the final chunk when the
+      client sets `stream_options.include_usage` (fixed cumulative-overcount bug).
+
 ## Backlog — future improvements
 
-- [ ] Inbound API-key auth on the gateway (`api_key_header`)
 - [ ] Replace brittle keyword classifier with weighted / embedding-based routing
 - [ ] Regenerate `.spec/code-map.json` & `code-trace.json` for new modules
-- [ ] Streaming path: token accounting + autoscale support
+- [ ] Autoscale over the streaming path (currently non-streaming only)
 - [ ] Embeddings: task-aware routing (query vs passage) if multiple embed models

@@ -281,6 +281,32 @@ def test_rate_limit_returns_429(monkeypatch):
     srv._rate_windows.clear()
 
 
+def test_api_key_auth_enforced_on_v1(monkeypatch):
+    from unittest.mock import AsyncMock
+    import nvidia_smartroute.gateway.server as srv
+
+    monkeypatch.setattr(srv.settings, "require_api_key", True)
+    monkeypatch.setattr(srv.settings, "gateway_api_keys", "secret123")
+    monkeypatch.setattr(srv.settings, "enable_rate_limit", False)
+    monkeypatch.setattr(
+        srv.nim_client, "chat_completions",
+        AsyncMock(return_value={"choices": [{"index": 0, "message": {"role": "assistant", "content": "ok"}, "finish_reason": "stop"}]}),
+    )
+    client = TestClient(srv.app)
+    body = {"messages": [{"role": "user", "content": "hi"}]}
+
+    # No key -> 401
+    assert client.post("/v1/chat/completions", json=body).status_code == 401
+    # Wrong key -> 401
+    assert client.post("/v1/chat/completions", json=body, headers={"X-API-Key": "nope"}).status_code == 401
+    # Correct key (header) -> 200
+    assert client.post("/v1/chat/completions", json=body, headers={"X-API-Key": "secret123"}).status_code == 200
+    # Correct key (Bearer) -> 200
+    assert client.post("/v1/chat/completions", json=body, headers={"Authorization": "Bearer secret123"}).status_code == 200
+    # Health is never gated
+    assert client.get("/health").status_code == 200
+
+
 def test_health_endpoint_not_rate_limited(monkeypatch):
     import nvidia_smartroute.gateway.server as srv
 
@@ -406,6 +432,42 @@ def test_streaming_records_latency(monkeypatch):
     chunks = asyncio.run(consume())
     assert chunks[-1] == "data: [DONE]\n\n"
     assert srv.metrics.get_avg_latency_ms("m/x") is not None
+    srv.metrics.reset()
+
+
+def test_streaming_records_usage_from_chunk(monkeypatch):
+    """When the upstream stream includes a usage chunk, tokens are recorded."""
+    import nvidia_smartroute.gateway.server as srv
+
+    async def fake_line_stream():
+        yield 'data: {"choices":[{"delta":{"content":"hi"}}]}'
+        yield 'data: {"choices":[],"usage":{"total_tokens":7}}'
+        yield "data: [DONE]"
+
+    class FakeStreamResp:
+        status_code = 200
+        headers = {}
+        def raise_for_status(self): pass
+        async def __aenter__(self): return self
+        async def __aexit__(self, *a): return False
+        async def aiter_lines(self):
+            async for l in fake_line_stream():
+                yield l
+
+    class FakeHTTP:
+        def stream(self, *a, **k): return FakeStreamResp()
+
+    monkeypatch.setattr(srv, "http_client", FakeHTTP())
+    monkeypatch.setattr(srv.nim_client, "key_pool", __import__("nvidia_smartroute.keypool", fromlist=["KeyPool"]).KeyPool(["k"], 10, 60))
+    srv.metrics.reset()
+
+    async def consume():
+        async for _ in srv._stream_nim_request("m/y", [{"role": "user", "content": "hi"}], True):
+            pass
+
+    asyncio.run(consume())
+    snap = {m["model_id"]: m for m in srv.metrics.snapshot()["models"]}
+    assert snap["m/y"]["total_tokens"] == 7
     srv.metrics.reset()
 
 

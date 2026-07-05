@@ -125,6 +125,14 @@ class Settings(BaseSettings):
     api_key_header: str = Field(
         default="X-API-Key", description="Header name for API key authentication"
     )
+    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    require_api_key: bool = Field(
+        default=False, description="Require a valid client API key on /v1/* endpoints"
+    )
+    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    gateway_api_keys: Optional[str] = Field(
+        default=None, description="Comma-separated client API keys accepted by the gateway"
+    )
 
     # Rate limiting (inbound, applied to /v1/* endpoints)
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
@@ -185,6 +193,13 @@ class Settings(BaseSettings):
     def cors_origins(self) -> List[str]:
         """Parse the raw allowed-origins string into a list."""
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
+
+    @property
+    def gateway_api_key_set(self) -> set:
+        """Set of client API keys the gateway accepts (inbound auth)."""
+        if not self.gateway_api_keys:
+            return set()
+        return {k.strip() for k in self.gateway_api_keys.split(",") if k.strip()}
 
     @property
     def api_keys(self) -> List[str]:
