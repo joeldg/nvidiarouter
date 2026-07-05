@@ -63,6 +63,24 @@ nvidia-smartroute version
 `dashboard` starts the gateway automatically if it isn't running and stops it on
 exit; pass `--no-start-gateway` to disable that.
 
+### Watch it under load
+
+Run the dashboard in one terminal and drive traffic in another to watch routing,
+model selection, cache hits, backpressure, and cost update live:
+
+```bash
+# terminal 1 — dashboard (also starts the gateway)
+nvidia-smartroute dashboard
+
+# terminal 2 — load generator
+nvidia-smartroute stress -n 200 -c 20            # 200 requests, 20 concurrent
+nvidia-smartroute stress -n 500 -c 50 --rps 30   # throttled to 30 req/s
+```
+
+`stress` uses a varied prompt mix (maths, code, chat, translation, …) so
+different tasks and models light up, repeats some prompts to exercise the cache,
+and prints a latency/throughput/routing summary at the end.
+
 ## API
 
 ```bash

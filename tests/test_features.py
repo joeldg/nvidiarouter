@@ -950,5 +950,36 @@ def test_adaptive_strategy_used_by_router(monkeypatch):
     assert chosen.model_id == ranked[-1].model_id  # bandit's pick was honoured
 
 
+# --- Stress-test helpers --------------------------------------------------
+
+def test_percentile():
+    from nvidia_smartroute.cli import _percentile
+
+    assert _percentile([], 50) == 0.0
+    assert _percentile([10], 50) == 10
+    vals = [10, 20, 30, 40, 50]
+    assert _percentile(vals, 0) == 10
+    assert _percentile(vals, 100) == 50
+    assert _percentile(vals, 50) == 30
+
+
+def test_summarize_stress():
+    from nvidia_smartroute.cli import _summarize_stress
+
+    results = [
+        {"status": 200, "ms": 100, "model": "m1", "cache": "MISS"},
+        {"status": 200, "ms": 200, "model": "m1", "cache": "HIT"},
+        {"status": 503, "ms": 5, "model": None, "cache": None},
+        {"status": 200, "ms": 300, "model": "m2", "cache": "MISS"},
+    ]
+    s = _summarize_stress(results, elapsed=2.0)
+    assert s["total"] == 4 and s["ok"] == 3 and s["failed"] == 1
+    assert s["rps"] == 2.0
+    assert s["cache_hits"] == 1
+    assert s["status_counts"] == {200: 3, 503: 1}
+    assert s["model_counts"] == {"m1": 2, "m2": 1}
+    assert s["p50_ms"] == 200.0  # median of ok latencies [100, 200, 300]
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
