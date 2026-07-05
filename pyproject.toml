@@ -39,7 +39,7 @@ dev = [
 ]
 
 [project.scripts]
-nvidia-smartroute = "nvidia_smartroute.cli:main"
+nvidia-smartroute = "nvidia_smartroute.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["."]
