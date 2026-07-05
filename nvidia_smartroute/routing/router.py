@@ -64,6 +64,9 @@ class ModelCapability:
     # Context window size
     context_window: int = 4096
 
+    # Approximate model size in billions of parameters (0 = unknown).
+    parameters_b: float = 0.0
+
     # Specialized capabilities
     supports_streaming: bool = False
     supports_function_calling: bool = False
@@ -310,6 +313,25 @@ class ModelRegistry:
     def __init__(self):
         self.models: Dict[str, ModelCapability] = {}
         self._initialize_default_models()
+        self._load_discovered_models()
+
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    def _load_discovered_models(self) -> None:
+        """Load discovered models (from `discover`) on top of the defaults."""
+        import os
+
+        path = settings.models_file
+        if not path or not os.path.exists(path):
+            return
+        try:
+            # Imported lazily to avoid a circular import at module load.
+            from ..discovery import load_models
+
+            for cap in load_models(path):
+                self.models[cap.model_id] = cap
+            logger.info("loaded discovered models", count=len(self.models), file=path)
+        except Exception as e:  # pragma: no cover - defensive
+            logger.warning("failed to load discovered models", error=str(e) or repr(e))
 
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     def _initialize_default_models(self):

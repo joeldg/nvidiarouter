@@ -104,6 +104,17 @@ Living checklist of what's done, what's in progress, and what's deferred.
 - [x] Tool / function calling — `tools`/`tool_choice` forwarded, `tool_calls`
       returned unchanged (verified live: real `get_weather` tool call).
 
+## Done — model discovery + benchmarking (11th pass)
+
+- [x] `discover` command: fetch the NIM catalog, probe servability per account,
+      enrich with capability profiles (params, tasks, vision/fc), persist to
+      `discovered_models.json`; the router loads them on top of the defaults.
+- [x] `model_catalog.py`: curated metadata for notable free models (Kimi 1T,
+      GLM, DeepSeek-R1, Llama-405B, …) + pattern-based inference for the rest.
+- [x] `benchmark` command: per-model leaderboard (params, p50 latency, tok/s)
+      so you can pick the biggest/fastest models that work for your key.
+- [x] `/v1/models` exposes `parameters_b`.
+
 ## Stellar — stretch ideas (make it a standout app)
 
 Differentiators:

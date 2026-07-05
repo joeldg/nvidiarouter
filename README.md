@@ -56,12 +56,36 @@ nvidia-smartroute dashboard      # launch the TUI (auto-starts the gateway if do
 nvidia-smartroute status         # check whether the gateway is running
 nvidia-smartroute config         # print the effective configuration (secrets redacted)
 nvidia-smartroute doctor         # diagnose config, connectivity, model availability
+nvidia-smartroute discover       # find which NIM models your account can serve
+nvidia-smartroute benchmark      # rank registered models by speed/success/throughput
 nvidia-smartroute stop           # stop the running gateway (via its PID file)
 nvidia-smartroute version
 ```
 
 `dashboard` starts the gateway automatically if it isn't running and stops it on
 exit; pass `--no-start-gateway` to disable that.
+
+### Discover and evaluate models
+
+The router only routes to models it knows about. Out of the box it ships a small
+built-in set; discover the full set your account can serve and let the router use
+them:
+
+```bash
+nvidia-smartroute discover              # probe the catalog, save servable models
+# (restart the gateway to pick them up)
+nvidia-smartroute benchmark             # leaderboard: params, latency, tok/s per model
+```
+
+`discover` fetches the NIM catalog, probes each model for servability (a real
+1-token request), enriches it with a capability profile (parameter count, tasks,
+vision/function-calling), and writes `discovered_models.json`. The router loads
+that on top of the built-in defaults. Use `--limit N` to sample, or `--no-probe`
+to enrich the whole catalog without servability checks.
+
+`benchmark` then drives a few requests at each registered model and ranks them by
+success rate, p50 latency, and tokens/sec — so you can pick the biggest/fastest
+models that actually work for your key.
 
 ### Watch it under load
 

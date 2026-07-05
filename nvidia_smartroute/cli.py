@@ -526,6 +526,167 @@ def stress(
     console.print("\n[dim]Watch live detail on the dashboard's /metrics view.[/dim]")
 
 
+# @spec[PROJECT_PROFILE.md#Requirements]
+@app.command()
+def discover(
+    output: str = typer.Option(settings.models_file, help="Where to write discovered models"),
+    probe: bool = typer.Option(
+        True, "--probe/--no-probe",
+        help="Probe each model for servability (accurate but slower)",
+    ),
+    limit: int = typer.Option(0, help="Only check the first N catalog models (0 = all)"),
+    include_embeddings: bool = typer.Option(False, help="Include embedding models"),
+):
+    """Discover which NIM models your account can serve and register them.
+
+    Writes a capability profile per servable model; restart the gateway to route
+    across the discovered set. Probing respects the per-key rate limit, so a full
+    catalog scan can take a few minutes — use --limit to sample.
+    """
+    from rich.progress import BarColumn, Progress, TextColumn, TimeElapsedColumn
+    from rich.table import Table
+
+    from nvidia_smartroute import discovery
+    from nvidia_smartroute.model_catalog import is_embedding_model, rank_by_capability
+
+    keys = settings.api_keys
+    if not keys:
+        console.print("[red]No API key configured — set NVIDIA_API_KEY in .env[/red]")
+        raise typer.Exit(code=1)
+    key = keys[0]
+    base = settings.nvidia_nim_base_url
+
+    console.print("[blue bold]Discovering NIM models[/blue bold]")
+    try:
+        catalog = discovery.fetch_catalog(base, key)
+    except Exception as exc:
+        console.print(f"[red]Failed to fetch catalog: {exc}[/red]")
+        raise typer.Exit(code=1)
+    if not include_embeddings:
+        catalog = [m for m in catalog if not is_embedding_model(m)]
+    if limit:
+        catalog = catalog[:limit]
+    console.print(f"  {len(catalog)} models to check "
+                  f"({'probing' if probe else 'no probe'})\n")
+
+    caps = []
+    with Progress(
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TextColumn("{task.completed}/{task.total}"),
+        TimeElapsedColumn(),
+        console=console,
+    ) as progress:
+        task_id = progress.add_task("checking", total=len(catalog))
+        for model_id in catalog:
+            ok = discovery.probe_servable(base, key, model_id) if probe else True
+            if ok:
+                caps.append(discovery.deserialize(discovery.infer_capability(model_id)))
+            progress.advance(task_id)
+
+    if not caps:
+        console.print("[yellow]No servable models found.[/yellow]")
+        raise typer.Exit(code=1)
+
+    discovery.save_models(output, caps)
+
+    profiles = rank_by_capability([discovery.serialize(c) for c in caps])
+    table = Table(title=f"{len(caps)} servable models", show_header=True, header_style="bold")
+    table.add_column("Model")
+    table.add_column("Params (B)", justify="right")
+    table.add_column("Tasks")
+    for p in profiles:
+        params = f"{p['parameters_b']:.0f}" if p["parameters_b"] else "?"
+        tasks = ", ".join(p["supported_tasks"][:3])
+        if len(p["supported_tasks"]) > 3:
+            tasks += ", …"
+        table.add_row(p["model_id"], params, tasks)
+    console.print(table)
+    console.print(
+        f"\n[green]Saved {len(caps)} models to {output}. "
+        f"Restart the gateway to route across them.[/green]"
+    )
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+@app.command()
+def benchmark(
+    host: str = typer.Option(settings.host, help="Gateway host"),
+    port: int = typer.Option(settings.port, help="Gateway port"),
+    per_model: int = typer.Option(5, help="Requests per model"),
+    max_tokens: int = typer.Option(32, help="max_tokens per request"),
+):
+    """Benchmark every registered model: latency, success rate, throughput.
+
+    Helps you see which models are fastest and most capable (by parameter count)
+    so you can pick the best ones for your workload.
+    """
+    import asyncio
+    import time
+
+    import httpx
+    from rich.table import Table
+
+    probe_host = "127.0.0.1" if host in ("0.0.0.0", "") else host
+    base = f"http://{probe_host}:{port}"
+    if not _gateway_healthy(f"{base}/health"):
+        console.print(f"[red]Gateway not reachable at {probe_host}:{port}.[/red]")
+        raise typer.Exit(code=1)
+
+    models = httpx.get(f"{base}/v1/models", timeout=10.0).json().get("data", [])
+    console.print(f"[green]Benchmarking[/green] {len(models)} models "
+                  f"({per_model} requests each)...\n")
+    prompt = "Explain what an API gateway does in two short sentences."
+
+    async def _bench(client, model):
+        lats, ok, toks = [], 0, 0
+        for _ in range(per_model):
+            t0 = time.time()
+            try:
+                r = await client.post(
+                    f"{base}/v1/chat/completions",
+                    json={"model": model["id"], "messages": [{"role": "user", "content": prompt}],
+                          "max_tokens": max_tokens, "temperature": 0},
+                )
+                if r.status_code == 200:
+                    ok += 1
+                    lats.append((time.time() - t0) * 1000.0)
+                    toks += r.json().get("usage", {}).get("total_tokens", 0) or 0
+            except Exception:
+                pass
+        total_s = sum(lats) / 1000.0
+        return {
+            "model": model["id"],
+            "params": model.get("parameters_b", 0) or 0,
+            "ok": ok,
+            "p50_ms": _percentile(lats, 50),
+            "tps": round(toks / total_s, 1) if total_s > 0 else 0.0,
+        }
+
+    async def _run():
+        # Sequential across models to respect the per-key rate limit.
+        async with httpx.AsyncClient(timeout=180.0) as client:
+            return [await _bench(client, m) for m in models]
+
+    rows = asyncio.run(_run())
+    rows.sort(key=lambda r: (-r["ok"], r["p50_ms"] or 1e9))
+
+    table = Table(title="Model leaderboard", show_header=True, header_style="bold")
+    table.add_column("Model")
+    table.add_column("Params (B)", justify="right")
+    table.add_column("OK", justify="right")
+    table.add_column("p50 ms", justify="right")
+    table.add_column("tok/s", justify="right")
+    for r in rows:
+        params = f"{r['params']:.0f}" if r["params"] else "?"
+        table.add_row(
+            r["model"], params, f"{r['ok']}/{per_model}",
+            f"{r['p50_ms']:.0f}" if r["p50_ms"] else "-",
+            f"{r['tps']}" if r["tps"] else "-",
+        )
+    console.print(table)
+
+
 # @spec[PROJECT_PROFILE.md#Token Budget Class]
 @app.command()
 def version():

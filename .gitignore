@@ -157,3 +157,4 @@ logs
 *.pid
 .nvidia-smartroute.pid
 .nvidia-smartroute-metrics.json
+discovered_models.json

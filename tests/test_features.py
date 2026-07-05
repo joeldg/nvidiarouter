@@ -981,5 +981,73 @@ def test_summarize_stress():
     assert s["p50_ms"] == 200.0  # median of ok latencies [100, 200, 300]
 
 
+# --- Model discovery ------------------------------------------------------
+
+def test_infer_capability_curated_and_inferred():
+    from nvidia_smartroute.model_catalog import infer_capability, is_embedding_model
+    from nvidia_smartroute.routing.router import TaskType
+
+    kimi = infer_capability("moonshotai/kimi-k2-instruct")
+    assert kimi["parameters_b"] == 1000
+    assert kimi["supports_function_calling"] is True
+
+    vision = infer_capability("meta/llama-3.2-90b-vision-instruct")
+    assert vision["supports_vision"] is True
+    assert vision["supported_tasks"] == [TaskType.VISION]
+    assert vision["parameters_b"] == 90  # extracted from "90b"
+
+    coder = infer_capability("qwen/qwen2.5-coder-32b-instruct")
+    assert TaskType.CODE_GENERATION in coder["supported_tasks"]
+    assert coder["parameters_b"] == 32
+
+    assert is_embedding_model("nvidia/nv-embedqa-e5-v5") is True
+
+
+def test_capability_serialize_roundtrip():
+    from nvidia_smartroute.discovery import serialize, deserialize
+    from nvidia_smartroute.model_catalog import infer_capability
+
+    cap = deserialize(infer_capability("meta/llama-3.1-70b-instruct"))
+    again = deserialize(serialize(cap))
+    assert again.model_id == cap.model_id
+    assert again.supported_tasks == cap.supported_tasks
+    assert again.parameters_b == cap.parameters_b
+
+
+def test_discover_probes_and_filters(monkeypatch):
+    import nvidia_smartroute.discovery as disc
+
+    monkeypatch.setattr(disc, "fetch_catalog", lambda base, key: [
+        "moonshotai/kimi-k2-instruct",
+        "meta/llama-3.1-8b-instruct",
+        "nvidia/nv-embedqa-e5-v5",  # embedding -> filtered out
+        "some/broken-model",
+    ])
+    # kimi + llama servable; broken one not.
+    servable = {"moonshotai/kimi-k2-instruct", "meta/llama-3.1-8b-instruct"}
+    monkeypatch.setattr(disc, "probe_servable", lambda base, key, mid: mid in servable)
+
+    caps, report = disc.discover("http://x", "k")
+    ids = {c.model_id for c in caps}
+    assert ids == servable  # embedding filtered, broken excluded
+    assert report["servable"] == 2
+    assert report["catalog_size"] == 3  # embedding removed before probing
+
+
+def test_registry_loads_discovered_file(tmp_path, monkeypatch):
+    from nvidia_smartroute.discovery import save_models, deserialize
+    from nvidia_smartroute.model_catalog import infer_capability
+    import nvidia_smartroute.routing.router as rmod
+    from nvidia_smartroute.routing.router import ModelRegistry
+
+    path = tmp_path / "discovered.json"
+    save_models(str(path), [deserialize(infer_capability("moonshotai/kimi-k2-instruct"))])
+    monkeypatch.setattr(rmod.settings, "models_file", str(path))
+
+    reg = ModelRegistry()
+    assert "moonshotai/kimi-k2-instruct" in reg.models  # discovered model registered
+    assert "meta/llama-3.1-8b-instruct" in reg.models   # defaults still present
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
