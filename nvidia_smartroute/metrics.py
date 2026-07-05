@@ -27,6 +27,8 @@ class ModelMetrics:
     error_count: int = 0
     total_tokens: int = 0
     total_cost_usd: float = 0.0
+    # Peak observed per-request generation throughput (tokens/sec).
+    max_tps: float = 0.0
     # Rolling window of the most recent latency samples (milliseconds).
     latencies_ms: Deque[float] = field(default_factory=lambda: deque(maxlen=50))
     last_latency_ms: float = 0.0
@@ -112,6 +114,14 @@ class MetricsTracker:
         with self._lock:
             self._get_model(model_id).total_cost_usd += max(0.0, usd)
 
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    def record_throughput(self, model_id: str, tokens_per_sec: float) -> None:
+        """Track the peak per-request generation throughput for a model."""
+        with self._lock:
+            model = self._get_model(model_id)
+            if tokens_per_sec > model.max_tps:
+                model.max_tps = tokens_per_sec
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     def get_avg_latency_ms(self, model_id: str) -> Optional[float]:
         """Live average latency for a model, or None if never observed."""
@@ -156,6 +166,7 @@ class MetricsTracker:
                     "avg_latency_ms": round(m.avg_latency_ms, 2),
                     "last_latency_ms": round(m.last_latency_ms, 2),
                     "throughput_tps": round(m.throughput_tps, 2),
+                    "max_tps": round(m.max_tps, 2),
                     "last_used": m.last_used,
                 }
                 for m in self._models.values()
@@ -185,6 +196,7 @@ class MetricsTracker:
                         "error_count": m.error_count,
                         "total_tokens": m.total_tokens,
                         "total_cost_usd": m.total_cost_usd,
+                        "max_tps": m.max_tps,
                         "latencies_ms": list(m.latencies_ms),
                         "last_latency_ms": m.last_latency_ms,
                         "first_seen": m.first_seen,
@@ -205,6 +217,7 @@ class MetricsTracker:
                 model.error_count = int(md.get("error_count", 0))
                 model.total_tokens = int(md.get("total_tokens", 0))
                 model.total_cost_usd = float(md.get("total_cost_usd", 0.0))
+                model.max_tps = float(md.get("max_tps", 0.0))
                 for sample in list(md.get("latencies_ms", []))[-50:]:
                     model.latencies_ms.append(float(sample))
                 model.last_latency_ms = float(md.get("last_latency_ms", 0.0))

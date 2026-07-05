@@ -158,3 +158,6 @@ logs
 .nvidia-smartroute.pid
 .nvidia-smartroute-metrics.json
 discovered_models.json
+
+# Claude Code local tooling
+.claude/

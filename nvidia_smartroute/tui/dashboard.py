@@ -85,7 +85,9 @@ class DashboardApp(App):
         self.title = "NVIDIA-SmartRoute-CLI"
         self.sub_title = f"gateway @ {self.metrics_url}"
         table = self.query_one("#model_table", DataTable)
-        table.add_columns("Model", "Params", "Reqs", "Avg ms", "Tok/s", "Cost $", "Errors")
+        table.add_columns(
+            "Model", "Params", "Reqs", "Avg ms", "Tok/s", "Max t/s", "Cost $", "Errors"
+        )
         table.zebra_stripes = True
         self.set_interval(self.refresh_rate, self.refresh_metrics)
         self.call_after_refresh(self.refresh_metrics)
@@ -149,6 +151,7 @@ class DashboardApp(App):
                 str(m.get("request_count", 0)),
                 f"{m.get('avg_latency_ms', 0):.0f}",
                 f"{m.get('throughput_tps', 0):.1f}",
+                f"{m.get('max_tps', 0):.1f}",
                 f"{m.get('total_cost_usd', 0):.4f}",
                 str(m.get("error_count", 0)),
             )
