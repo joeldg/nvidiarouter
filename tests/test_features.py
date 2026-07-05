@@ -846,5 +846,109 @@ def test_concurrency_gate_queues_then_proceeds():
     asyncio.run(run())
 
 
+# --- Cost & budget --------------------------------------------------------
+
+def test_compute_cost():
+    from nvidia_smartroute.cost import compute_cost
+
+    class M:
+        input_cost_per_1k = 0.001
+        output_cost_per_1k = 0.002
+
+    # 1000 prompt @ 0.001 + 500 completion @ 0.002 = 0.001 + 0.001 = 0.002
+    assert compute_cost(M(), 1000, 500) == pytest.approx(0.002)
+
+
+def test_budget_blocks_when_exceeded():
+    from nvidia_smartroute.cost import BudgetTracker
+
+    b = BudgetTracker(daily_budget_usd=0.01)
+    assert b.allow()
+    b.record(0.005)
+    assert b.allow()
+    b.record(0.006)  # total 0.011 > cap
+    assert not b.allow()
+    assert b.snapshot()["remaining_usd"] == 0.0
+
+
+def test_budget_unlimited_allows():
+    from nvidia_smartroute.cost import BudgetTracker
+
+    b = BudgetTracker(daily_budget_usd=0.0)
+    b.record(9999.0)
+    assert b.allow()
+    assert b.snapshot()["daily_budget_usd"] is None
+
+
+def test_metrics_records_cost():
+    from nvidia_smartroute.metrics import MetricsTracker
+
+    m = MetricsTracker()
+    m.record_cost("a", 0.0012)
+    m.record_cost("a", 0.0008)
+    snap = m.snapshot()
+    assert snap["total_cost_usd"] == 0.002
+    assert {r["model_id"]: r for r in snap["models"]}["a"]["total_cost_usd"] == 0.002
+
+
+def test_cost_aware_routing_prefers_cheaper(monkeypatch):
+    import nvidia_smartroute.routing.router as rmod
+    from nvidia_smartroute.routing.router import RequestRouter, TaskType
+
+    rmod.metrics.reset()
+    r = RequestRouter()
+    # Cost ignored -> highest-quality chat model wins.
+    monkeypatch.setattr(rmod.settings, "cost_weight", 0.0)
+    assert r.model_registry.select_best_model(TaskType.CHAT).model_id == \
+        "nvidia/llama-3.3-nemotron-super-49b-v1"
+    # Strong cost weight -> cheapest chat model wins.
+    monkeypatch.setattr(rmod.settings, "cost_weight", 1.0)
+    assert r.model_registry.select_best_model(TaskType.CHAT).model_id == \
+        "meta/llama-3.1-8b-instruct"
+
+
+# --- Adaptive routing (bandit) --------------------------------------------
+
+def test_reward_from():
+    from nvidia_smartroute.bandit import reward_from
+
+    assert reward_from(False, 100) == 0.0
+    assert reward_from(True, 0) == 1.0
+    assert reward_from(True, 1000) == 0.75
+    assert reward_from(True, 2000) == 0.5  # full latency penalty
+
+
+def test_bandit_exploits_best_and_explores_new():
+    from nvidia_smartroute.bandit import AdaptiveRouter
+
+    b = AdaptiveRouter(epsilon=0.0)  # pure exploitation
+    b.record("chat", "good", 0.9)
+    b.record("chat", "bad", 0.1)
+    assert b.select("chat", ["good", "bad"]) == "good"
+    # An unseen arm starts optimistic (1.0) so it gets explored first.
+    assert b.select("chat", ["good", "bad", "fresh"]) == "fresh"
+
+
+def test_bandit_explores_with_epsilon(monkeypatch):
+    import nvidia_smartroute.bandit as bmod
+    from nvidia_smartroute.bandit import AdaptiveRouter
+
+    b = AdaptiveRouter(epsilon=1.0)  # always explore
+    monkeypatch.setattr(bmod.random, "choice", lambda c: c[-1])
+    assert b.select("t", ["a", "b", "c"]) == "c"
+
+
+def test_adaptive_strategy_used_by_router(monkeypatch):
+    import nvidia_smartroute.routing.router as rmod
+    from nvidia_smartroute.routing.router import RequestRouter, TaskType
+
+    monkeypatch.setattr(rmod.settings, "routing_strategy", "adaptive")
+    monkeypatch.setattr(rmod.adaptive_router, "select", lambda task, cands: cands[-1])
+    r = RequestRouter()
+    chosen = r._select_model(TaskType.CHAT)
+    ranked = r.model_registry.rank_models(TaskType.CHAT)
+    assert chosen.model_id == ranked[-1].model_id  # bandit's pick was honoured
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

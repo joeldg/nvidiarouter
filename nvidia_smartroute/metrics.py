@@ -26,6 +26,7 @@ class ModelMetrics:
     request_count: int = 0
     error_count: int = 0
     total_tokens: int = 0
+    total_cost_usd: float = 0.0
     # Rolling window of the most recent latency samples (milliseconds).
     latencies_ms: Deque[float] = field(default_factory=lambda: deque(maxlen=50))
     last_latency_ms: float = 0.0
@@ -101,6 +102,11 @@ class MetricsTracker:
         with self._lock:
             self._get_model(model_id).error_count += 1
 
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    def record_cost(self, model_id: str, usd: float) -> None:
+        with self._lock:
+            self._get_model(model_id).total_cost_usd += max(0.0, usd)
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     def get_avg_latency_ms(self, model_id: str) -> Optional[float]:
         """Live average latency for a model, or None if never observed."""
@@ -141,6 +147,7 @@ class MetricsTracker:
                     "request_count": m.request_count,
                     "error_count": m.error_count,
                     "total_tokens": m.total_tokens,
+                    "total_cost_usd": round(m.total_cost_usd, 6),
                     "avg_latency_ms": round(m.avg_latency_ms, 2),
                     "last_latency_ms": round(m.last_latency_ms, 2),
                     "throughput_tps": round(m.throughput_tps, 2),
@@ -152,6 +159,9 @@ class MetricsTracker:
                 "uptime_seconds": round(time.time() - self._started_at, 2),
                 "active_connections": self._active_connections,
                 "total_requests": self._total_requests,
+                "total_cost_usd": round(
+                    sum(m.total_cost_usd for m in self._models.values()), 6
+                ),
                 "models": models,
                 "routing_log": list(self._routing_log),
             }
@@ -169,6 +179,7 @@ class MetricsTracker:
                         "request_count": m.request_count,
                         "error_count": m.error_count,
                         "total_tokens": m.total_tokens,
+                        "total_cost_usd": m.total_cost_usd,
                         "latencies_ms": list(m.latencies_ms),
                         "last_latency_ms": m.last_latency_ms,
                         "first_seen": m.first_seen,
@@ -188,6 +199,7 @@ class MetricsTracker:
                 model.request_count = int(md.get("request_count", 0))
                 model.error_count = int(md.get("error_count", 0))
                 model.total_tokens = int(md.get("total_tokens", 0))
+                model.total_cost_usd = float(md.get("total_cost_usd", 0.0))
                 for sample in list(md.get("latencies_ms", []))[-50:]:
                     model.latencies_ms.append(float(sample))
                 model.last_latency_ms = float(md.get("last_latency_ms", 0.0))

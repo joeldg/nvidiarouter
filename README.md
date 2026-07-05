@@ -11,6 +11,10 @@ engine, multi-key rotation for throughput, and a rich terminal dashboard.
 - **Intelligent routing** — a weighted, word-boundary classifier detects the
   task (code, maths, vision, reasoning, translation, summarization, …) and picks
   the best-suited NIM model, with latency-aware scoring and a confidence signal.
+- **Adaptive routing** (optional) — an epsilon-greedy bandit that learns the
+  best model per task from real outcomes and shifts traffic over time.
+- **Cost intelligence** — per-request cost tracking, a daily budget guardrail,
+  and optional cost-aware routing.
 - **Vision** — remote image URLs are auto-fetched and inlined as base64 (NVIDIA's
   vision NIM requires inline images).
 - **Agent autoscale engine** — complex multi-step code requests are fanned out to
@@ -51,6 +55,7 @@ nvidia-smartroute start          # start the gateway on 0.0.0.0:9000
 nvidia-smartroute dashboard      # launch the TUI (auto-starts the gateway if down)
 nvidia-smartroute status         # check whether the gateway is running
 nvidia-smartroute config         # print the effective configuration (secrets redacted)
+nvidia-smartroute doctor         # diagnose config, connectivity, model availability
 nvidia-smartroute stop           # stop the running gateway (via its PID file)
 nvidia-smartroute version
 ```
@@ -109,6 +114,8 @@ All settings are environment variables (see [.env.example](./.env.example)):
 | `CIRCUIT_BREAKER_ENABLED` / `CIRCUIT_FAILURE_THRESHOLD` | `True` / `3` | Take failing models out of rotation |
 | `MAX_INFLIGHT_REQUESTS` / `MAX_QUEUED_REQUESTS` | `32` / `64` | Concurrency gate + queue depth |
 | `PERSIST_METRICS` / `METRICS_FILE` | `False` / … | Persist metrics across restarts |
+| `ROUTING_STRATEGY` / `BANDIT_EPSILON` | `static` / `0.1` | `adaptive` = learning bandit |
+| `DAILY_BUDGET_USD` / `COST_WEIGHT` | `0` / `0` | Daily spend cap / cost-aware routing |
 | `REQUIRE_API_KEY` / `GATEWAY_API_KEYS` | `False` / – | Optional inbound client auth |
 | `AUTOSCALE_SEQUENTIAL` | `True` | Run sub-agents one at a time (free-tier safe) |
 | `DEFAULT_EMBEDDING_MODEL` | `nvidia/nv-embedqa-e5-v5` | Embeddings model |

@@ -12,6 +12,8 @@ from enum import Enum
 import structlog
 
 from ..metrics import metrics
+from ..config import settings
+from ..bandit import adaptive_router
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 logger = structlog.get_logger()
@@ -49,7 +51,11 @@ class ModelCapability:
     # Performance characteristics
     latency_ms: int = 0  # Average latency in milliseconds
     throughput_tps: float = 0.0  # Tokens per second
-    cost_per_token: float = 0.0  # Cost per token (if applicable)
+    cost_per_token: float = 0.0  # Deprecated; see input/output_cost_per_1k
+    # USD per 1,000 tokens. Free on the NIM free tier ($0), but representative
+    # hosted rates so cost tracking/routing produce meaningful numbers when set.
+    input_cost_per_1k: float = 0.0
+    output_cost_per_1k: float = 0.0
 
     # Quality scores (0.0 to 1.0)
     quality_score: float = 0.0
@@ -333,6 +339,8 @@ class ModelRegistry:
             reliability_score=0.9,
             context_window=32768,
             supports_streaming=True,
+            input_cost_per_1k=0.0009,
+            output_cost_per_1k=0.0009,
             description="NVIDIA Nemotron Super 49B for reasoning and math",
             tags=["general-purpose", "reasoning", "math"],
         )
@@ -360,6 +368,8 @@ class ModelRegistry:
             context_window=32768,
             supports_streaming=True,
             supports_function_calling=True,
+            input_cost_per_1k=0.0009,
+            output_cost_per_1k=0.0009,
             description="Meta Llama 3.1 70B generalist for code and content",
             tags=["general-purpose", "code", "creative"],
         )
@@ -377,6 +387,8 @@ class ModelRegistry:
             reliability_score=0.9,
             context_window=32768,
             supports_streaming=True,
+            input_cost_per_1k=0.0002,
+            output_cost_per_1k=0.0002,
             description="Meta Llama 3.1 8B for fast conversational responses",
             tags=["fast", "chat", "lightweight"],
         )
@@ -395,6 +407,8 @@ class ModelRegistry:
             context_window=32768,
             supports_streaming=True,
             supports_vision=True,
+            input_cost_per_1k=0.0011,
+            output_cost_per_1k=0.0011,
             description="Meta Llama 3.2 90B Vision for image understanding",
             tags=["vision", "multimodal", "image-analysis"],
         )
@@ -477,11 +491,18 @@ class ModelRegistry:
         # Normalise to a 0..1 penalty (clamped); lower latency -> smaller penalty.
         latency_penalty = min(latency_ms / 2000.0, 1.0)
 
-        return (
+        score = (
             0.5 * model.quality_score
             + 0.3 * model.reliability_score
             + 0.2 * (1.0 - latency_penalty)
         )
+        # Optional cost-aware routing: penalise pricier models. Reference of
+        # $0.002/1k tokens maps to a full penalty; disabled when cost_weight = 0.
+        if settings.cost_weight:
+            avg_cost = (model.input_cost_per_1k + model.output_cost_per_1k) / 2.0
+            cost_penalty = min(avg_cost / 0.002, 1.0)
+            score -= settings.cost_weight * cost_penalty
+        return score
 
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
@@ -492,6 +513,19 @@ class RequestRouter:
         self.capability_analyzer = CapabilityAnalyzer()
         self.model_registry = ModelRegistry()
         self._decision_history: List[Dict[str, Any]] = []
+
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    def _select_model(self, task_type: TaskType) -> Optional[ModelCapability]:
+        """Select a model via the adaptive bandit or static scoring."""
+        if settings.routing_strategy == "adaptive":
+            candidates = self.model_registry.rank_models(task_type)
+            chosen = adaptive_router.select(
+                task_type.value, [m.model_id for m in candidates]
+            )
+            model = self.model_registry.get_model(chosen) if chosen else None
+            if model:
+                return model
+        return self.model_registry.select_best_model(task_type)
 
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     async def route_request(
@@ -535,9 +569,10 @@ class RequestRouter:
                 if specific_model.supported_tasks:
                     task_type = specific_model.supported_tasks[0]
 
-        # If no specific model was requested or found, select the best model for the task
+        # If no specific model was requested or found, select the best model for
+        # the task — via the adaptive bandit or static scoring.
         if not selected_model:
-            selected_model = self.model_registry.select_best_model(task_type)
+            selected_model = self._select_model(task_type)
 
         if not selected_model:
             confidence = min(confidence, 0.5)

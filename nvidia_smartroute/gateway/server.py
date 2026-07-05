@@ -28,6 +28,8 @@ from ..keypool import key_pool, KeyPool, KeyPoolExhaustedError, _mask as _mask_k
 from ..cache import response_cache, make_key
 from ..circuit import breaker
 from ..concurrency import gate, QueueFullError
+from ..cost import budget, compute_cost
+from ..bandit import adaptive_router, reward_from
 from .. import logging_config  # noqa: F401  (configures structlog on import)
 
 # Structured logging (unified with the router/agent layers).
@@ -328,6 +330,8 @@ async def get_metrics():
     snapshot["cache"] = response_cache.snapshot()
     snapshot["circuits"] = breaker.snapshot()
     snapshot["concurrency"] = gate.snapshot()
+    snapshot["budget"] = budget.snapshot()
+    snapshot["adaptive_routing"] = adaptive_router.snapshot()
     return snapshot
 
 
@@ -639,14 +643,13 @@ async def _stream_nim_request(  # noqa: C901
             response.raise_for_status()
             # Track the latest usage seen; upstream may send it cumulatively
             # across chunks, so record it once at the end (not per chunk).
-            final_total_tokens = 0
+            final_usage: dict = {}
             async for line in response.aiter_lines():
                 if not line.startswith("data: "):
                     continue
                 data = line[6:]  # Remove "data: " prefix
                 if data.strip() == "[DONE]":
-                    if final_total_tokens:
-                        metrics.record_tokens(model, final_total_tokens)
+                    _record_stream_usage(model, final_usage)
                     yield "data: [DONE]\n\n"
                     return
                 try:
@@ -654,14 +657,13 @@ async def _stream_nim_request(  # noqa: C901
                     json_data = json.loads(data)
                     usage = json_data.get("usage") if isinstance(json_data, dict) else None
                     if isinstance(usage, dict) and usage.get("total_tokens"):
-                        final_total_tokens = int(usage["total_tokens"])
+                        final_usage = usage
                     yield f"data: {json.dumps(json_data)}\n\n"
                 except json.JSONDecodeError:
                     # If it's not JSON, wrap it in a basic chunk.
                     yield f"data: {json.dumps({'choices': [{'delta': {'content': data}}]})}\n\n"
             # Stream completed (no explicit [DONE]); record usage if seen.
-            if final_total_tokens:
-                metrics.record_tokens(model, final_total_tokens)
+            _record_stream_usage(model, final_usage)
             return
 
 
@@ -713,6 +715,30 @@ async def _inline_remote_images(messages: list) -> list:
     return result
 
 
+# @spec[PROJECT_PROFILE.md#Requirements]
+def _record_cost(model, usage: dict) -> None:
+    """Compute a request's USD cost from usage + model pricing and record it."""
+    cost = compute_cost(
+        model,
+        int(usage.get("prompt_tokens") or 0),
+        int(usage.get("completion_tokens") or 0),
+    )
+    if cost:
+        metrics.record_cost(model.model_id, cost)
+        budget.record(cost)
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+def _record_stream_usage(model_id: str, usage: dict) -> None:
+    """Record tokens + cost for a streamed response (usage in the final chunk)."""
+    if not usage or not usage.get("total_tokens"):
+        return
+    metrics.record_tokens(model_id, int(usage["total_tokens"]))
+    model = router.model_registry.get_model(model_id)
+    if model:
+        _record_cost(model, usage)
+
+
 # Model fallback chain
 # @spec[PROJECT_PROFILE.md#Requirements]
 def _should_fallback(exc: Exception) -> bool:
@@ -755,6 +781,7 @@ async def _complete_with_fallback(  # noqa: C901
         if healthy:
             candidates = healthy
 
+    task = getattr(task_type, "value", str(task_type))
     last_exc: Optional[Exception] = None
     for index, model in enumerate(candidates):
         nim_start = time.time()
@@ -767,12 +794,15 @@ async def _complete_with_fallback(  # noqa: C901
                 temperature=temperature,
                 **extra,
             )
-            metrics.record_latency(model.model_id, (time.time() - nim_start) * 1000.0)
+            latency_ms = (time.time() - nim_start) * 1000.0
+            metrics.record_latency(model.model_id, latency_ms)
             usage = data.get("usage") if isinstance(data, dict) else None
             if isinstance(usage, dict) and usage.get("total_tokens"):
                 metrics.record_tokens(model.model_id, int(usage["total_tokens"]))
+                _record_cost(model, usage)
             if settings.circuit_breaker_enabled:
                 breaker.record_success(model.model_id)
+            adaptive_router.record(task, model.model_id, reward_from(True, latency_ms))
             return data, model, model.model_id != primary.model_id
         except KeyPoolExhaustedError:
             raise  # a key problem, not a model problem — don't fail over
@@ -781,6 +811,7 @@ async def _complete_with_fallback(  # noqa: C901
             # Only hard upstream failures count against the model's circuit.
             if settings.circuit_breaker_enabled and _should_fallback(exc):
                 breaker.record_failure(model.model_id)
+            adaptive_router.record(task, model.model_id, 0.0)
             last_exc = exc
             if index + 1 < len(candidates) and _should_fallback(exc):
                 logger.warning(
@@ -898,6 +929,21 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             reasoning=getattr(routing_decision, "reasoning", "N/A"),
         )
 
+        # Budget guardrail: refuse new upstream work once the daily cap is hit.
+        if not budget.allow():
+            raise HTTPException(
+                status_code=503,
+                headers={"Retry-After": "3600"},
+                detail={
+                    "error": {
+                        "message": "Daily budget exceeded; try again later",
+                        "type": "budget_exceeded",
+                        "code": 503,
+                        "request_id": request_id,
+                    }
+                },
+            )
+
         # Track performance in background
         background_tasks.add_task(
             _record_request_performance,
@@ -986,6 +1032,11 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
                 metrics.record_latency(
                     selected_model.model_id, (time.time() - nim_start) * 1000.0
                 )
+                metrics.record_tokens(
+                    selected_model.model_id,
+                    int(orchestrated["usage"].get("total_tokens") or 0),
+                )
+                _record_cost(selected_model, orchestrated["usage"])
             else:
                 # Call the selected model, failing over to the next-best model
                 # for the task on hard upstream errors (404 / 5xx / transport).
