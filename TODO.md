@@ -29,30 +29,21 @@ Living checklist of what's done, what's in progress, and what's deferred.
 - [x] Auto-inline remote image URLs → base64 for vision requests
 - [x] Tests for the above (26 passing, no deprecation warnings)
 
+## Done — multi-key rotation (throughput)
+
+- [x] **Multi-key rotation / failover to scale past 40 req/min per key.**
+  - Config: `NVIDIA_API_KEYS=k1,k2,...` pool + single `NVIDIA_API_KEY`, merged
+    and de-duplicated via `settings.api_keys`.
+  - `KeyPool`: per-key rolling-window budget, picks the key with most remaining
+    budget (spreads load evenly), cooldown on 429.
+  - `NIMClient` uses the pool (per-request auth header); `_post_with_retries`
+    fails over to another key on 429 and returns 503 + Retry-After when all keys
+    are exhausted. Streaming path rotates keys on connect-time 429.
+  - Per-key usage/remaining surfaced in `/metrics`; keys masked in logs/metrics.
+  - Verified live: budget exhaustion -> [200,200,503]; failover key1->key2.
+  - Follow-up: optional `NVIDIA_API_KEY_1..5` numbered vars (comma list covers it).
+
 ## Backlog — future improvements
-
-### High priority — throughput
-
-- [ ] **Multi-key rotation / failover to scale past 40 req/min per key.**
-  NIM free models cap at ~40 requests/minute per API key. Support a pool of up
-  to ~5 keys and rotate across them to raise aggregate throughput (~200/min).
-  - Config: accept multiple keys, e.g. `NVIDIA_API_KEYS=key1,key2,...` and/or
-    `NVIDIA_API_KEY_1..5`; keep single-key `NVIDIA_API_KEY` working.
-  - Track per-key request counts in a rolling 60s window (reuse the sliding-window
-    approach from the inbound rate limiter).
-  - Selection: pick the key with most remaining budget (or round-robin); when a
-    key is at/near its cap, skip it. If all keys are saturated, either queue the
-    request or return 429 with `Retry-After` (make it configurable).
-  - Failover: on upstream 429 for a key, mark it cooled-down (honor `Retry-After`)
-    and retry the request on the next available key before surfacing an error.
-    Tie into the existing `_post_with_retries` backoff.
-  - Per-key auth is per request (rebuild the `Authorization` header), so the
-    shared `http_client` can stay; the `NIMClient` needs a key provider instead
-    of a fixed key.
-  - Surface per-key usage/remaining-budget in `/metrics` for the TUI.
-  - Never log or echo full keys (mask like `nvapi-...abc`); keep them out of git.
-
-### Other
 
 - [ ] Embeddings: routing + metrics + guard for missing `model`
 - [ ] `stop` command: real process control (PID file / signal)

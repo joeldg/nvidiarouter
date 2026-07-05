@@ -250,50 +250,72 @@ def test_health_endpoint_not_rate_limited(monkeypatch):
 
 # --- Upstream retry / backoff ---------------------------------------------
 
-def test_post_with_retries_recovers_from_429(monkeypatch):
+class _FakeResp:
+    def __init__(self, status, body=None):
+        self.status_code = status
+        self.headers = {}
+        self._body = body if body is not None else {"ok": status == 200}
+    def json(self):
+        return self._body
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise RuntimeError(f"HTTP {self.status_code}")
+
+
+def test_post_with_retries_fails_over_on_429(monkeypatch):
+    """A 429 cools the key down and the request fails over to another key."""
     import nvidia_smartroute.gateway.server as srv
+    from nvidia_smartroute.keypool import KeyPool
 
-    class FakeResp:
-        def __init__(self, status, body=None):
-            self.status_code = status
-            self.headers = {}
-            self._body = body or {}
-        def json(self):
-            return self._body
-        def raise_for_status(self):
-            if self.status_code >= 400:
-                raise RuntimeError(f"HTTP {self.status_code}")
+    monkeypatch.setattr(srv.nim_client, "key_pool", KeyPool(["k1", "k2"], per_key_limit=10, window=60))
+    monkeypatch.setattr(srv.settings, "upstream_max_retries", 3)
+    monkeypatch.setattr(srv.settings, "upstream_backoff_base", 0.0)
 
-    seq = [FakeResp(429), FakeResp(503), FakeResp(200, {"ok": True})]
+    used = []
+
+    class FakeClient:
+        async def post(self, url, json=None, headers=None):
+            key = headers.get("Authorization", "").replace("Bearer ", "")
+            used.append(key)
+            return _FakeResp(429 if key == "k1" else 200)
+
+    monkeypatch.setattr(srv, "http_client", FakeClient())
+    result = asyncio.run(srv.nim_client._post_with_retries("http://x/chat", {"model": "m"}))
+    assert result == {"ok": True}
+    assert "k1" in used and "k2" in used  # rotated off the rate-limited key
+
+
+def test_post_with_retries_retries_5xx_same_key(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+    from nvidia_smartroute.keypool import KeyPool
+
+    monkeypatch.setattr(srv.nim_client, "key_pool", KeyPool(["k1"], per_key_limit=10, window=60))
+    monkeypatch.setattr(srv.settings, "upstream_max_retries", 3)
+    monkeypatch.setattr(srv.settings, "upstream_backoff_base", 0.0)
+    seq = [_FakeResp(503), _FakeResp(200)]
 
     class FakeClient:
         async def post(self, url, json=None, headers=None):
             return seq.pop(0)
 
     monkeypatch.setattr(srv, "http_client", FakeClient())
-    monkeypatch.setattr(srv.settings, "upstream_max_retries", 3)
-    monkeypatch.setattr(srv.settings, "upstream_backoff_base", 0.0)
-
     result = asyncio.run(srv.nim_client._post_with_retries("http://x/chat", {"model": "m"}))
     assert result == {"ok": True}
-    assert seq == []  # all three responses consumed
+    assert seq == []
 
 
 def test_post_with_retries_raises_on_4xx(monkeypatch):
     import nvidia_smartroute.gateway.server as srv
+    from nvidia_smartroute.keypool import KeyPool
 
-    class FakeResp:
-        status_code = 400
-        headers = {}
-        def json(self): return {}
-        def raise_for_status(self): raise RuntimeError("HTTP 400")
+    monkeypatch.setattr(srv.nim_client, "key_pool", KeyPool(["k1"], per_key_limit=10, window=60))
+    monkeypatch.setattr(srv.settings, "upstream_max_retries", 3)
 
     class FakeClient:
         async def post(self, url, json=None, headers=None):
-            return FakeResp()
+            return _FakeResp(400)
 
     monkeypatch.setattr(srv, "http_client", FakeClient())
-    monkeypatch.setattr(srv.settings, "upstream_max_retries", 3)
     with pytest.raises(RuntimeError):
         asyncio.run(srv.nim_client._post_with_retries("http://x/chat", {"model": "m"}))
 
@@ -341,6 +363,65 @@ def test_streaming_records_latency(monkeypatch):
     assert chunks[-1] == "data: [DONE]\n\n"
     assert srv.metrics.get_avg_latency_ms("m/x") is not None
     srv.metrics.reset()
+
+
+# --- Key pool -------------------------------------------------------------
+
+def test_config_api_keys_merges_and_dedupes(monkeypatch):
+    monkeypatch.setenv("NVIDIA_API_KEY", "k1")
+    monkeypatch.setenv("NVIDIA_API_KEYS", "k2, k3, k1")  # k1 duplicated
+    s = Settings(_env_file=None)
+    assert s.api_keys == ["k2", "k3", "k1"]
+
+
+def test_keypool_spreads_load_across_keys():
+    from nvidia_smartroute.keypool import KeyPool
+
+    pool = KeyPool(["k1", "k2", "k3"], per_key_limit=40, window=60)
+    picks = [pool.acquire()[0] for _ in range(6)]
+    # Picking the most-remaining key each time rotates evenly across the pool.
+    assert set(picks) == {"k1", "k2", "k3"}
+    assert picks.count("k1") == picks.count("k2") == picks.count("k3") == 2
+
+
+def test_keypool_exhaustion_reports_wait():
+    from nvidia_smartroute.keypool import KeyPool
+
+    pool = KeyPool(["only"], per_key_limit=2, window=60)
+    assert pool.acquire()[0] == "only"
+    assert pool.acquire()[0] == "only"
+    key, wait = pool.acquire()  # budget exhausted
+    assert key is None
+    assert 0 < wait <= 60
+
+
+def test_keypool_cooldown_and_failover():
+    from nvidia_smartroute.keypool import KeyPool
+
+    pool = KeyPool(["a", "b"], per_key_limit=40, window=60)
+    pool.record_cooldown("a", 30)
+    # 'a' is cooling down, so acquire must return 'b'.
+    assert pool.acquire()[0] == "b"
+
+
+def test_keypool_snapshot_masks_keys():
+    from nvidia_smartroute.keypool import KeyPool
+
+    pool = KeyPool(["testkey01-abcdefghij-secret-xyz"], per_key_limit=40, window=60)
+    pool.acquire()
+    snap = pool.snapshot()
+    assert snap[0]["used"] == 1
+    assert snap[0]["remaining"] == 39
+    assert "secret" not in snap[0]["key"]
+    assert snap[0]["key"].startswith("testkey01")
+
+
+def test_metrics_endpoint_includes_key_pool():
+    from nvidia_smartroute.gateway.server import app
+
+    data = TestClient(app).get("/metrics").json()
+    assert "api_keys" in data
+    assert isinstance(data["api_keys"], list)
 
 
 if __name__ == "__main__":

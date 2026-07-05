@@ -35,6 +35,14 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("nvidia_nim_api_key", "nvidia_api_key"),
         description="NVIDIA NIM API key for accessing models",
     )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    # Optional pool of additional keys (comma-separated). NIM free models cap
+    # at ~40 req/min per key; rotating across keys raises aggregate throughput.
+    nvidia_api_keys: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices("nvidia_api_keys", "nvidia_nim_api_keys"),
+        description="Comma-separated pool of NVIDIA API keys for rotation",
+    )
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     # Default to the OpenAI-compatible NIM endpoint. Accept NVIDIA_BASE_URL too.
     nvidia_nim_base_url: str = Field(
@@ -120,6 +128,15 @@ class Settings(BaseSettings):
         default=0.5, gt=0, description="Base seconds for exponential backoff"
     )
     # @spec[PROJECT_PROFILE.md#Requirements]
+    # Per-key outbound budget (NIM free tier is ~40 requests/minute per key).
+    rate_limit_per_key: int = Field(
+        default=40, ge=1, description="Max upstream requests per key per window"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    per_key_rate_window: int = Field(
+        default=60, ge=1, description="Rolling window (seconds) for per-key budget"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
     inline_remote_images: bool = Field(
         default=True,
         description="Fetch remote image URLs and inline them as base64 for vision",
@@ -146,6 +163,27 @@ class Settings(BaseSettings):
     def cors_origins(self) -> List[str]:
         """Parse the raw allowed-origins string into a list."""
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
+
+    @property
+    def api_keys(self) -> List[str]:
+        """
+        The ordered, de-duplicated pool of NVIDIA API keys.
+
+        Merges the single ``NVIDIA_API_KEY`` with the comma-separated
+        ``NVIDIA_API_KEYS`` pool. Single-key setups keep working unchanged.
+        """
+        keys: List[str] = []
+        if self.nvidia_api_keys:
+            keys.extend(k.strip() for k in self.nvidia_api_keys.split(","))
+        if self.nvidia_nim_api_key:
+            keys.append(self.nvidia_nim_api_key.strip())
+        seen = set()
+        ordered: List[str] = []
+        for k in keys:
+            if k and k not in seen:
+                seen.add(k)
+                ordered.append(k)
+        return ordered
 
 
 # @spec[PROJECT_PROFILE.md#Token Budget Class]
