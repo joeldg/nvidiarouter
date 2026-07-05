@@ -16,7 +16,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import httpx
 
 from .routing.router import ModelCapability, TaskType
-from .model_catalog import infer_capability, is_embedding_model
+from .model_catalog import infer_capability, is_routable
 
 _FIELD_NAMES = {f.name for f in fields(ModelCapability)}
 
@@ -93,7 +93,8 @@ def discover(
     """
     catalog = fetch_catalog(base_url, api_key)
     if not include_embeddings:
-        catalog = [m for m in catalog if not is_embedding_model(m)]
+        # Skip embeddings and specialized non-chat models (guard/safety/etc.).
+        catalog = [m for m in catalog if is_routable(m)]
     if limit is not None:
         catalog = catalog[:limit]
 

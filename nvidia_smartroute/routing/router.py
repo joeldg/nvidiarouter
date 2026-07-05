@@ -6,7 +6,7 @@ Model capability routing and NVIDIA NIM integration for NVIDIA-SmartRoute-CLI.
 import re
 import time
 from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from enum import Enum
 
 import structlog
@@ -317,17 +317,27 @@ class ModelRegistry:
 
     # @spec[PROJECT_PROFILE.md#Requirements]
     def _load_discovered_models(self) -> None:
-        """Load discovered models (from `discover`) on top of the defaults."""
+        """Load discovered models (from `discover`) on top of the defaults.
+
+        Loading is inlined here (rather than importing ``discovery``) so the
+        registry singleton, created during this module's import, can't trigger a
+        circular import.
+        """
+        import json
         import os
 
         path = settings.models_file
         if not path or not os.path.exists(path):
             return
         try:
-            # Imported lazily to avoid a circular import at module load.
-            from ..discovery import load_models
-
-            for cap in load_models(path):
+            field_names = {f.name for f in fields(ModelCapability)}
+            for entry in json.loads(open(path).read()):
+                tasks = [TaskType(v) for v in entry.get("supported_tasks", [])]
+                kwargs = {
+                    k: v for k, v in entry.items()
+                    if k in field_names and k != "supported_tasks"
+                }
+                cap = ModelCapability(supported_tasks=tasks, **kwargs)
                 self.models[cap.model_id] = cap
             logger.info("loaded discovered models", count=len(self.models), file=path)
         except Exception as e:  # pragma: no cover - defensive
@@ -518,6 +528,9 @@ class ModelRegistry:
             + 0.3 * model.reliability_score
             + 0.2 * (1.0 - latency_penalty)
         )
+        # Small size preference so near-ties resolve toward the larger (more
+        # capable) model — deterministic, and aligned with "largest capability".
+        score += 0.03 * min(model.parameters_b / 1000.0, 1.0)
         # Optional cost-aware routing: penalise pricier models. Reference of
         # $0.002/1k tokens maps to a full penalty; disabled when cost_weight = 0.
         if settings.cost_weight:
