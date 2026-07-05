@@ -65,6 +65,10 @@ def test_metrics_tracker_records_and_snapshots():
     tracker.connection_opened()
     tracker.connection_opened()
     tracker.connection_closed()
+    # total_requests is bumped separately (real API traffic), not by the
+    # connection gauge — so health/metrics polling doesn't inflate it.
+    tracker.note_request()
+    tracker.note_request()
     tracker.record_latency("m1", 100.0)
     tracker.record_latency("m1", 300.0)
     tracker.record_tokens("m1", 50)
@@ -305,6 +309,26 @@ def test_api_key_auth_enforced_on_v1(monkeypatch):
     assert client.post("/v1/chat/completions", json=body, headers={"Authorization": "Bearer secret123"}).status_code == 200
     # Health is never gated
     assert client.get("/health").status_code == 200
+
+
+def test_health_polling_does_not_inflate_total_requests(monkeypatch):
+    from unittest.mock import AsyncMock
+    import nvidia_smartroute.gateway.server as srv
+
+    monkeypatch.setattr(srv.settings, "enable_rate_limit", False)
+    srv.metrics.reset()
+    monkeypatch.setattr(
+        srv.nim_client, "chat_completions",
+        AsyncMock(return_value={"choices": [{"index": 0, "message": {"role": "assistant", "content": "ok"}, "finish_reason": "stop"}]}),
+    )
+    client = TestClient(srv.app)
+    for _ in range(5):
+        client.get("/health")
+        client.get("/metrics")
+    assert client.get("/metrics").json()["total_requests"] == 0  # polling doesn't count
+    client.post("/v1/chat/completions", json={"messages": [{"role": "user", "content": "hi"}]})
+    assert client.get("/metrics").json()["total_requests"] == 1  # only the API call
+    srv.metrics.reset()
 
 
 def test_health_endpoint_not_rate_limited(monkeypatch):

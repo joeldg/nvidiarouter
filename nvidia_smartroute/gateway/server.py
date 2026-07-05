@@ -206,8 +206,12 @@ async def log_requests(request: Request, call_next):
     # Add request ID to request state for tracing
     request.state.request_id = request_id
 
-    # Track active connections for the live dashboard.
+    # Track active connections for the live dashboard. Only count real API
+    # traffic (/v1/*) toward total requests — not health/metrics polling, which
+    # would otherwise tick up once per dashboard refresh.
     metrics.connection_opened()
+    if request.url.path.startswith("/v1/"):
+        metrics.note_request()
     try:
         # Process request
         response = await call_next(request)

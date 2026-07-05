@@ -62,12 +62,17 @@ class MetricsTracker:
     def connection_opened(self) -> None:
         with self._lock:
             self._active_connections += 1
-            self._total_requests += 1
 
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     def connection_closed(self) -> None:
         with self._lock:
             self._active_connections = max(0, self._active_connections - 1)
+
+    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    def note_request(self) -> None:
+        """Count a real API request (not health/metrics polling)."""
+        with self._lock:
+            self._total_requests += 1
 
     @property
     def active_connections(self) -> int:
