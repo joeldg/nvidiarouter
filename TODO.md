@@ -80,6 +80,13 @@ Living checklist of what's done, what's in progress, and what's deferred.
 - [x] Comprehensive README refresh (features, endpoints, config table, scaling,
       Docker, dev).
 
+## Done — circuit breaker (9th pass)
+
+- [x] Per-model circuit breaker: trip open after N consecutive hard failures,
+      deny for a cooldown, then half-open probe; close on success / re-open on a
+      failed probe. Integrated into the fallback chain (open models skipped) and
+      surfaced in `/ready` (unhealthy_models) and `/metrics` (circuits).
+
 ## Done — throughput / reliability / capabilities (8th pass)
 
 - [x] Response cache (TTL + LRU) — identical non-streaming requests skip the

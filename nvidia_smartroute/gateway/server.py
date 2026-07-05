@@ -25,6 +25,7 @@ from ..routing.router import router, RoutingDecision
 from ..agents import autoscale_engine
 from ..keypool import key_pool, KeyPool, KeyPoolExhaustedError, _mask as _mask_key
 from ..cache import response_cache, make_key
+from ..circuit import breaker
 from .. import logging_config  # noqa: F401  (configures structlog on import)
 
 # Structured logging (unified with the router/agent layers).
@@ -256,6 +257,8 @@ async def readiness_check():
     # TODO: Add actual NVIDIA API connectivity check
     nvidia_api_ready = key_pool.has_keys()
 
+    open_models = breaker.open_models()
+
     status = "ready" if (http_ready and nvidia_api_ready) else "not_ready"
 
     return {
@@ -264,6 +267,7 @@ async def readiness_check():
         "checks": {
             "http_client": "ready" if http_ready else "not_initialized",
             "nvidia_api": "configured" if nvidia_api_ready else "not_configured",
+            "unhealthy_models": open_models,
         },
     }
 
@@ -277,6 +281,7 @@ async def get_metrics():
     snapshot["routing_stats"] = router.get_routing_stats()
     snapshot["api_keys"] = key_pool.snapshot()
     snapshot["cache"] = response_cache.snapshot()
+    snapshot["circuits"] = breaker.snapshot()
     return snapshot
 
 
@@ -678,7 +683,7 @@ def _should_fallback(exc: Exception) -> bool:
 
 
 # @spec[PROJECT_PROFILE.md#Requirements]
-async def _complete_with_fallback(
+async def _complete_with_fallback(  # noqa: C901
     task_type,
     primary,
     messages: list,
@@ -697,6 +702,13 @@ async def _complete_with_fallback(
                 candidates.append(m)
         candidates = candidates[: 1 + settings.max_model_fallbacks]
 
+    # Circuit breaker: skip models whose circuit is open. If that would leave
+    # nothing, keep the original list (better to try than to hard-fail).
+    if settings.circuit_breaker_enabled:
+        healthy = [m for m in candidates if breaker.allow(m.model_id)]
+        if healthy:
+            candidates = healthy
+
     last_exc: Optional[Exception] = None
     for index, model in enumerate(candidates):
         nim_start = time.time()
@@ -713,11 +725,16 @@ async def _complete_with_fallback(
             usage = data.get("usage") if isinstance(data, dict) else None
             if isinstance(usage, dict) and usage.get("total_tokens"):
                 metrics.record_tokens(model.model_id, int(usage["total_tokens"]))
-            return data, model, index > 0
+            if settings.circuit_breaker_enabled:
+                breaker.record_success(model.model_id)
+            return data, model, model.model_id != primary.model_id
         except KeyPoolExhaustedError:
             raise  # a key problem, not a model problem — don't fail over
         except Exception as exc:
             metrics.record_error(model.model_id)
+            # Only hard upstream failures count against the model's circuit.
+            if settings.circuit_breaker_enabled and _should_fallback(exc):
+                breaker.record_failure(model.model_id)
             last_exc = exc
             if index + 1 < len(candidates) and _should_fallback(exc):
                 logger.warning(

@@ -132,6 +132,18 @@ class Settings(BaseSettings):
     max_model_fallbacks: int = Field(
         default=2, ge=0, description="Max alternative models to try on failure"
     )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    circuit_breaker_enabled: bool = Field(
+        default=True, description="Take repeatedly-failing models out of rotation"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    circuit_failure_threshold: int = Field(
+        default=3, ge=1, description="Consecutive failures before a model trips open"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    circuit_reset_seconds: int = Field(
+        default=30, ge=1, description="Cooldown before probing a tripped model"
+    )
 
     # TUI settings
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]

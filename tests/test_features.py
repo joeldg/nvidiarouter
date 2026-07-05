@@ -737,5 +737,55 @@ def test_tools_are_forwarded_and_tool_calls_returned(monkeypatch):
     assert resp.json()["choices"][0]["message"]["tool_calls"][0]["function"]["name"] == "get_weather"
 
 
+# --- Circuit breaker ------------------------------------------------------
+
+def test_circuit_breaker_trips_probes_and_recovers():
+    import time
+    from nvidia_smartroute.circuit import CircuitBreaker
+
+    cb = CircuitBreaker(failure_threshold=2, reset_seconds=0.05)
+    assert cb.allow("m") and cb.state("m") == "closed"
+    cb.record_failure("m")
+    assert cb.allow("m")  # 1 failure, still closed
+    cb.record_failure("m")  # 2 -> trips open
+    assert cb.state("m") == "open"
+    assert cb.allow("m") is False
+    time.sleep(0.06)
+    assert cb.allow("m") is True  # cooldown elapsed -> half-open probe
+    cb.record_failure("m")  # failed probe re-opens
+    assert cb.allow("m") is False
+    time.sleep(0.06)
+    assert cb.allow("m") is True  # half-open again
+    cb.record_success("m")  # successful probe closes it
+    assert cb.state("m") == "closed" and cb.allow("m")
+
+
+def test_fallback_skips_open_circuit(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+    from nvidia_smartroute.routing.router import TaskType
+
+    srv.breaker.reset()
+    monkeypatch.setattr(srv.settings, "circuit_breaker_enabled", True)
+    monkeypatch.setattr(srv.settings, "enable_model_fallback", True)
+    ranked = srv.router.model_registry.rank_models(TaskType.CHAT)
+    primary = ranked[0]
+    for _ in range(srv.settings.circuit_failure_threshold):
+        srv.breaker.record_failure(primary.model_id)
+
+    tried = []
+
+    async def fake_chat(model, messages, **kw):
+        tried.append(model)
+        return {"choices": [{"message": {"content": "ok"}}], "model": model}
+
+    monkeypatch.setattr(srv.nim_client, "chat_completions", fake_chat)
+    data, used, fell_back = asyncio.run(srv._complete_with_fallback(
+        TaskType.CHAT, primary, [{"role": "user", "content": "hi"}], None, None, {},
+    ))
+    assert primary.model_id not in tried  # open circuit was skipped
+    assert used.model_id != primary.model_id and fell_back is True
+    srv.breaker.reset()
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

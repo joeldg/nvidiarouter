@@ -21,6 +21,8 @@ engine, multi-key rotation for throughput, and a rich terminal dashboard.
   in-memory TTL+LRU cache, skipping the upstream call (big latency/budget win).
 - **Model fallback chains** — if a model fails (404/5xx/timeout), the request
   fails over to the next-best model for the task.
+- **Circuit breaker** — a repeatedly-failing model is taken out of rotation,
+  then probed back in after a cooldown.
 - **Tool / function calling** — `tools`/`tool_choice` pass through and
   `tool_calls` responses are returned unchanged.
 - **Resilience** — inbound rate limiting, upstream retry/backoff, configurable
@@ -101,6 +103,7 @@ All settings are environment variables (see [.env.example](./.env.example)):
 | `UPSTREAM_MAX_RETRIES` | `3` | Retries on 429/5xx with backoff |
 | `ENABLE_CACHE` / `MODEL_CACHE_TTL` | `True` / `300` | Response cache + TTL (s) |
 | `ENABLE_MODEL_FALLBACK` / `MAX_MODEL_FALLBACKS` | `True` / `2` | Fail over to next-best model |
+| `CIRCUIT_BREAKER_ENABLED` / `CIRCUIT_FAILURE_THRESHOLD` | `True` / `3` | Take failing models out of rotation |
 | `REQUIRE_API_KEY` / `GATEWAY_API_KEYS` | `False` / – | Optional inbound client auth |
 | `AUTOSCALE_SEQUENTIAL` | `True` | Run sub-agents one at a time (free-tier safe) |
 | `DEFAULT_EMBEDDING_MODEL` | `nvidia/nv-embedqa-e5-v5` | Embeddings model |
