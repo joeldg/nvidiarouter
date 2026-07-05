@@ -24,12 +24,12 @@ console = Console()
 # @spec[PROJECT_PROFILE.md#Intent]
 def _display_banner():
     """Display the application banner."""
-    banner = """
-  ____ _               _           _    ____                                  
- / ___| |__   ___  ___| | __ _    / \\  |  _ \\  ___   ___ _ __   __ _ _ __ ___ 
-| |   | '_ \\ / _ \\/ __| |/ _`    / _ \\ | | | |/ _ \\ / _ \\ '_ \\ / _` | '__/ __|
-| |___| | | |  __/ (__| | (_|   / ___ \\| |_| | (_) | (_) | | | | (_) | |  \\__ \\
- \\____|_| |_|\\___|\\___|_|\\__,_  /_/   \\_\\____/ \\___/ \\___/|_|  |_\\__,_|_|  |___/
+    banner = r"""
+  _____                      __  ____              __
+  / ___/____ ___  ____ ______/ /_/ __ \____  __  __/ /____
+  \__ \/ __ `__ \/ __ `/ ___/ __/ /_/ / __ \/ / / / __/ _ \
+ ___/ / / / / / / /_/ / /  / /_/ _, _/ /_/ / /_/ / /_/  __/
+/____/_/ /_/ /_/\__,_/_/   \__/_/ |_|\____/\__,_/\__/\___/
     """
     styled_banner = Text(banner, style="cyan")
     console.print(Panel(styled_banner, title="NVIDIA SmartRoute", border_style="blue"))
@@ -78,15 +78,135 @@ def stop():
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 @app.command()
-def status():
+def status(
+    host: str = typer.Option(settings.host, help="Gateway host to probe"),
+    port: int = typer.Option(settings.port, help="Gateway port to probe"),
+):
     """Show the current status of the NVIDIA SmartRoute gateway."""
+    import httpx
+
     console.print("[blue]NVIDIA SmartRoute Gateway Status[/blue]")
     console.print(f"Host: {settings.host}")
     console.print(f"Port: {settings.port}")
     console.print(f"Workers: {settings.workers}")
-    console.print(f"Reload: {settings.reload}")
     console.print(f"Log Level: {settings.log_level}")
-    console.print("[green]Status: Ready[/green]")
+
+    probe_host = "127.0.0.1" if host in ("0.0.0.0", "") else host
+    url = f"http://{probe_host}:{port}/health"
+    try:
+        resp = httpx.get(url, timeout=3.0)
+        resp.raise_for_status()
+        data = resp.json()
+        console.print(f"[green]Status: RUNNING[/green] ({data.get('status')})")
+    except Exception as exc:
+        console.print(f"[red]Status: NOT RUNNING[/red] (could not reach {url})")
+        console.print(f"[dim]{exc}[/dim]")
+
+
+# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+def _gateway_healthy(health_url: str, timeout: float = 2.0) -> bool:
+    """Return True if the gateway responds 200 at its health endpoint."""
+    import httpx
+
+    try:
+        return httpx.get(health_url, timeout=timeout).status_code == 200
+    except Exception:
+        return False
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+def _start_gateway(host: str, port: int, health_url: str, wait_seconds: int = 40):
+    """
+    Launch the gateway as a background subprocess and wait until it is ready.
+
+    Returns the Popen handle on success. Exits the CLI on failure.
+    """
+    import subprocess
+    import time as _time
+
+    proc = subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "uvicorn",
+            "nvidia_smartroute.gateway.server:app",
+            "--host",
+            host,
+            "--port",
+            str(port),
+            "--log-level",
+            "warning",
+        ],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+    deadline = _time.time() + wait_seconds
+    while _time.time() < deadline:
+        if proc.poll() is not None:
+            console.print("[red]Gateway process exited before becoming ready.[/red]")
+            raise typer.Exit(code=1)
+        if _gateway_healthy(health_url):
+            console.print("[green]Gateway is ready.[/green]")
+            return proc
+        _time.sleep(0.5)
+
+    console.print(f"[red]Gateway did not become ready within {wait_seconds}s.[/red]")
+    proc.terminate()
+    raise typer.Exit(code=1)
+
+
+# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+@app.command()
+def dashboard(
+    host: str = typer.Option(settings.host, help="Gateway host to connect to"),
+    port: int = typer.Option(settings.port, help="Gateway port to connect to"),
+    refresh: float = typer.Option(
+        settings.tui_refresh_rate, help="Refresh interval in seconds"
+    ),
+    start_gateway: bool = typer.Option(
+        True,
+        "--start-gateway/--no-start-gateway",
+        help="Start the gateway automatically if it is not already running",
+    ),
+):
+    """Launch the interactive real-time metrics dashboard (TUI).
+
+    If the gateway is not already running it is started automatically (unless
+    --no-start-gateway is passed) and shut down again when the dashboard exits.
+    """
+    from nvidia_smartroute.tui import run_dashboard
+
+    probe_host = "127.0.0.1" if host in ("0.0.0.0", "") else host
+    health_url = f"http://{probe_host}:{port}/health"
+    metrics_url = f"http://{probe_host}:{port}/metrics"
+
+    proc = None
+    if _gateway_healthy(health_url):
+        console.print(f"[green]Gateway already running at {health_url}[/green]")
+    elif start_gateway:
+        console.print(
+            f"[yellow]Gateway not running; starting it on {host}:{port}...[/yellow]"
+        )
+        proc = _start_gateway(host, port, health_url)
+    else:
+        console.print(
+            f"[yellow]Gateway not reachable at {health_url}; "
+            f"launching dashboard anyway.[/yellow]"
+        )
+
+    try:
+        console.print(f"[green]Launching dashboard against {metrics_url}[/green]")
+        run_dashboard(metrics_url=metrics_url, refresh_rate=refresh)
+    finally:
+        # Only tear down a gateway that this command started.
+        if proc is not None:
+            console.print("[yellow]Shutting down gateway started by dashboard...[/yellow]")
+            proc.terminate()
+            try:
+                proc.wait(timeout=10)
+            except Exception:
+                proc.kill()
 
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
@@ -95,7 +215,7 @@ def status():
 def config():
     """Show the current configuration."""
     console.print("[blue]Current Configuration[/blue]")
-    config_dict = settings.dict()
+    config_dict = settings.model_dump()
     for key, value in config_dict.items():
         if "key" in key.lower() or "secret" in key.lower() or "token" in key.lower():
             value = "[REDACTED]"

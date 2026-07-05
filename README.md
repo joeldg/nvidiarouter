@@ -20,14 +20,19 @@ pip install nvidia-smartroute
 ## Usage
 
 ```bash
-# Start the API gateway server
+# Start the API gateway server (listens on 0.0.0.0:9000)
 nvidia-smartroute start
 
-# Check server status
+# Launch the interactive real-time metrics dashboard (TUI).
+# If the gateway isn't already running, the dashboard starts it automatically
+# and shuts it down again on exit. Use --no-start-gateway to disable that.
+nvidia-smartroute dashboard
+
+# Check whether the gateway is running
 nvidia-smartroute status
 
 # View current configuration
-nvidia-smartroute config show
+nvidia-smartroute config
 
 # Stop the server
 nvidia-smartroute stop

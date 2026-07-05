@@ -7,7 +7,7 @@ import logging
 import time
 import uuid
 import json
-from typing import Optional, Dict, Any, List, AsyncGenerator
+from typing import Optional, Dict, Any, List, AsyncGenerator, Union
 from datetime import datetime
 
 import uvicorn
@@ -18,7 +18,9 @@ import httpx
 import asyncio
 
 from ..config import settings
+from ..metrics import metrics
 from ..routing.router import router, TaskType, RoutingDecision
+from ..agents import autoscale_engine
 
 # Configure logging
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
@@ -36,10 +38,13 @@ app = FastAPI(
 
 # Add CORS middleware
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# Allowing credentials together with a wildcard origin is rejected by browsers,
+# so only enable credentials when origins are explicitly configured.
+_cors_origins = settings.cors_origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
-    allow_credentials=True,
+    allow_origins=_cors_origins,
+    allow_credentials=_cors_origins != ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -63,10 +68,15 @@ async def log_requests(request: Request, call_next):
     
     # Add request ID to request state for tracing
     request.state.request_id = request_id
-    
-    # Process request
-    response = await call_next(request)
-    
+
+    # Track active connections for the live dashboard.
+    metrics.connection_opened()
+    try:
+        # Process request
+        response = await call_next(request)
+    finally:
+        metrics.connection_closed()
+
     # Calculate processing time
     process_time = time.time() - start_time
     
@@ -126,7 +136,7 @@ async def startup_event():
     """Initialize HTTP client on startup."""
     global http_client
     http_client = httpx.AsyncClient(
-        timeout=httpx.Timeout(30.0, connect=10.0),
+        timeout=httpx.Timeout(settings.request_timeout, connect=10.0),
         limits=httpx.Limits(max_connections=100, max_keepalive_connections=20)
     )
     logger.info("HTTP client initialized for NVIDIA NIM API")
@@ -201,6 +211,16 @@ async def readiness_check():
     }
 
 
+# Live metrics endpoint (consumed by the TUI dashboard)
+# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+@app.get("/metrics")
+async def get_metrics():
+    """Return live gateway metrics and routing statistics."""
+    snapshot = metrics.snapshot()
+    snapshot["routing_stats"] = router.get_routing_stats()
+    return snapshot
+
+
 # NVIDIA NIM API client
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 class NIMClient:
@@ -251,7 +271,7 @@ class NIMClient:
     async def embeddings(
         self, 
         model: str, 
-        input: str | list[str],
+        input: Union[str, List[str]],
         encoding_format: str = "float"
     ) -> dict:
         """Send embedding request to NVIDIA NIM."""
@@ -367,7 +387,7 @@ async def stream_chat_completion(
         # Yield an error chunk in OpenAI format
         error_chunk = {
             "error": {
-                "message": str(e),
+                "message": str(e) or repr(e),
                 "type": "internal_error",
                 "param": None,
                 "code": 500
@@ -484,9 +504,10 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
         max_tokens = body.get("max_tokens")
         temperature = body.get("temperature")
         
-        # Remove parameters we handle separately
-        body_without_model = {k: v for k, v in body.items() 
-                             if k not in ["model", "stream", "max_tokens", "temperature"]}
+        # Remove parameters we handle/pass separately so they aren't forwarded
+        # twice (as explicit args and again via **body_without_model).
+        body_without_model = {k: v for k, v in body.items()
+                             if k not in ["messages", "model", "stream", "max_tokens", "temperature"]}
         
         logger.info(
             f"Chat completion request received",
@@ -535,15 +556,12 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
         )
         
         # Track performance in background
-        def record_performance():
-            background_tasks.add_task(
-                _record_request_performance, 
-                request_id, 
-                routing_decision, 
-                start_time
-            )
-        
-        background_tasks.add_task(record_performance)
+        background_tasks.add_task(
+            _record_request_performance,
+            request_id,
+            routing_decision,
+            start_time
+        )
         
         # If streaming is requested, return a streaming response
         if stream:
@@ -567,37 +585,65 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
                 }
             )
         
+        # Common tracing headers for the response.
+        response_headers = {
+            "X-Request-ID": request_id,
+            "X-Selected-Model": selected_model.model_id,
+            "X-Task-Type": routing_decision.task_type.value,
+            "X-Routing-Confidence": str(routing_decision.confidence),
+        }
+
         # Non-streaming response
+        nim_start = time.time()
         try:
-            response_data = await nim_client.chat_completions(
-                model=selected_model.model_id,
-                messages=messages,
-                stream=False,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                **body_without_model
-            )
-            
-            # Add custom headers for tracing
-            response_headers = {
-                "X-Request-ID": request_id,
-                "X-Selected-Model": selected_model.model_id,
-                "X-Task-Type": routing_decision.task_type.value,
-                "X-Routing-Confidence": str(routing_decision.confidence)
-            }
-            
-            # Add the headers to the response
-            for key, value in response_headers.items():
-                response_data[key] = value
-            
-            return response_data
+            # Dynamic Agent Autoscale Engine: complex multi-step code tasks are
+            # fanned out to specialized sub-agents that each call NIM.
+            if autoscale_engine.should_scale(routing_decision.task_type, messages):
+                logger.info(
+                    "autoscaling request to sub-agents",
+                    extra={"request_id": request_id, "model": selected_model.model_id},
+                )
+                orchestrated = await autoscale_engine.orchestrate(
+                    messages=messages,
+                    model_id=selected_model.model_id,
+                    nim_call=nim_client.chat_completions,
+                )
+                response_data = format_chat_response(
+                    content=orchestrated["content"],
+                    model=selected_model.model_id,
+                    request_id=request_id,
+                )
+                response_data["_agents"] = orchestrated["agents"]
+                response_headers["X-Autoscaled"] = "true"
+                response_headers["X-Agent-Count"] = str(len(orchestrated["agents"]))
+            else:
+                response_data = await nim_client.chat_completions(
+                    model=selected_model.model_id,
+                    messages=messages,
+                    stream=False,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    **body_without_model
+                )
+
+            # Record live latency and token usage for the routing tracker/TUI.
+            latency_ms = (time.time() - nim_start) * 1000.0
+            metrics.record_latency(selected_model.model_id, latency_ms)
+            usage = response_data.get("usage") if isinstance(response_data, dict) else None
+            if isinstance(usage, dict) and usage.get("total_tokens"):
+                metrics.record_tokens(selected_model.model_id, int(usage["total_tokens"]))
+
+            # Return the upstream payload unchanged, with tracing metadata
+            # exposed as response headers (not injected into the body).
+            return JSONResponse(content=response_data, headers=response_headers)
         except Exception as e:
+            metrics.record_error(selected_model.model_id)
             logger.error(f"Error in chat_completions: {e}")
             raise HTTPException(
                 status_code=500,
                 detail={
                     "error": {
-                        "message": str(e),
+                        "message": str(e) or repr(e),
                         "type": "internal_error",
                         "code": 500,
                         "request_id": request_id,
@@ -611,7 +657,7 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             status_code=500,
             detail={
                 "error": {
-                    "message": str(e),
+                    "message": str(e) or repr(e),
                     "type": "internal_error",
                     "code": 500,
                     "request_id": request_id,
@@ -644,7 +690,7 @@ async def embeddings(request: Request):
             status_code=500,
             detail={
                 "error": {
-                    "message": str(e),
+                    "message": str(e) or repr(e),
                     "type": "internal_error",
                     "code": 500,
                 }
@@ -665,7 +711,7 @@ async def list_models():
             status_code=500,
             detail={
                 "error": {
-                    "message": str(e),
+                    "message": str(e) or repr(e),
                     "type": "internal_error",
                     "code": 500,
                 }

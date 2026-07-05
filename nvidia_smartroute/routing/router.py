@@ -5,12 +5,15 @@ Model capability routing and NVIDIA NIM integration for NVIDIA-SmartRoute-CLI.
 
 import asyncio
 import json
+import re
 import time
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
 import structlog
+
+from ..metrics import metrics
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 logger = structlog.get_logger()
@@ -29,6 +32,7 @@ class TaskType(Enum):
     TRANSLATION = "translation"
     SUMMARIZATION = "summarization"
     QUESTION_ANSWERING = "question_answering"
+    VISION = "vision"
     CHAT = "chat"
 
 
@@ -80,7 +84,41 @@ class RoutingDecision:
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 class CapabilityAnalyzer:
     """Analyzes requests to determine task type."""
-    
+
+    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    @staticmethod
+    def _extract_content(messages: List[Dict[str, Any]]) -> Tuple[str, bool]:
+        """
+        Flatten message content to text and detect whether any image is present.
+
+        Handles both plain-string content and OpenAI multimodal content, where
+        `content` is a list of parts such as
+        ``{"type": "text", "text": ...}`` and
+        ``{"type": "image_url", "image_url": {...}}``.
+
+        Returns:
+            (combined_text, has_image)
+        """
+        texts: List[str] = []
+        has_image = False
+        for msg in messages:
+            content = msg.get("content", "")
+            if isinstance(content, str):
+                texts.append(content)
+            elif isinstance(content, list):
+                for part in content:
+                    if not isinstance(part, dict):
+                        texts.append(str(part))
+                        continue
+                    part_type = part.get("type")
+                    if part_type == "text":
+                        texts.append(part.get("text", ""))
+                    elif part_type in ("image_url", "image", "input_image"):
+                        has_image = True
+            elif content is not None:
+                texts.append(str(content))
+        return " ".join(texts), has_image
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     def analyze_request(self, messages: List[Dict[str, str]]) -> TaskType:
         """
@@ -94,9 +132,16 @@ class CapabilityAnalyzer:
         """
         if not messages:
             return TaskType.CHAT
-        
-        # Combine all message content for analysis
-        full_text = " ".join([msg.get("content", "") for msg in messages]).lower()
+
+        # Extract text and detect image parts. OpenAI multimodal messages carry
+        # `content` as a list of parts (text / image_url), so plain string
+        # joining would raise on those payloads.
+        full_text, has_image = self._extract_content(messages)
+        full_text = full_text.lower()
+
+        # A request carrying an image is a vision task regardless of the text.
+        if has_image:
+            return TaskType.VISION
         
         # Check for code-related keywords
         code_indicators = [
@@ -144,9 +189,11 @@ class CapabilityAnalyzer:
         ]
         
         # Check for mathematics indicators
+        # Note: "sum" is intentionally omitted because it is a substring of
+        # "summarize"/"summary" and would misclassify summarization requests.
         math_indicators = [
             "calculate", "compute", "solve", "equation", "formula", "derivative",
-            "integral", "limit", "sum", "average", "mean", "median", "mode",
+            "integral", "limit", "average", "median", "mode",
             "statistics", "probability", "percentage", "fraction", "algebra",
             "geometry", "trigonometry", "calculus"
         ]
@@ -173,6 +220,9 @@ class CapabilityAnalyzer:
         creative_score = sum(1 for indicator in creative_indicators if indicator in full_text)
         analysis_score = sum(1 for indicator in analysis_indicators if indicator in full_text)
         math_score = sum(1 for indicator in math_indicators if indicator in full_text)
+        # Arithmetic expressions (e.g. "2+2", "10 * 3") are a strong math signal
+        if re.search(r"\d+\s*[+\-*/^]\s*\d+", full_text):
+            math_score += 2
         trans_score = sum(1 for indicator in trans_indicators if indicator in full_text)
         sum_score = sum(1 for indicator in sum_indicators if indicator in full_text)
         
@@ -189,8 +239,8 @@ class CapabilityAnalyzer:
             "summarization": sum_score,
             "chat": 1  # Default baseline
         }
-        print("Scores:", scores)
-        
+        logger.debug("capability scores", scores=scores)
+
         # Find the category with the highest score
         max_category = max(scores, key=scores.get)
         max_score = scores[max_category]
@@ -229,74 +279,111 @@ class ModelRegistry:
     
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     def _initialize_default_models(self):
-        """Initialize with default NVIDIA NIM models."""
-        # Nemotron 3 Super - good for general tasks
-        self.models["nemotron-3-super"] = ModelCapability(
-            model_id="nemotron-3-super",
-            name="Nemotron-3-Super",
+        """Initialize with default NVIDIA NIM models (build.nvidia.com IDs).
+
+        These IDs were verified as servable against the live NIM endpoint. If
+        your account has access to additional models (e.g. a dedicated code
+        model), register them here to specialize routing further.
+        """
+        # Nemotron Super 49B - strong reasoning, math, summarization, Q&A
+        self.models["nvidia/llama-3.3-nemotron-super-49b-v1"] = ModelCapability(
+            model_id="nvidia/llama-3.3-nemotron-super-49b-v1",
+            name="Llama-3.3-Nemotron-Super-49B",
             provider="nvidia",
             version="1.0",
-            supported_tasks=[TaskType.CHAT, TaskType.REASONING],
-            latency_ms=500,
-            throughput_tps=45.0,
-            quality_score=0.85,
+            supported_tasks=[
+                TaskType.REASONING,
+                TaskType.MATHEMATICS,
+                TaskType.SUMMARIZATION,
+                TaskType.QUESTION_ANSWERING,
+                TaskType.TRANSLATION,
+                TaskType.CHAT,
+            ],
+            latency_ms=700,
+            throughput_tps=35.0,
+            quality_score=0.92,
             reliability_score=0.9,
-            context_window=8192,
+            context_window=32768,
             supports_streaming=True,
-            description="NVIDIA's Nemotron 3 Super language model",
-            tags=["general-purpose", "chat", "reasoning"]
+            description="NVIDIA Nemotron Super 49B for reasoning and math",
+            tags=["general-purpose", "reasoning", "math"],
         )
-        
-        # CodeLlama - good for code tasks
-        self.models["codellama-70b"] = ModelCapability(
-            model_id="codellama-70b",
-            name="CodeLlama-70b",
+
+        # Llama 3.1 70B - capable generalist; handles code and creative writing.
+        # (No dedicated code model is available to this account, so code tasks
+        # route here.)
+        self.models["meta/llama-3.1-70b-instruct"] = ModelCapability(
+            model_id="meta/llama-3.1-70b-instruct",
+            name="Llama-3.1-70B-Instruct",
             provider="nvidia",
             version="1.0",
-            supported_tasks=[TaskType.CODE_GENERATION, TaskType.CODE_COMPLETION, TaskType.CODE_EXPLANATION, TaskType.CODE_REVIEW],
-            latency_ms=800,
-            throughput_tps=30.0,
-            quality_score=0.9,
-            reliability_score=0.85,
-            context_window=16384,
-            supports_streaming=True,
-            description="Meta's CodeLlama 70B for code generation and understanding",
-            tags=["code", "programming", "software-engineering"]
-        )
-        
-        # Llama 3 - good for creative tasks
-        self.models["llama3-70b"] = ModelCapability(
-            model_id="llama3-70b",
-            name="Llama-3-70b",
-            provider="nvidia",
-            version="1.0",
-            supported_tasks=[TaskType.CREATIVE_WRITING],
+            supported_tasks=[
+                TaskType.CODE_GENERATION,
+                TaskType.CODE_COMPLETION,
+                TaskType.CODE_EXPLANATION,
+                TaskType.CODE_REVIEW,
+                TaskType.CREATIVE_WRITING,
+                TaskType.CHAT,
+            ],
             latency_ms=600,
             throughput_tps=40.0,
             quality_score=0.88,
             reliability_score=0.88,
-            context_window=8192,
+            context_window=32768,
             supports_streaming=True,
-            description="Meta's Llama 3 70B for creative writing and content generation",
-            tags=["creative", "writing", "content-generation"]
+            supports_function_calling=True,
+            description="Meta Llama 3.1 70B generalist for code and content",
+            tags=["general-purpose", "code", "creative"],
         )
-        
-        # Embedding model
-        self.models["nv-embed-v1"] = ModelCapability(
-            model_id="nv-embed-v1",
-            name="NV-Embed-v1",
+
+        # Llama 3.1 8B - fast, low-latency conversational model.
+        self.models["meta/llama-3.1-8b-instruct"] = ModelCapability(
+            model_id="meta/llama-3.1-8b-instruct",
+            name="Llama-3.1-8B-Instruct",
             provider="nvidia",
             version="1.0",
-            supported_tasks=[TaskType.TRANSLATION],  # Using TRANSLATION as closest to EMBEDDING for now
-            latency_ms=200,
-            throughput_tps=200.0,
-            quality_score=0.92,
-            reliability_score=0.95,
-            context_window=512,
-            description="NVIDIA's embedding model for text embeddings",
-            tags=["embedding", "semantic-search", "retrieval"]
+            supported_tasks=[TaskType.CHAT],
+            latency_ms=250,
+            throughput_tps=90.0,
+            quality_score=0.80,
+            reliability_score=0.9,
+            context_window=32768,
+            supports_streaming=True,
+            description="Meta Llama 3.1 8B for fast conversational responses",
+            tags=["fast", "chat", "lightweight"],
+        )
+
+        # Llama 3.2 90B Vision - multimodal image understanding
+        self.models["meta/llama-3.2-90b-vision-instruct"] = ModelCapability(
+            model_id="meta/llama-3.2-90b-vision-instruct",
+            name="Llama-3.2-90B-Vision-Instruct",
+            provider="nvidia",
+            version="1.0",
+            supported_tasks=[TaskType.VISION],
+            latency_ms=1200,
+            throughput_tps=20.0,
+            quality_score=0.87,
+            reliability_score=0.85,
+            context_window=32768,
+            supports_streaming=True,
+            supports_vision=True,
+            description="Meta Llama 3.2 90B Vision for image understanding",
+            tags=["vision", "multimodal", "image-analysis"],
         )
     
+    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    def get_model(self, model_id: str) -> Optional[ModelCapability]:
+        """
+        Look up a model by its identifier.
+
+        Args:
+            model_id: The model identifier to look up
+
+        Returns:
+            ModelCapability: The matching model, or None if not registered
+        """
+        return self.models.get(model_id)
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     def select_best_model(self, task_type: TaskType) -> Optional[ModelCapability]:
         """
@@ -327,10 +414,31 @@ class ModelRegistry:
         
         if not suitable_models:
             return None
-        
-        # For simplicity, return the first suitable model
-        # In a more sophisticated implementation, we would score them
-        return suitable_models[0]
+
+        # Score each candidate and return the best. Scoring blends static
+        # quality/reliability with a live latency signal so the router adapts
+        # to real observed performance (the "latency tracker").
+        return max(suitable_models, key=self._score_model)
+
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    def _score_model(self, model: ModelCapability) -> float:
+        """
+        Compute a routing score for a model (higher is better).
+
+        Combines static quality and reliability with a latency penalty derived
+        from the live latency tracker when samples exist, otherwise the model's
+        declared latency. Latency is normalised against a 2000ms reference.
+        """
+        live_latency = metrics.get_avg_latency_ms(model.model_id)
+        latency_ms = live_latency if live_latency is not None else float(model.latency_ms)
+        # Normalise to a 0..1 penalty (clamped); lower latency -> smaller penalty.
+        latency_penalty = min(latency_ms / 2000.0, 1.0)
+
+        return (
+            0.5 * model.quality_score
+            + 0.3 * model.reliability_score
+            + 0.2 * (1.0 - latency_penalty)
+        )
 
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
@@ -394,13 +502,21 @@ class RequestRouter:
         
         # Create the decision
         decision = RoutingDecision(
-            request_id=task_type,
+            request_id=request_id,
             task_type=task_type,
             selected_model=selected_model,
             confidence=confidence,
             reasoning=reasoning
         )
-        
+
+        # Surface the decision on the live routing log for the TUI/metrics.
+        metrics.log_routing(
+            request_id=request_id,
+            task_type=task_type.value,
+            model_id=selected_model.model_id if selected_model else None,
+            confidence=confidence,
+        )
+
         # Add to history for statistics
         self._decision_history.append({
             "timestamp": time.time(),
