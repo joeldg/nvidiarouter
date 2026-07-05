@@ -17,6 +17,12 @@ engine, multi-key rotation for throughput, and a rich terminal dashboard.
   writer / tester / reviewer sub-agents (each a real NIM call) and composed.
 - **Multi-key rotation** — pool several API keys to scale past the ~40 req/min
   per-key free-tier cap, with per-key budgeting and 429 failover.
+- **Response caching** — identical non-streaming requests are served from an
+  in-memory TTL+LRU cache, skipping the upstream call (big latency/budget win).
+- **Model fallback chains** — if a model fails (404/5xx/timeout), the request
+  fails over to the next-best model for the task.
+- **Tool / function calling** — `tools`/`tool_choice` pass through and
+  `tool_calls` responses are returned unchanged.
 - **Resilience** — inbound rate limiting, upstream retry/backoff, configurable
   timeouts, optional inbound API-key auth.
 - **Rich TUI dashboard** — live throughput, active connections, per-model
@@ -93,6 +99,8 @@ All settings are environment variables (see [.env.example](./.env.example)):
 | `RATE_LIMIT_PER_KEY` | `40` | Per-key outbound budget (NIM free-tier cap) |
 | `ENABLE_RATE_LIMIT` / `RATE_LIMIT_REQUESTS` | `True` / `100` | Inbound per-client limit on `/v1/*` |
 | `UPSTREAM_MAX_RETRIES` | `3` | Retries on 429/5xx with backoff |
+| `ENABLE_CACHE` / `MODEL_CACHE_TTL` | `True` / `300` | Response cache + TTL (s) |
+| `ENABLE_MODEL_FALLBACK` / `MAX_MODEL_FALLBACKS` | `True` / `2` | Fail over to next-best model |
 | `REQUIRE_API_KEY` / `GATEWAY_API_KEYS` | `False` / – | Optional inbound client auth |
 | `AUTOSCALE_SEQUENTIAL` | `True` | Run sub-agents one at a time (free-tier safe) |
 | `DEFAULT_EMBEDDING_MODEL` | `nvidia/nv-embedqa-e5-v5` | Embeddings model |

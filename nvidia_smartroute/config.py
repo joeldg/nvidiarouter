@@ -106,6 +106,33 @@ class Settings(BaseSettings):
         default=300, ge=1, description="Timeout (seconds) for a sub-agent task"
     )
 
+    # Response cache
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    enable_cache: bool = Field(
+        default=True, description="Cache identical non-streaming chat responses"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    cache_ttl: int = Field(
+        default=300, ge=1,
+        validation_alias=AliasChoices("cache_ttl", "model_cache_ttl"),
+        description="Response cache TTL in seconds",
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    cache_max_entries: int = Field(
+        default=1000, ge=1, description="Maximum number of cached responses"
+    )
+
+    # Reliability
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    enable_model_fallback: bool = Field(
+        default=True,
+        description="On upstream model failure, retry the next-best model",
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    max_model_fallbacks: int = Field(
+        default=2, ge=0, description="Max alternative models to try on failure"
+    )
+
     # TUI settings
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     tui_refresh_rate: float = Field(

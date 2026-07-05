@@ -449,6 +449,21 @@ class ModelRegistry:
         return max(suitable_models, key=self._score_model)
 
     # @spec[PROJECT_PROFILE.md#Requirements]
+    def rank_models(self, task_type: TaskType) -> List[ModelCapability]:
+        """
+        Return all suitable models for a task, best first.
+
+        Used to build a fallback chain: if the top model fails upstream, the
+        gateway can retry the next-ranked model that supports the same task.
+        """
+        suitable = [m for m in self.models.values() if task_type in m.supported_tasks]
+        if not suitable:
+            suitable = [m for m in self.models.values() if TaskType.CHAT in m.supported_tasks]
+        if not suitable:
+            suitable = list(self.models.values())
+        return sorted(suitable, key=self._score_model, reverse=True)
+
+    # @spec[PROJECT_PROFILE.md#Requirements]
     def _score_model(self, model: ModelCapability) -> float:
         """
         Compute a routing score for a model (higher is better).

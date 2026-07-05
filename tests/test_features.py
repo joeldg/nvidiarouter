@@ -626,5 +626,116 @@ def test_embeddings_defaults_model_and_records_metrics(monkeypatch):
     srv.metrics.reset()
 
 
+# --- Response cache -------------------------------------------------------
+
+def test_response_cache_hit_skips_upstream(monkeypatch):
+    from unittest.mock import AsyncMock
+    import nvidia_smartroute.gateway.server as srv
+
+    monkeypatch.setattr(srv.settings, "enable_cache", True)
+    monkeypatch.setattr(srv.settings, "enable_rate_limit", False)
+    srv.response_cache.clear()
+    upstream = AsyncMock(return_value={"choices": [{"index": 0, "message": {"role": "assistant", "content": "42"}, "finish_reason": "stop"}]})
+    monkeypatch.setattr(srv.nim_client, "chat_completions", upstream)
+
+    client = TestClient(srv.app)
+    body = {"messages": [{"role": "user", "content": "cache me please"}], "temperature": 0}
+    r1 = client.post("/v1/chat/completions", json=body)
+    r2 = client.post("/v1/chat/completions", json=body)
+    assert r1.status_code == 200 and r2.status_code == 200
+    assert r1.headers.get("X-Cache") == "MISS"
+    assert r2.headers.get("X-Cache") == "HIT"
+    assert upstream.await_count == 1  # second request served from cache
+    srv.response_cache.clear()
+
+
+# --- Model fallback chain -------------------------------------------------
+
+def test_model_fallback_on_upstream_error(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+    from nvidia_smartroute.routing.router import TaskType
+
+    monkeypatch.setattr(srv.settings, "enable_model_fallback", True)
+    monkeypatch.setattr(srv.settings, "max_model_fallbacks", 2)
+
+    ranked = srv.router.model_registry.rank_models(TaskType.CHAT)
+    primary = ranked[0]
+
+    class FakeResp:
+        status_code = 500
+
+    class UpstreamError(Exception):
+        response = FakeResp()
+
+    tried = []
+
+    async def fake_chat(model, messages, stream=False, max_tokens=None, temperature=None, **kw):
+        tried.append(model)
+        if model == primary.model_id:
+            raise UpstreamError()
+        return {"choices": [{"message": {"content": "ok"}}], "model": model}
+
+    monkeypatch.setattr(srv.nim_client, "chat_completions", fake_chat)
+    data, used, fell_back = asyncio.run(srv._complete_with_fallback(
+        TaskType.CHAT, primary, [{"role": "user", "content": "hi"}], None, None, {},
+    ))
+    assert fell_back is True
+    assert used.model_id != primary.model_id
+    assert tried[0] == primary.model_id  # primary attempted first
+
+
+def test_no_fallback_on_client_error(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+    from nvidia_smartroute.routing.router import TaskType
+
+    monkeypatch.setattr(srv.settings, "enable_model_fallback", True)
+    ranked = srv.router.model_registry.rank_models(TaskType.CHAT)
+    primary = ranked[0]
+
+    class FakeResp:
+        status_code = 400
+
+    class BadRequest(Exception):
+        response = FakeResp()
+
+    async def fake_chat(model, messages, **kw):
+        raise BadRequest()
+
+    monkeypatch.setattr(srv.nim_client, "chat_completions", fake_chat)
+    # A 400 is the same on every model, so it must not fan out.
+    with pytest.raises(BadRequest):
+        asyncio.run(srv._complete_with_fallback(
+            TaskType.CHAT, primary, [{"role": "user", "content": "hi"}], None, None, {},
+        ))
+
+
+# --- Tool / function calling passthrough ----------------------------------
+
+def test_tools_are_forwarded_and_tool_calls_returned(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+
+    monkeypatch.setattr(srv.settings, "enable_cache", False)
+    monkeypatch.setattr(srv.settings, "enable_rate_limit", False)
+    captured = {}
+
+    async def fake_chat(model, messages, stream=False, max_tokens=None, temperature=None, **kw):
+        captured.update(kw)
+        return {"choices": [{"index": 0, "message": {"role": "assistant", "content": None, "tool_calls": [
+            {"id": "call_1", "type": "function", "function": {"name": "get_weather", "arguments": "{}"}}]},
+            "finish_reason": "tool_calls"}]}
+
+    monkeypatch.setattr(srv.nim_client, "chat_completions", fake_chat)
+    tools = [{"type": "function", "function": {"name": "get_weather", "parameters": {}}}]
+    resp = TestClient(srv.app).post("/v1/chat/completions", json={
+        "messages": [{"role": "user", "content": "weather?"}], "tools": tools, "tool_choice": "auto",
+    })
+    assert resp.status_code == 200
+    # tools/tool_choice were forwarded upstream ...
+    assert captured.get("tools") == tools
+    assert captured.get("tool_choice") == "auto"
+    # ... and the tool_calls response passed straight through.
+    assert resp.json()["choices"][0]["message"]["tool_calls"][0]["function"]["name"] == "get_weather"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

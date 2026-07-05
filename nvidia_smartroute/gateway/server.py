@@ -24,6 +24,7 @@ from ..metrics import metrics
 from ..routing.router import router, RoutingDecision
 from ..agents import autoscale_engine
 from ..keypool import key_pool, KeyPool, KeyPoolExhaustedError, _mask as _mask_key
+from ..cache import response_cache, make_key
 from .. import logging_config  # noqa: F401  (configures structlog on import)
 
 # Structured logging (unified with the router/agent layers).
@@ -275,6 +276,7 @@ async def get_metrics():
     snapshot = metrics.snapshot()
     snapshot["routing_stats"] = router.get_routing_stats()
     snapshot["api_keys"] = key_pool.snapshot()
+    snapshot["cache"] = response_cache.snapshot()
     return snapshot
 
 
@@ -660,6 +662,74 @@ async def _inline_remote_images(messages: list) -> list:
     return result
 
 
+# Model fallback chain
+# @spec[PROJECT_PROFILE.md#Requirements]
+def _should_fallback(exc: Exception) -> bool:
+    """Whether an upstream failure warrants trying a different model.
+
+    Fall back on 404 (model unavailable), 5xx, and transport errors; not on
+    other 4xx (a bad request will fail identically on every model).
+    """
+    resp = getattr(exc, "response", None)
+    if resp is not None:
+        code = resp.status_code
+        return code == 404 or code >= 500
+    return True
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+async def _complete_with_fallback(
+    task_type,
+    primary,
+    messages: list,
+    max_tokens,
+    temperature,
+    extra: dict,
+):
+    """Call the primary model, failing over to next-best models on hard errors.
+
+    Returns (response_data, used_model, fallback_used).
+    """
+    candidates = [primary]
+    if settings.enable_model_fallback:
+        for m in router.model_registry.rank_models(task_type):
+            if all(m.model_id != c.model_id for c in candidates):
+                candidates.append(m)
+        candidates = candidates[: 1 + settings.max_model_fallbacks]
+
+    last_exc: Optional[Exception] = None
+    for index, model in enumerate(candidates):
+        nim_start = time.time()
+        try:
+            data = await nim_client.chat_completions(
+                model=model.model_id,
+                messages=messages,
+                stream=False,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                **extra,
+            )
+            metrics.record_latency(model.model_id, (time.time() - nim_start) * 1000.0)
+            usage = data.get("usage") if isinstance(data, dict) else None
+            if isinstance(usage, dict) and usage.get("total_tokens"):
+                metrics.record_tokens(model.model_id, int(usage["total_tokens"]))
+            return data, model, index > 0
+        except KeyPoolExhaustedError:
+            raise  # a key problem, not a model problem — don't fail over
+        except Exception as exc:
+            metrics.record_error(model.model_id)
+            last_exc = exc
+            if index + 1 < len(candidates) and _should_fallback(exc):
+                logger.warning(
+                    "model failed; trying fallback",
+                    model=model.model_id,
+                    error=str(exc) or repr(exc),
+                )
+                continue
+            raise
+    raise last_exc if last_exc else RuntimeError("no model candidates")
+
+
 # Record request performance in background
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 async def _record_request_performance(
@@ -690,7 +760,7 @@ async def _record_request_performance(
 
 # @spec[PROJECT_PROFILE.md#Requirements]
 @app.post("/v1/chat/completions")
-async def chat_completions(request: Request, background_tasks: BackgroundTasks):
+async def chat_completions(request: Request, background_tasks: BackgroundTasks):  # noqa: C901
     """OpenAI-compatible chat completions endpoint with intelligent routing."""
     start_time = time.time()
     request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
@@ -716,6 +786,18 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             stream=stream,
             model_hint=model,
         )
+
+        # Response cache: identical non-streaming requests are served from cache,
+        # skipping routing and the upstream NIM call entirely.
+        cache_key = None
+        if settings.enable_cache and not stream:
+            cache_key = make_key({k: v for k, v in body.items() if k != "stream"})
+            cached = response_cache.get(cache_key)
+            if cached is not None:
+                return JSONResponse(
+                    content=cached,
+                    headers={"X-Request-ID": request_id, "X-Cache": "HIT"},
+                )
 
         # Inline any remote image URLs (NVIDIA vision NIM needs base64 data URLs).
         messages = await _inline_remote_images(messages)
@@ -817,22 +899,28 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
                 response_data["_agents"] = orchestrated["agents"]
                 response_headers["X-Autoscaled"] = "true"
                 response_headers["X-Agent-Count"] = str(len(orchestrated["agents"]))
-            else:
-                response_data = await nim_client.chat_completions(
-                    model=selected_model.model_id,
-                    messages=messages,
-                    stream=False,
-                    max_tokens=max_tokens,
-                    temperature=temperature,
-                    **body_without_model
+                metrics.record_latency(
+                    selected_model.model_id, (time.time() - nim_start) * 1000.0
                 )
+            else:
+                # Call the selected model, failing over to the next-best model
+                # for the task on hard upstream errors (404 / 5xx / transport).
+                response_data, used_model, fell_back = await _complete_with_fallback(
+                    routing_decision.task_type,
+                    selected_model,
+                    messages,
+                    max_tokens,
+                    temperature,
+                    body_without_model,
+                )
+                if fell_back:
+                    response_headers["X-Selected-Model"] = used_model.model_id
+                    response_headers["X-Model-Fallback"] = "true"
 
-            # Record live latency and token usage for the routing tracker/TUI.
-            latency_ms = (time.time() - nim_start) * 1000.0
-            metrics.record_latency(selected_model.model_id, latency_ms)
-            usage = response_data.get("usage") if isinstance(response_data, dict) else None
-            if isinstance(usage, dict) and usage.get("total_tokens"):
-                metrics.record_tokens(selected_model.model_id, int(usage["total_tokens"]))
+            # Cache the successful response for identical future requests.
+            if cache_key is not None:
+                response_cache.set(cache_key, response_data)
+            response_headers["X-Cache"] = "MISS"
 
             # Return the upstream payload unchanged, with tracing metadata
             # exposed as response headers (not injected into the body).
