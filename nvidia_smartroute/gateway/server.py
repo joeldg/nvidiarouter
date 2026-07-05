@@ -367,18 +367,21 @@ class NIMClient:
     
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     async def embeddings(
-        self, 
-        model: str, 
+        self,
+        model: str,
         input: Union[str, List[str]],
-        encoding_format: str = "float"
+        encoding_format: str = "float",
+        **kwargs,
     ) -> dict:
         """Send embedding request to NVIDIA NIM."""
         payload = {
             "model": model,
             "input": input,
-            "encoding_format": encoding_format
+            "encoding_format": encoding_format,
         }
-        
+        # Forward model-specific params (e.g. input_type, truncate).
+        payload.update({k: v for k, v in kwargs.items() if v is not None})
+
         url = f"{self.base_url}/embeddings"
         return await self._post_with_retries(url, payload)
 
@@ -386,8 +389,8 @@ class NIMClient:
     async def models(self) -> dict:
         """Get available models from NVIDIA NIM."""
         url = f"{self.base_url}/models"
-        
-        response = await http_client.get(url, headers=self.headers)
+        key = await self._acquire_key()
+        response = await http_client.get(url, headers=self._headers(key))
         response.raise_for_status()
         return response.json()
 
@@ -851,29 +854,74 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
 @app.post("/v1/embeddings")
 async def embeddings(request: Request):
     """OpenAI-compatible embeddings endpoint."""
-    # For simplicity, we're not implementing routing for embeddings yet
-    # In a full implementation, this would use the router to select an appropriate model
+    request_id = getattr(request.state, "request_id", str(uuid.uuid4()))
     body = await request.json()
-    model = body.get("model")
+
     input_data = body.get("input")
+    if input_data is None or input_data == "" or input_data == []:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": {
+                    "message": "'input' is required and must be a non-empty string or list",
+                    "type": "invalid_request_error",
+                    "code": 400,
+                    "request_id": request_id,
+                }
+            },
+        )
+
+    # Default to the configured embedding model when none is provided.
+    model = body.get("model") or settings.default_embedding_model
     encoding_format = body.get("encoding_format", "float")
-    
+    # NVIDIA embedqa models require input_type/truncate; default them sensibly.
+    input_type = body.get("input_type", "query")
+    truncate = body.get("truncate", "END")
+
+    nim_start = time.time()
     try:
         response = await nim_client.embeddings(
             model=model,
             input=input_data,
-            encoding_format=encoding_format
+            encoding_format=encoding_format,
+            input_type=input_type,
+            truncate=truncate,
         )
-        return response
+        # Record live metrics for the embedding model.
+        metrics.record_latency(model, (time.time() - nim_start) * 1000.0)
+        usage = response.get("usage") if isinstance(response, dict) else None
+        if isinstance(usage, dict) and usage.get("total_tokens"):
+            metrics.record_tokens(model, int(usage["total_tokens"]))
+        return JSONResponse(
+            content=response,
+            headers={"X-Request-ID": request_id, "X-Selected-Model": model},
+        )
+    except KeyPoolExhaustedError as e:
+        metrics.record_error(model)
+        logger.warning(f"All API keys rate-limited (embeddings): {e}")
+        raise HTTPException(
+            status_code=503,
+            headers={"Retry-After": str(settings.per_key_rate_window)},
+            detail={
+                "error": {
+                    "message": "All API keys are rate-limited; retry later",
+                    "type": "rate_limit_exceeded",
+                    "code": 503,
+                    "request_id": request_id,
+                }
+            },
+        )
     except Exception as e:
+        metrics.record_error(model)
         logger.error(f"Error in embeddings: {e}")
         raise HTTPException(
-            status_code=500,
+            status_code=502,
             detail={
                 "error": {
                     "message": str(e) or repr(e),
-                    "type": "internal_error",
-                    "code": 500,
+                    "type": "upstream_error",
+                    "code": 502,
+                    "request_id": request_id,
                 }
             }
         )
@@ -881,23 +929,46 @@ async def embeddings(request: Request):
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 @app.get("/v1/models")
-async def list_models():
-    """OpenAI-compatible models endpoint."""
-    try:
-        response = await nim_client.models()
-        return response
-    except Exception as e:
-        logger.error(f"Error in list_models: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": {
-                    "message": str(e) or repr(e),
-                    "type": "internal_error",
-                    "code": 500,
-                }
+async def list_models(source: str = "router"):
+    """
+    OpenAI-compatible models endpoint.
+
+    Returns the models this gateway actually routes to (the router registry).
+    Pass ``?source=upstream`` to proxy NVIDIA's full NIM catalog instead.
+    """
+    if source == "upstream":
+        try:
+            return await nim_client.models()
+        except Exception as e:
+            logger.error(f"Error in list_models: {e}")
+            raise HTTPException(
+                status_code=502,
+                detail={
+                    "error": {
+                        "message": str(e) or repr(e),
+                        "type": "upstream_error",
+                        "code": 502,
+                    }
+                },
+            )
+
+    created = int(time.time())
+    data = []
+    for model in router.model_registry.models.values():
+        data.append(
+            {
+                "id": model.model_id,
+                "object": "model",
+                "created": created,
+                "owned_by": model.provider,
+                # Router-specific metadata (non-standard extensions).
+                "supported_tasks": [t.value for t in model.supported_tasks],
+                "context_window": model.context_window,
+                "supports_vision": model.supports_vision,
+                "supports_streaming": model.supports_streaming,
             }
         )
+    return {"object": "list", "data": data}
 
 
 if __name__ == "__main__":

@@ -43,15 +43,22 @@ Living checklist of what's done, what's in progress, and what's deferred.
   - Verified live: budget exhaustion -> [200,200,503]; failover key1->key2.
   - Follow-up: optional `NVIDIA_API_KEY_1..5` numbered vars (comma list covers it).
 
+## Done — backlog batch (3rd pass)
+
+- [x] `/v1/models`: return the router's registry (with `?source=upstream` for the
+      NVIDIA catalog). Fixed a `models()` regression (removed `self.headers`).
+- [x] Autoscale free-tier reliability: `autoscale_sequential` (default on) runs
+      tester/reviewer one at a time so they don't compete on a slow model.
+- [x] Embeddings hardening: default model (`nv-embedqa-e5-v5`), 400 on missing
+      input, `input_type`/`truncate` defaults, live metrics, 502/503 error codes.
+
 ## Backlog — future improvements
 
-- [ ] Embeddings: routing + metrics + guard for missing `model`
 - [ ] `stop` command: real process control (PID file / signal)
 - [ ] Inbound API-key auth on the gateway (`api_key_header`)
 - [ ] Token usage accounting for autoscaled responses (currently 0/0/0)
-- [ ] Autoscale on free tier: sequential option / concurrency cap to avoid timeouts
 - [ ] Replace brittle keyword classifier with weighted / embedding-based routing
 - [ ] Unify logging (gateway stdlib `logging` vs router `structlog`)
 - [ ] Regenerate `.spec/code-map.json` & `code-trace.json` for new modules
 - [ ] Streaming path: token accounting + autoscale support
-- [ ] `/v1/models`: return the router's registry, not just the upstream catalog
+- [ ] Embeddings: task-aware routing (query vs passage) if multiple embed models

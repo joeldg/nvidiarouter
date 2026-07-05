@@ -424,5 +424,102 @@ def test_metrics_endpoint_includes_key_pool():
     assert isinstance(data["api_keys"], list)
 
 
+# --- /v1/models returns router registry -----------------------------------
+
+def test_models_endpoint_returns_router_registry():
+    from nvidia_smartroute.gateway.server import app, router
+
+    data = TestClient(app).get("/v1/models").json()
+    assert data["object"] == "list"
+    ids = {m["id"] for m in data["data"]}
+    assert ids == set(router.model_registry.models.keys())
+    # Router metadata is exposed and OpenAI shape is preserved.
+    sample = data["data"][0]
+    assert sample["object"] == "model" and "supported_tasks" in sample
+
+
+def test_upstream_models_uses_key_pool_headers(monkeypatch):
+    """Regression: models() must build headers from the key pool, not self.headers."""
+    import nvidia_smartroute.gateway.server as srv
+    from nvidia_smartroute.keypool import KeyPool
+
+    seen = {}
+
+    class FakeClient:
+        async def get(self, url, headers=None):
+            seen["auth"] = headers.get("Authorization")
+
+            class R:
+                status_code = 200
+                def raise_for_status(self): pass
+                def json(self): return {"object": "list", "data": [{"id": "x"}]}
+            return R()
+
+    monkeypatch.setattr(srv, "http_client", FakeClient())
+    monkeypatch.setattr(srv.nim_client, "key_pool", KeyPool(["poolkey"], per_key_limit=10, window=60))
+    out = asyncio.run(srv.nim_client.models())
+    assert out["data"] == [{"id": "x"}]
+    assert seen["auth"] == "Bearer poolkey"
+
+
+# --- Autoscale sequential mode --------------------------------------------
+
+def test_autoscale_sequential_runs_followups_one_at_a_time(monkeypatch):
+    import nvidia_smartroute.agents.orchestrator as orch
+
+    monkeypatch.setattr(orch.settings, "autoscale_sequential", True)
+    engine = orch.AutoscaleEngine(max_concurrent=5, timeout=10)
+    concurrent = 0
+    max_seen = 0
+
+    async def fake_nim(model, messages, **kwargs):
+        nonlocal concurrent, max_seen
+        concurrent += 1
+        max_seen = max(max_seen, concurrent)
+        await asyncio.sleep(0.01)
+        concurrent -= 1
+        return {"choices": [{"message": {"content": "x"}}]}
+
+    result = asyncio.run(engine.orchestrate(
+        messages=[{"role": "user", "content": "build with tests"}],
+        model_id="m", nim_call=fake_nim,
+    ))
+    assert len(result["agents"]) == 3
+    # Sequential mode: never more than one call in flight at a time.
+    assert max_seen == 1
+
+
+# --- Embeddings hardening --------------------------------------------------
+
+def test_embeddings_requires_input():
+    from nvidia_smartroute.gateway.server import app
+
+    resp = TestClient(app).post("/v1/embeddings", json={"model": "m"})
+    assert resp.status_code == 400
+    assert resp.json()["detail"]["error"]["type"] == "invalid_request_error"
+
+
+def test_embeddings_defaults_model_and_records_metrics(monkeypatch):
+    from unittest.mock import AsyncMock
+    import nvidia_smartroute.gateway.server as srv
+
+    captured = {}
+
+    async def fake_embeddings(model, input, encoding_format="float", **kwargs):
+        captured["model"] = model
+        captured["kwargs"] = kwargs
+        return {"object": "list", "data": [{"embedding": [0.1, 0.2]}], "usage": {"total_tokens": 4}}
+
+    monkeypatch.setattr(srv.nim_client, "embeddings", fake_embeddings)
+    srv.metrics.reset()
+    resp = TestClient(srv.app).post("/v1/embeddings", json={"input": "hello"})
+    assert resp.status_code == 200
+    # Defaulted to the configured embedding model and forwarded input_type/truncate.
+    assert captured["model"] == srv.settings.default_embedding_model
+    assert captured["kwargs"].get("input_type") == "query"
+    assert srv.metrics.get_avg_latency_ms(srv.settings.default_embedding_model) is not None
+    srv.metrics.reset()
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

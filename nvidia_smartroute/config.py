@@ -68,6 +68,11 @@ class Settings(BaseSettings):
         default=True,
         description="Enable intelligent model routing based on task type",
     )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    default_embedding_model: str = Field(
+        default="nvidia/nv-embedqa-e5-v5",
+        description="Model used for /v1/embeddings when none is specified",
+    )
 
     # Dynamic Agent Autoscale settings
     # @spec[PROJECT_PROFILE.md#Requirements]
@@ -78,6 +83,14 @@ class Settings(BaseSettings):
     # @spec[PROJECT_PROFILE.md#Requirements]
     max_concurrent_agents: int = Field(
         default=10, ge=1, description="Maximum number of concurrent sub-agents"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    # Run follow-up sub-agents (tester/reviewer) one at a time. Default True so
+    # they don't compete on the same slow free-tier model and time out; set
+    # False to parallelize when models are fast / keys are plentiful.
+    autoscale_sequential: bool = Field(
+        default=True,
+        description="Run follow-up sub-agents sequentially instead of concurrently",
     )
     # @spec[PROJECT_PROFILE.md#Requirements]
     agent_timeout: int = Field(

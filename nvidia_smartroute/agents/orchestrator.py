@@ -218,11 +218,19 @@ class AutoscaleEngine:
             ),
         )
 
-        # Tester and reviewer are independent -> run them concurrently.
-        followups = await asyncio.gather(
-            self._run_agent(tester, model_id, messages, nim_call, semaphore, review_context),
-            self._run_agent(reviewer, model_id, messages, nim_call, semaphore, review_context),
-        )
+        # Tester and reviewer are independent. Run them sequentially by default
+        # (avoids competing on the same slow free-tier model), or concurrently
+        # when autoscale_sequential is disabled.
+        if settings.autoscale_sequential:
+            followups = [
+                await self._run_agent(tester, model_id, messages, nim_call, semaphore, review_context),
+                await self._run_agent(reviewer, model_id, messages, nim_call, semaphore, review_context),
+            ]
+        else:
+            followups = await asyncio.gather(
+                self._run_agent(tester, model_id, messages, nim_call, semaphore, review_context),
+                self._run_agent(reviewer, model_id, messages, nim_call, semaphore, review_context),
+            )
         results.extend(followups)
         return self._compose(results)
 
