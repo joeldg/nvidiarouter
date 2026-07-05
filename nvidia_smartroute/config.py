@@ -122,6 +122,17 @@ class Settings(BaseSettings):
         default=1000, ge=1, description="Maximum number of cached responses"
     )
 
+    # Cost & budget
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    daily_budget_usd: float = Field(
+        default=0.0, ge=0, description="Daily spend cap in USD (0 = unlimited)"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    cost_weight: float = Field(
+        default=0.0, ge=0,
+        description="Weight of model cost in routing (0 = ignore cost)",
+    )
+
     # Reliability
     # @spec[PROJECT_PROFILE.md#Requirements]
     enable_model_fallback: bool = Field(

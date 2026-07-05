@@ -846,5 +846,66 @@ def test_concurrency_gate_queues_then_proceeds():
     asyncio.run(run())
 
 
+# --- Cost & budget --------------------------------------------------------
+
+def test_compute_cost():
+    from nvidia_smartroute.cost import compute_cost
+
+    class M:
+        input_cost_per_1k = 0.001
+        output_cost_per_1k = 0.002
+
+    # 1000 prompt @ 0.001 + 500 completion @ 0.002 = 0.001 + 0.001 = 0.002
+    assert compute_cost(M(), 1000, 500) == pytest.approx(0.002)
+
+
+def test_budget_blocks_when_exceeded():
+    from nvidia_smartroute.cost import BudgetTracker
+
+    b = BudgetTracker(daily_budget_usd=0.01)
+    assert b.allow()
+    b.record(0.005)
+    assert b.allow()
+    b.record(0.006)  # total 0.011 > cap
+    assert not b.allow()
+    assert b.snapshot()["remaining_usd"] == 0.0
+
+
+def test_budget_unlimited_allows():
+    from nvidia_smartroute.cost import BudgetTracker
+
+    b = BudgetTracker(daily_budget_usd=0.0)
+    b.record(9999.0)
+    assert b.allow()
+    assert b.snapshot()["daily_budget_usd"] is None
+
+
+def test_metrics_records_cost():
+    from nvidia_smartroute.metrics import MetricsTracker
+
+    m = MetricsTracker()
+    m.record_cost("a", 0.0012)
+    m.record_cost("a", 0.0008)
+    snap = m.snapshot()
+    assert snap["total_cost_usd"] == 0.002
+    assert {r["model_id"]: r for r in snap["models"]}["a"]["total_cost_usd"] == 0.002
+
+
+def test_cost_aware_routing_prefers_cheaper(monkeypatch):
+    import nvidia_smartroute.routing.router as rmod
+    from nvidia_smartroute.routing.router import RequestRouter, TaskType
+
+    rmod.metrics.reset()
+    r = RequestRouter()
+    # Cost ignored -> highest-quality chat model wins.
+    monkeypatch.setattr(rmod.settings, "cost_weight", 0.0)
+    assert r.model_registry.select_best_model(TaskType.CHAT).model_id == \
+        "nvidia/llama-3.3-nemotron-super-49b-v1"
+    # Strong cost weight -> cheapest chat model wins.
+    monkeypatch.setattr(rmod.settings, "cost_weight", 1.0)
+    assert r.model_registry.select_best_model(TaskType.CHAT).model_id == \
+        "meta/llama-3.1-8b-instruct"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

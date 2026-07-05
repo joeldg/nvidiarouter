@@ -12,6 +12,7 @@ from enum import Enum
 import structlog
 
 from ..metrics import metrics
+from ..config import settings
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 logger = structlog.get_logger()
@@ -49,7 +50,11 @@ class ModelCapability:
     # Performance characteristics
     latency_ms: int = 0  # Average latency in milliseconds
     throughput_tps: float = 0.0  # Tokens per second
-    cost_per_token: float = 0.0  # Cost per token (if applicable)
+    cost_per_token: float = 0.0  # Deprecated; see input/output_cost_per_1k
+    # USD per 1,000 tokens. Free on the NIM free tier ($0), but representative
+    # hosted rates so cost tracking/routing produce meaningful numbers when set.
+    input_cost_per_1k: float = 0.0
+    output_cost_per_1k: float = 0.0
 
     # Quality scores (0.0 to 1.0)
     quality_score: float = 0.0
@@ -333,6 +338,8 @@ class ModelRegistry:
             reliability_score=0.9,
             context_window=32768,
             supports_streaming=True,
+            input_cost_per_1k=0.0009,
+            output_cost_per_1k=0.0009,
             description="NVIDIA Nemotron Super 49B for reasoning and math",
             tags=["general-purpose", "reasoning", "math"],
         )
@@ -360,6 +367,8 @@ class ModelRegistry:
             context_window=32768,
             supports_streaming=True,
             supports_function_calling=True,
+            input_cost_per_1k=0.0009,
+            output_cost_per_1k=0.0009,
             description="Meta Llama 3.1 70B generalist for code and content",
             tags=["general-purpose", "code", "creative"],
         )
@@ -377,6 +386,8 @@ class ModelRegistry:
             reliability_score=0.9,
             context_window=32768,
             supports_streaming=True,
+            input_cost_per_1k=0.0002,
+            output_cost_per_1k=0.0002,
             description="Meta Llama 3.1 8B for fast conversational responses",
             tags=["fast", "chat", "lightweight"],
         )
@@ -395,6 +406,8 @@ class ModelRegistry:
             context_window=32768,
             supports_streaming=True,
             supports_vision=True,
+            input_cost_per_1k=0.0011,
+            output_cost_per_1k=0.0011,
             description="Meta Llama 3.2 90B Vision for image understanding",
             tags=["vision", "multimodal", "image-analysis"],
         )
@@ -477,11 +490,18 @@ class ModelRegistry:
         # Normalise to a 0..1 penalty (clamped); lower latency -> smaller penalty.
         latency_penalty = min(latency_ms / 2000.0, 1.0)
 
-        return (
+        score = (
             0.5 * model.quality_score
             + 0.3 * model.reliability_score
             + 0.2 * (1.0 - latency_penalty)
         )
+        # Optional cost-aware routing: penalise pricier models. Reference of
+        # $0.002/1k tokens maps to a full penalty; disabled when cost_weight = 0.
+        if settings.cost_weight:
+            avg_cost = (model.input_cost_per_1k + model.output_cost_per_1k) / 2.0
+            cost_penalty = min(avg_cost / 0.002, 1.0)
+            score -= settings.cost_weight * cost_penalty
+        return score
 
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
