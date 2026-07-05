@@ -2,7 +2,6 @@
 Basic tests for NVIDIA-SmartRoute-CLI setup.
 """
 
-import pytest
 from fastapi.testclient import TestClient
 
 from nvidia_smartroute.gateway.server import app
