@@ -34,7 +34,10 @@ _CODE_TASKS = [
 # best-effort and used for display/scoring, not billing.
 # @spec[PROJECT_PROFILE.md#Requirements]
 _CURATED: Dict[str, Dict[str, Any]] = {
+    # Kimi / GLM ship without a size token in the ID, so curate them explicitly.
+    "moonshotai/kimi-k2.6": {"parameters_b": 1000, "context_window": 256000},
     "moonshotai/kimi-k2-instruct": {"parameters_b": 1000, "context_window": 128000},
+    "z-ai/glm-5.2": {"parameters_b": 355, "context_window": 200000},
     "zai-org/glm-4.6": {"parameters_b": 357, "context_window": 200000},
     "zai-org/glm-4.5-air": {"parameters_b": 106, "context_window": 128000},
     "deepseek-ai/deepseek-r1": {"parameters_b": 671, "context_window": 128000,

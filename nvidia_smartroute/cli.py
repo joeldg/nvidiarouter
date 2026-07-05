@@ -528,7 +528,7 @@ def stress(
 
 # @spec[PROJECT_PROFILE.md#Requirements]
 @app.command()
-def discover(
+def discover(  # noqa: C901
     output: str = typer.Option(settings.models_file, help="Where to write discovered models"),
     probe: bool = typer.Option(
         True, "--probe/--no-probe",
@@ -536,18 +536,28 @@ def discover(
     ),
     limit: int = typer.Option(0, help="Only check the first N catalog models (0 = all)"),
     include_embeddings: bool = typer.Option(False, help="Include embedding models"),
+    delay: float = typer.Option(
+        -1.0,
+        help="Seconds between probes (default: derived from the per-key rate limit)",
+    ),
 ):
     """Discover which NIM models your account can serve and register them.
 
     Writes a capability profile per servable model; restart the gateway to route
-    across the discovered set. Probing respects the per-key rate limit, so a full
-    catalog scan can take a few minutes — use --limit to sample.
+    across the discovered set. Probing is throttled to stay under the per-key
+    rate limit, so a full catalog scan takes a few minutes — use --limit to sample.
     """
+    import time
+
     from rich.progress import BarColumn, Progress, TextColumn, TimeElapsedColumn
     from rich.table import Table
 
     from nvidia_smartroute import discovery
     from nvidia_smartroute.model_catalog import is_embedding_model, rank_by_capability
+
+    # Throttle to stay under the per-key rate limit (with a little headroom).
+    if delay < 0:
+        delay = 60.0 / max(1, settings.rate_limit_per_key) + 0.2
 
     keys = settings.api_keys
     if not keys:
@@ -566,8 +576,9 @@ def discover(
         catalog = [m for m in catalog if not is_embedding_model(m)]
     if limit:
         catalog = catalog[:limit]
+    est = f"  ~{len(catalog) * delay / 60:.1f} min at {delay:.1f}s/probe" if probe else ""
     console.print(f"  {len(catalog)} models to check "
-                  f"({'probing' if probe else 'no probe'})\n")
+                  f"({'probing' if probe else 'no probe'}){est}\n")
 
     caps = []
     with Progress(
@@ -578,11 +589,14 @@ def discover(
         console=console,
     ) as progress:
         task_id = progress.add_task("checking", total=len(catalog))
-        for model_id in catalog:
+        for i, model_id in enumerate(catalog):
             ok = discovery.probe_servable(base, key, model_id) if probe else True
             if ok:
                 caps.append(discovery.deserialize(discovery.infer_capability(model_id)))
             progress.advance(task_id)
+            # Throttle between probes (not after the last one).
+            if probe and delay and i < len(catalog) - 1:
+                time.sleep(delay)
 
     if not caps:
         console.print("[yellow]No servable models found.[/yellow]")

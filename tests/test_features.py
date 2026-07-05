@@ -1026,6 +1026,12 @@ def test_infer_capability_curated_and_inferred():
     assert kimi["parameters_b"] == 1000
     assert kimi["supports_function_calling"] is True
 
+    # Real catalog IDs (no size token) must resolve via the curated table.
+    assert infer_capability("moonshotai/kimi-k2.6")["parameters_b"] == 1000
+    assert infer_capability("z-ai/glm-5.2")["parameters_b"] == 355
+    # Big models whose ID carries a size token infer correctly without curation.
+    assert infer_capability("mistralai/mistral-large-3-675b-instruct-2512")["parameters_b"] == 675
+
     vision = infer_capability("meta/llama-3.2-90b-vision-instruct")
     assert vision["supports_vision"] is True
     assert vision["supported_tasks"] == [TaskType.VISION]
