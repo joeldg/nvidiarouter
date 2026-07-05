@@ -356,6 +356,176 @@ def doctor(
     console.print("\n[green]Doctor complete — all good.[/green]")
 
 
+# A varied prompt mix so different tasks/models light up on the dashboard.
+# Some prompts repeat across a run, which also exercises the response cache.
+# @spec[PROJECT_PROFILE.md#Requirements]
+_STRESS_PROMPTS = [
+    "What is 17 * 23?",
+    "Write a Python function to reverse a string",
+    "Write a haiku about the ocean",
+    "Translate 'good morning' to Spanish",
+    "Summarize what a CPU does in one sentence",
+    "Hello, how are you today?",
+    "Explain why the sky is blue",
+    "What is 2 + 2?",
+    "Solve for x: 3x + 5 = 20",
+    "Write a limerick about coffee",
+]
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+def _percentile(values, pct: float) -> float:
+    """Return the pct-th percentile (0..100) of a list of numbers."""
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    k = (len(ordered) - 1) * (pct / 100.0)
+    lo = int(k)
+    hi = min(lo + 1, len(ordered) - 1)
+    return ordered[lo] + (ordered[hi] - ordered[lo]) * (k - lo)
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+def _summarize_stress(results: list, elapsed: float) -> dict:
+    """Aggregate stress-run results into a stats dict (pure; unit-tested)."""
+    total = len(results)
+    ok = [r for r in results if r["status"] == 200]
+    latencies = [r["ms"] for r in ok]
+    status_counts: dict = {}
+    model_counts: dict = {}
+    cache_hits = 0
+    for r in results:
+        status_counts[r["status"]] = status_counts.get(r["status"], 0) + 1
+        if r.get("model"):
+            model_counts[r["model"]] = model_counts.get(r["model"], 0) + 1
+        if r.get("cache") == "HIT":
+            cache_hits += 1
+    return {
+        "total": total,
+        "ok": len(ok),
+        "failed": total - len(ok),
+        "rps": round(total / elapsed, 2) if elapsed > 0 else 0.0,
+        "p50_ms": round(_percentile(latencies, 50), 1),
+        "p90_ms": round(_percentile(latencies, 90), 1),
+        "p99_ms": round(_percentile(latencies, 99), 1),
+        "status_counts": status_counts,
+        "model_counts": model_counts,
+        "cache_hits": cache_hits,
+    }
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+@app.command()
+def stress(
+    host: str = typer.Option(settings.host, help="Gateway host"),
+    port: int = typer.Option(settings.port, help="Gateway port"),
+    requests: int = typer.Option(100, "--requests", "-n", help="Total requests to send"),
+    concurrency: int = typer.Option(10, "--concurrency", "-c", help="Concurrent requests"),
+    max_tokens: int = typer.Option(16, help="max_tokens per request (keep small)"),
+    rps: float = typer.Option(0.0, help="Throttle to this requests/sec (0 = unthrottled)"),
+):
+    """Drive load at a running gateway so you can watch the dashboard live.
+
+    Run `nvidia-smartroute dashboard` in one terminal, then this in another.
+    """
+    import asyncio
+    import time
+
+    import httpx
+    from rich.progress import BarColumn, Progress, TextColumn, TimeElapsedColumn
+    from rich.table import Table
+
+    probe_host = "127.0.0.1" if host in ("0.0.0.0", "") else host
+    url = f"http://{probe_host}:{port}/v1/chat/completions"
+
+    if not _gateway_healthy(f"http://{probe_host}:{port}/health"):
+        console.print(f"[red]Gateway not reachable at {probe_host}:{port}.[/red]")
+        console.print("[yellow]Start it first: nvidia-smartroute dashboard[/yellow]")
+        raise typer.Exit(code=1)
+
+    console.print(
+        f"[green]Stressing[/green] {url}\n"
+        f"  requests={requests} concurrency={concurrency} "
+        f"max_tokens={max_tokens} rps={'∞' if not rps else rps}\n"
+    )
+
+    results: list = []
+    interval = 1.0 / rps if rps else 0.0
+
+    async def _run(progress, task_id):
+        sem = asyncio.Semaphore(concurrency)
+        async with httpx.AsyncClient(timeout=180.0) as client:
+            async def one(i: int):
+                prompt = _STRESS_PROMPTS[i % len(_STRESS_PROMPTS)]
+                async with sem:
+                    t0 = time.time()
+                    try:
+                        resp = await client.post(
+                            url,
+                            json={
+                                "messages": [{"role": "user", "content": prompt}],
+                                "max_tokens": max_tokens,
+                                "temperature": 0,
+                            },
+                        )
+                        results.append({
+                            "status": resp.status_code,
+                            "ms": (time.time() - t0) * 1000.0,
+                            "model": resp.headers.get("X-Selected-Model"),
+                            "task": resp.headers.get("X-Task-Type"),
+                            "cache": resp.headers.get("X-Cache"),
+                        })
+                    except Exception as exc:
+                        results.append({
+                            "status": 0, "ms": (time.time() - t0) * 1000.0,
+                            "model": None, "task": None, "cache": None,
+                            "error": type(exc).__name__,
+                        })
+                    progress.advance(task_id)
+
+            tasks = []
+            for i in range(requests):
+                tasks.append(asyncio.create_task(one(i)))
+                if interval:
+                    await asyncio.sleep(interval)
+            await asyncio.gather(*tasks)
+
+    start = time.time()
+    with Progress(
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TextColumn("{task.completed}/{task.total}"),
+        TimeElapsedColumn(),
+        console=console,
+    ) as progress:
+        task_id = progress.add_task("firing", total=requests)
+        asyncio.run(_run(progress, task_id))
+    elapsed = time.time() - start
+
+    stats = _summarize_stress(results, elapsed)
+
+    console.print(
+        f"\n[bold]Results[/bold] — {stats['ok']}/{stats['total']} ok "
+        f"({stats['failed']} failed) in {elapsed:.1f}s @ "
+        f"[cyan]{stats['rps']} req/s[/cyan]"
+    )
+    console.print(
+        f"  latency (ok): p50 {stats['p50_ms']}ms | "
+        f"p90 {stats['p90_ms']}ms | p99 {stats['p99_ms']}ms"
+    )
+    console.print(f"  status codes: {stats['status_counts']}  cache hits: {stats['cache_hits']}")
+
+    if stats["model_counts"]:
+        table = Table(title="Routed models", show_header=True, header_style="bold")
+        table.add_column("Model")
+        table.add_column("Requests", justify="right")
+        for model, count in sorted(stats["model_counts"].items(), key=lambda kv: -kv[1]):
+            table.add_row(model, str(count))
+        console.print(table)
+
+    console.print("\n[dim]Watch live detail on the dashboard's /metrics view.[/dim]")
+
+
 # @spec[PROJECT_PROFILE.md#Token Budget Class]
 @app.command()
 def version():
