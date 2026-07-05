@@ -52,13 +52,18 @@ Living checklist of what's done, what's in progress, and what's deferred.
 - [x] Embeddings hardening: default model (`nv-embedqa-e5-v5`), 400 on missing
       input, `input_type`/`truncate` defaults, live metrics, 502/503 error codes.
 
+## Done — backlog batch (4th pass)
+
+- [x] `stop` command: real process control via PID file + SIGTERM; `start`
+      writes/cleans the PID file (configurable `PID_FILE`).
+- [x] Token usage accounting for autoscaled responses (summed across sub-agents).
+- [x] Unify logging on structlog (`logging_config`); gateway fields now render;
+      `LOG_JSON` for JSON output.
+
 ## Backlog — future improvements
 
-- [ ] `stop` command: real process control (PID file / signal)
 - [ ] Inbound API-key auth on the gateway (`api_key_header`)
-- [ ] Token usage accounting for autoscaled responses (currently 0/0/0)
 - [ ] Replace brittle keyword classifier with weighted / embedding-based routing
-- [ ] Unify logging (gateway stdlib `logging` vs router `structlog`)
 - [ ] Regenerate `.spec/code-map.json` & `code-trace.json` for new modules
 - [ ] Streaming path: token accounting + autoscale support
 - [ ] Embeddings: task-aware routing (query vs passage) if multiple embed models

@@ -49,6 +49,8 @@ class SubAgentResult:
     content: str
     model_id: str
     latency_ms: float
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
     error: Optional[str] = None
 
 
@@ -134,12 +136,16 @@ class AutoscaleEngine:
                     timeout=self.timeout,
                 )
                 content = _extract_content(response)
+                usage = response.get("usage") if isinstance(response, dict) else None
+                usage = usage if isinstance(usage, dict) else {}
                 return SubAgentResult(
                     name=agent.name,
                     role=agent.role,
                     content=content,
                     model_id=model_id,
                     latency_ms=(time.time() - start) * 1000.0,
+                    prompt_tokens=int(usage.get("prompt_tokens") or 0),
+                    completion_tokens=int(usage.get("completion_tokens") or 0),
                 )
             except asyncio.TimeoutError:
                 logger.warning("sub-agent timed out", agent=agent.name, timeout=self.timeout)
@@ -250,14 +256,23 @@ class AutoscaleEngine:
             elif r.content:
                 sections.append(f"{heading.get(r.role, '## ' + r.role)}\n{r.content}")
 
+        prompt_tokens = sum(r.prompt_tokens for r in results)
+        completion_tokens = sum(r.completion_tokens for r in results)
         return {
             "content": "\n\n".join(sections),
+            "usage": {
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens,
+                "total_tokens": prompt_tokens + completion_tokens,
+            },
             "agents": [
                 {
                     "name": r.name,
                     "role": r.role,
                     "model_id": r.model_id,
                     "latency_ms": round(r.latency_ms, 2),
+                    "prompt_tokens": r.prompt_tokens,
+                    "completion_tokens": r.completion_tokens,
                     "error": r.error,
                 }
                 for r in results

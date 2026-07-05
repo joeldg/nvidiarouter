@@ -24,6 +24,15 @@ class Settings(BaseSettings):
     reload: bool = Field(default=False, description="Enable auto-reload")
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     log_level: str = Field(default="info", description="Logging level")
+    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    log_json: bool = Field(
+        default=False, description="Emit JSON logs instead of console-formatted"
+    )
+    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    pid_file: str = Field(
+        default=".nvidia-smartroute.pid",
+        description="Path to the gateway PID file (used by start/stop)",
+    )
     # @spec[PROJECT_PROFILE.md#Token Budget Class]
     debug: bool = Field(default=False, description="Enable debug mode")
 

@@ -4,7 +4,6 @@ FastAPI server for NVIDIA-SmartRoute-CLI providing OpenAI-compatible endpoints.
 """
 
 import base64
-import logging
 import time
 import uuid
 import json
@@ -19,16 +18,18 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import asyncio
+import structlog
 
 from ..config import settings
 from ..metrics import metrics
 from ..routing.router import router, TaskType, RoutingDecision
 from ..agents import autoscale_engine
 from ..keypool import key_pool, KeyPool, KeyPoolExhaustedError, _mask as _mask_key
+from .. import logging_config  # noqa: F401  (configures structlog on import)
 
-# Configure logging
+# Structured logging (unified with the router/agent layers).
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger()
 
 # HTTP client for NVIDIA NIM API (initialised in the lifespan handler).
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
@@ -142,15 +143,13 @@ async def log_requests(request: Request, call_next):
     
     # Log request details
     logger.info(
-        f"Request completed",
-        extra={
-            "request_id": request_id,
-            "method": request.method,
-            "url": str(request.url),
-            "status_code": response.status_code,
-            "process_time": round(process_time, 4),
-            "client_host": request.client.host if request.client else None,
-        }
+        "request completed",
+        request_id=request_id,
+        method=request.method,
+        url=str(request.url),
+        status_code=response.status_code,
+        process_time=round(process_time, 4),
+        client_host=request.client.host if request.client else None,
     )
     
     # Add custom headers
@@ -167,12 +166,10 @@ async def global_exception_handler(request: Request, exc: Exception):
     """Handle unexpected exceptions."""
     request_id = getattr(request.state, "request_id", "unknown")
     logger.error(
-        f"Unhandled exception: {exc}",
-        extra={
-            "request_id": request_id,
-            "exception_type": type(exc).__name__,
-            "exception_message": str(exc),
-        },
+        "unhandled exception",
+        request_id=request_id,
+        exception_type=type(exc).__name__,
+        exception_message=str(exc),
         exc_info=True,
     )
     
@@ -314,15 +311,20 @@ class NIMClient:
                     self.key_pool.record_cooldown(key, delay or settings.per_key_rate_window)
                 if attempt < attempts - 1:
                     logger.warning(
-                        "upstream 429 on key %s; rotating (attempt %d/%d)",
-                        _mask_key(key), attempt + 1, attempts,
+                        "upstream 429; rotating key",
+                        key=_mask_key(key),
+                        attempt=attempt + 1,
+                        attempts=attempts,
                     )
                     continue
             # On 5xx, back off and retry (possibly a different key).
             elif response.status_code >= 500 and attempt < attempts - 1:
                 logger.warning(
-                    "upstream %s; retrying in %.1fs (attempt %d/%d)",
-                    response.status_code, delay, attempt + 1, attempts,
+                    "upstream error; retrying",
+                    status=response.status_code,
+                    delay=round(delay, 1),
+                    attempt=attempt + 1,
+                    attempts=attempts,
                 )
                 await asyncio.sleep(delay)
                 continue
@@ -551,7 +553,7 @@ async def _stream_nim_request(
                 )
                 if key:
                     key_pool.record_cooldown(key, delay)
-                logger.warning("upstream 429 on stream (key %s); rotating", _mask_key(key))
+                logger.warning("upstream 429 on stream; rotating key", key=_mask_key(key))
                 continue
 
             response.raise_for_status()
@@ -584,13 +586,13 @@ async def _fetch_as_data_url(url: str) -> Optional[str]:
         resp.raise_for_status()
         data = resp.content
         if len(data) > settings.image_fetch_max_bytes:
-            logger.warning("remote image too large (%d bytes); leaving as URL", len(data))
+            logger.warning("remote image too large; leaving as URL", bytes=len(data))
             return None
         mime = (resp.headers.get("Content-Type", "image/jpeg").split(";")[0].strip()
                 or "image/jpeg")
         return f"data:{mime};base64," + base64.b64encode(data).decode()
     except Exception as e:
-        logger.warning("failed to inline remote image %s: %s", url, e)
+        logger.warning("failed to inline remote image", url=url, error=str(e))
         return None
 
 
@@ -635,15 +637,13 @@ async def _record_request_performance(
         
         # Log performance metrics
         logger.info(
-            f"Request performance recorded",
-            extra={
-                "request_id": request_id,
-                "response_time": round(response_time, 4),
-                "selected_model": routing_decision.selected_model.model_id if routing_decision.selected_model else None,
-                "task_type": routing_decision.task_type.value if routing_decision.task_type else None,
-                "confidence": routing_decision.confidence if routing_decision else None,
-                "routing_reasoning": getattr(routing_decision, 'reasoning', None)
-            }
+            "request performance recorded",
+            request_id=request_id,
+            response_time=round(response_time, 4),
+            selected_model=routing_decision.selected_model.model_id if routing_decision.selected_model else None,
+            task_type=routing_decision.task_type.value if routing_decision.task_type else None,
+            confidence=routing_decision.confidence if routing_decision else None,
+            routing_reasoning=getattr(routing_decision, "reasoning", None),
         )
     except Exception as e:
         logger.error(f"Error recording request performance: {e}")
@@ -673,13 +673,11 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
                              if k not in ["messages", "model", "stream", "max_tokens", "temperature"]}
         
         logger.info(
-            f"Chat completion request received",
-            extra={
-                "request_id": request_id,
-                "message_count": len(messages),
-                "stream": stream,
-                "model_hint": model
-            }
+            "chat completion request received",
+            request_id=request_id,
+            message_count=len(messages),
+            stream=stream,
+            model_hint=model,
         )
         
         # Inline any remote image URLs (NVIDIA vision NIM needs base64 data URLs).
@@ -710,15 +708,12 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
         
         # Log the routing decision
         logger.info(
-            f"Routing decision: {selected_model.model_id} "
-            f"(confidence: {routing_decision.confidence:.2f}) for task {routing_decision.task_type.value}",
-            extra={
-                "request_id": request_id,
-                "selected_model": selected_model.model_id,
-                "task_type": routing_decision.task_type.value,
-                "confidence": routing_decision.confidence,
-                "reasoning": getattr(routing_decision, 'reasoning', 'N/A')
-            }
+            "routing decision",
+            request_id=request_id,
+            selected_model=selected_model.model_id,
+            task_type=routing_decision.task_type.value,
+            confidence=round(routing_decision.confidence, 2),
+            reasoning=getattr(routing_decision, "reasoning", "N/A"),
         )
         
         # Track performance in background
@@ -767,7 +762,8 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             if autoscale_engine.should_scale(routing_decision.task_type, messages):
                 logger.info(
                     "autoscaling request to sub-agents",
-                    extra={"request_id": request_id, "model": selected_model.model_id},
+                    request_id=request_id,
+                    model=selected_model.model_id,
                 )
                 orchestrated = await autoscale_engine.orchestrate(
                     messages=messages,
@@ -779,6 +775,8 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
                     model=selected_model.model_id,
                     request_id=request_id,
                 )
+                # Report the aggregated token usage across all sub-agents.
+                response_data["usage"] = orchestrated["usage"]
                 response_data["_agents"] = orchestrated["agents"]
                 response_headers["X-Autoscaled"] = "true"
                 response_headers["X-Agent-Count"] = str(len(orchestrated["agents"]))

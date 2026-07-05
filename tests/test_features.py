@@ -211,7 +211,51 @@ def test_chat_completion_autoscales_multistep_code(monkeypatch):
     assert resp.status_code == 200
     assert resp.headers.get("X-Autoscaled") == "true"
     assert resp.headers.get("X-Agent-Count") == "3"
-    assert {a["role"] for a in resp.json()["_agents"]} == {"writer", "tester", "reviewer"}
+    body = resp.json()
+    assert {a["role"] for a in body["_agents"]} == {"writer", "tester", "reviewer"}
+    assert "usage" in body and "total_tokens" in body["usage"]
+
+
+def test_autoscale_aggregates_token_usage():
+    engine = AutoscaleEngine(max_concurrent=5, timeout=10)
+
+    async def fake_nim(model, messages, **kwargs):
+        return {
+            "choices": [{"message": {"content": "x"}}],
+            "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+        }
+
+    result = asyncio.run(engine.orchestrate(
+        messages=[{"role": "user", "content": "build a thing with tests"}],
+        model_id="m", nim_call=fake_nim,
+    ))
+    # 3 sub-agents each report 10/5 -> summed 30/15/45.
+    assert result["usage"] == {"prompt_tokens": 30, "completion_tokens": 15, "total_tokens": 45}
+
+
+def test_stop_without_pidfile_errors(tmp_path, monkeypatch):
+    import nvidia_smartroute.cli as cli
+    from typer.testing import CliRunner
+
+    monkeypatch.setattr(cli.settings, "pid_file", str(tmp_path / "absent.pid"))
+    result = CliRunner().invoke(cli.app, ["stop"])
+    assert result.exit_code == 1
+
+
+def test_stop_signals_pid(tmp_path, monkeypatch):
+    import os
+    import nvidia_smartroute.cli as cli
+    from typer.testing import CliRunner
+
+    pid_file = tmp_path / "gw.pid"
+    pid_file.write_text("424242")
+    monkeypatch.setattr(cli.settings, "pid_file", str(pid_file))
+    signalled = {}
+    monkeypatch.setattr(os, "kill", lambda pid, sig: signalled.update(pid=pid, sig=sig))
+
+    result = CliRunner().invoke(cli.app, ["stop"])
+    assert result.exit_code == 0
+    assert signalled["pid"] == 424242
 
 
 # --- Inbound rate limiting ------------------------------------------------

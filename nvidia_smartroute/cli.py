@@ -44,36 +44,79 @@ def start(
     reload: bool = typer.Option(False, help="Enable auto-reload"),
 ):
     """Start the NVIDIA SmartRoute gateway server."""
+    import atexit
+    import os
+    from pathlib import Path
+
     _display_banner()
     console.print(f"[green]Starting NVIDIA SmartRoute gateway on {host}:{port}[/green]")
     console.print(f"[blue]Workers:[/blue] {workers}")
     console.print(f"[blue]Reload:[/blue] {reload}")
-    
+
+    # Write a PID file so `stop` can signal this process; clean it up on exit.
+    pid_path = Path(settings.pid_file)
+    pid_path.write_text(str(os.getpid()))
+    console.print(f"[blue]PID file:[/blue] {pid_path} ({os.getpid()})")
+
+    def _cleanup_pidfile():
+        try:
+            if pid_path.exists() and pid_path.read_text().strip() == str(os.getpid()):
+                pid_path.unlink()
+        except OSError:
+            pass
+
+    atexit.register(_cleanup_pidfile)
+
     # Configure signal handlers for graceful shutdown
     def signal_handler(sig, frame):
-        console.print("\\n[yellow]Received shutdown signal. Stopping gracefully...[/yellow]")
+        console.print("\n[yellow]Received shutdown signal. Stopping gracefully...[/yellow]")
+        _cleanup_pidfile()
         sys.exit(0)
-    
+
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    
+
     uvicorn.run(
         "nvidia_smartroute.gateway.server:app",
         host=host,
         port=port,
         workers=workers,
         reload=reload,
-        log_level="info",
+        log_level=settings.log_level.lower(),
     )
 
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 @app.command()
 def stop():
-    """Stop the NVIDIA SmartRoute gateway server."""
-    console.print("[yellow]Stopping NVIDIA SmartRoute gateway...[/yellow]")
-    # In a real implementation, this would send a signal to the running process
-    console.print("[green]Gateway stopped.[/green]")
+    """Stop the running NVIDIA SmartRoute gateway (via its PID file)."""
+    import os
+    import signal as _signal
+    from pathlib import Path
+
+    pid_path = Path(settings.pid_file)
+    if not pid_path.exists():
+        console.print(f"[yellow]No PID file at {pid_path}; gateway not running?[/yellow]")
+        raise typer.Exit(code=1)
+
+    try:
+        pid = int(pid_path.read_text().strip())
+    except (ValueError, OSError) as exc:
+        console.print(f"[red]Could not read PID file: {exc}[/red]")
+        raise typer.Exit(code=1)
+
+    console.print(f"[yellow]Stopping NVIDIA SmartRoute gateway (pid {pid})...[/yellow]")
+    try:
+        os.kill(pid, _signal.SIGTERM)
+    except ProcessLookupError:
+        console.print("[yellow]Process not found; removing stale PID file.[/yellow]")
+        pid_path.unlink(missing_ok=True)
+        raise typer.Exit(code=1)
+    except PermissionError:
+        console.print("[red]Permission denied signaling the process.[/red]")
+        raise typer.Exit(code=1)
+
+    console.print("[green]Sent SIGTERM. Gateway is shutting down.[/green]")
 
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
