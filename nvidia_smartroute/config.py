@@ -78,6 +78,17 @@ class Settings(BaseSettings):
         description="Enable intelligent model routing based on task type",
     )
     # @spec[PROJECT_PROFILE.md#Requirements]
+    # "static"  -> quality/latency/cost scoring (default)
+    # "adaptive" -> epsilon-greedy bandit that learns the best model per task
+    routing_strategy: str = Field(
+        default="static", description="Model selection strategy: static | adaptive"
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    bandit_epsilon: float = Field(
+        default=0.1, ge=0.0, le=1.0,
+        description="Exploration rate for adaptive routing (0..1)",
+    )
+    # @spec[PROJECT_PROFILE.md#Requirements]
     default_embedding_model: str = Field(
         default="nvidia/nv-embedqa-e5-v5",
         description="Model used for /v1/embeddings when none is specified",

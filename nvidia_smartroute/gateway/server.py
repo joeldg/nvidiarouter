@@ -29,6 +29,7 @@ from ..cache import response_cache, make_key
 from ..circuit import breaker
 from ..concurrency import gate, QueueFullError
 from ..cost import budget, compute_cost
+from ..bandit import adaptive_router, reward_from
 from .. import logging_config  # noqa: F401  (configures structlog on import)
 
 # Structured logging (unified with the router/agent layers).
@@ -330,6 +331,7 @@ async def get_metrics():
     snapshot["circuits"] = breaker.snapshot()
     snapshot["concurrency"] = gate.snapshot()
     snapshot["budget"] = budget.snapshot()
+    snapshot["adaptive_routing"] = adaptive_router.snapshot()
     return snapshot
 
 
@@ -779,6 +781,7 @@ async def _complete_with_fallback(  # noqa: C901
         if healthy:
             candidates = healthy
 
+    task = getattr(task_type, "value", str(task_type))
     last_exc: Optional[Exception] = None
     for index, model in enumerate(candidates):
         nim_start = time.time()
@@ -791,13 +794,15 @@ async def _complete_with_fallback(  # noqa: C901
                 temperature=temperature,
                 **extra,
             )
-            metrics.record_latency(model.model_id, (time.time() - nim_start) * 1000.0)
+            latency_ms = (time.time() - nim_start) * 1000.0
+            metrics.record_latency(model.model_id, latency_ms)
             usage = data.get("usage") if isinstance(data, dict) else None
             if isinstance(usage, dict) and usage.get("total_tokens"):
                 metrics.record_tokens(model.model_id, int(usage["total_tokens"]))
                 _record_cost(model, usage)
             if settings.circuit_breaker_enabled:
                 breaker.record_success(model.model_id)
+            adaptive_router.record(task, model.model_id, reward_from(True, latency_ms))
             return data, model, model.model_id != primary.model_id
         except KeyPoolExhaustedError:
             raise  # a key problem, not a model problem — don't fail over
@@ -806,6 +811,7 @@ async def _complete_with_fallback(  # noqa: C901
             # Only hard upstream failures count against the model's circuit.
             if settings.circuit_breaker_enabled and _should_fallback(exc):
                 breaker.record_failure(model.model_id)
+            adaptive_router.record(task, model.model_id, 0.0)
             last_exc = exc
             if index + 1 < len(candidates) and _should_fallback(exc):
                 logger.warning(

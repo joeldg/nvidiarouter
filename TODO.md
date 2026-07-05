@@ -107,10 +107,10 @@ Living checklist of what's done, what's in progress, and what's deferred.
 ## Stellar — stretch ideas (make it a standout app)
 
 Differentiators:
-- [ ] Cost & budget intelligence: per-request cost vs published pricing, spend in
-      /metrics + TUI, cost-aware routing, daily budget caps + alerts.
-- [ ] Adaptive routing (multi-armed bandit): learn best model per task from real
-      outcomes (latency/errors/quality) and adapt weights over time.
+- [x] Cost & budget intelligence: per-request cost, spend in /metrics,
+      cost-aware routing, daily budget cap (503 when exhausted).
+- [x] Adaptive routing (epsilon-greedy bandit): learns best model per task from
+      real outcomes (success + latency) and shifts traffic over time.
 - [ ] Web dashboard + prompt playground: browser UI over /metrics, live routing
       viz, and a "why did this route here" explainer (scores + confidence).
 - [ ] Horizontal scale via Redis: shared cache / rate-limit / key-budget /
@@ -124,11 +124,11 @@ Capabilities:
       + audit log (with PII redaction).
 
 Foundation:
-- [ ] CI (GitHub Actions): pytest + ruff + coverage on PRs; protect main.
+- [x] CI (GitHub Actions): ruff + pytest on push/PR to main (3.9/3.11/3.12).
+- [x] `doctor` command: validate keys, connectivity, and which models the
+      account can actually serve.
 - [ ] Publish to PyPI + changelog + semver.
 - [ ] docker-compose with Prometheus /metrics + Grafana dashboards.
-- [ ] `doctor` command: validate keys, connectivity, and which models the
-      account can actually serve (automate the manual probing).
 - [ ] Load-test harness proving the 40 -> 200 rpm multi-key scaling with numbers.
 
 ## Backlog — deferred (with rationale)

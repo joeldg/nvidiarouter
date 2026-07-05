@@ -907,5 +907,48 @@ def test_cost_aware_routing_prefers_cheaper(monkeypatch):
         "meta/llama-3.1-8b-instruct"
 
 
+# --- Adaptive routing (bandit) --------------------------------------------
+
+def test_reward_from():
+    from nvidia_smartroute.bandit import reward_from
+
+    assert reward_from(False, 100) == 0.0
+    assert reward_from(True, 0) == 1.0
+    assert reward_from(True, 1000) == 0.75
+    assert reward_from(True, 2000) == 0.5  # full latency penalty
+
+
+def test_bandit_exploits_best_and_explores_new():
+    from nvidia_smartroute.bandit import AdaptiveRouter
+
+    b = AdaptiveRouter(epsilon=0.0)  # pure exploitation
+    b.record("chat", "good", 0.9)
+    b.record("chat", "bad", 0.1)
+    assert b.select("chat", ["good", "bad"]) == "good"
+    # An unseen arm starts optimistic (1.0) so it gets explored first.
+    assert b.select("chat", ["good", "bad", "fresh"]) == "fresh"
+
+
+def test_bandit_explores_with_epsilon(monkeypatch):
+    import nvidia_smartroute.bandit as bmod
+    from nvidia_smartroute.bandit import AdaptiveRouter
+
+    b = AdaptiveRouter(epsilon=1.0)  # always explore
+    monkeypatch.setattr(bmod.random, "choice", lambda c: c[-1])
+    assert b.select("t", ["a", "b", "c"]) == "c"
+
+
+def test_adaptive_strategy_used_by_router(monkeypatch):
+    import nvidia_smartroute.routing.router as rmod
+    from nvidia_smartroute.routing.router import RequestRouter, TaskType
+
+    monkeypatch.setattr(rmod.settings, "routing_strategy", "adaptive")
+    monkeypatch.setattr(rmod.adaptive_router, "select", lambda task, cands: cands[-1])
+    r = RequestRouter()
+    chosen = r._select_model(TaskType.CHAT)
+    ranked = r.model_registry.rank_models(TaskType.CHAT)
+    assert chosen.model_id == ranked[-1].model_id  # bandit's pick was honoured
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

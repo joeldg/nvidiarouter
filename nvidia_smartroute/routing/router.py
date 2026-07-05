@@ -13,6 +13,7 @@ import structlog
 
 from ..metrics import metrics
 from ..config import settings
+from ..bandit import adaptive_router
 
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
 logger = structlog.get_logger()
@@ -513,6 +514,19 @@ class RequestRouter:
         self.model_registry = ModelRegistry()
         self._decision_history: List[Dict[str, Any]] = []
 
+    # @spec[PROJECT_PROFILE.md#Requirements]
+    def _select_model(self, task_type: TaskType) -> Optional[ModelCapability]:
+        """Select a model via the adaptive bandit or static scoring."""
+        if settings.routing_strategy == "adaptive":
+            candidates = self.model_registry.rank_models(task_type)
+            chosen = adaptive_router.select(
+                task_type.value, [m.model_id for m in candidates]
+            )
+            model = self.model_registry.get_model(chosen) if chosen else None
+            if model:
+                return model
+        return self.model_registry.select_best_model(task_type)
+
     # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
     async def route_request(
         self,
@@ -555,9 +569,10 @@ class RequestRouter:
                 if specific_model.supported_tasks:
                     task_type = specific_model.supported_tasks[0]
 
-        # If no specific model was requested or found, select the best model for the task
+        # If no specific model was requested or found, select the best model for
+        # the task — via the adaptive bandit or static scoring.
         if not selected_model:
-            selected_model = self.model_registry.select_best_model(task_type)
+            selected_model = self._select_model(task_type)
 
         if not selected_model:
             confidence = min(confidence, 0.5)
