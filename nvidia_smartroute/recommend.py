@@ -61,9 +61,12 @@ def recommend_all(registry=None) -> Dict[str, Any]:
         ranked = sorted(supporting, key=registry._score_model, reverse=True)
         best = ranked[0]
         basis, rationale = _rationale(registry, best)
+        confidence, low_confidence = _confidence(registry, ranked)
         out[task.value] = {
             "model": best.model_id,
             "basis": basis,
+            "confidence": confidence,
+            "low_confidence": low_confidence,
             "rationale": rationale,
             "alternatives": [
                 {"model": m.model_id, "score": round(registry._score_model(m), 4)}
@@ -71,6 +74,27 @@ def recommend_all(registry=None) -> Dict[str, Any]:
             ],
         }
     return out
+
+
+# @spec[RECOMMENDATION.md#Requirements]
+def _confidence(registry, ranked) -> tuple:
+    """Confidence in [0,1] from the winner's score margin over the runner-up.
+
+    A larger margin means higher confidence; a task with no alternative is fully
+    confident. `low_confidence` is True when the margin is below the configured
+    threshold (RECOMMENDATION.md req.9).
+    """
+    from .config import settings
+
+    if len(ranked) < 2:
+        return 1.0, False
+    margin = registry._score_model(ranked[0]) - registry._score_model(ranked[1])
+    margin = max(0.0, margin)
+    threshold = settings.recommend_low_confidence_margin
+    # Full confidence at ~5x the threshold; scales linearly below that.
+    reference = (threshold * 5) or 0.1
+    confidence = round(min(1.0, margin / reference), 3)
+    return confidence, margin < threshold
 
 
 # @spec[RECOMMENDATION.md#Requirements]
