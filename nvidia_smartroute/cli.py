@@ -624,68 +624,95 @@ def discover(  # noqa: C901
 
 # @spec[PROJECT_PROFILE.md#Requirements]
 @app.command()
-def benchmark(
-    host: str = typer.Option(settings.host, help="Gateway host"),
-    port: int = typer.Option(settings.port, help="Gateway port"),
-    per_model: int = typer.Option(5, help="Requests per model"),
-    max_tokens: int = typer.Option(32, help="max_tokens per request"),
+def benchmark(  # noqa: C901
+    per_model: int = typer.Option(3, help="Requests per model"),
+    max_tokens: int = typer.Option(48, help="max_tokens per request"),
+    top: int = typer.Option(8, help="Benchmark the N largest models (0 = all)"),
+    delay: float = typer.Option(
+        -1.0, help="Seconds between requests (default: from the per-key rate limit)"
+    ),
 ):
-    """Benchmark every registered model: latency, success rate, throughput.
+    """Benchmark registered models directly against NIM: latency + throughput.
 
-    Helps you see which models are fastest and most capable (by parameter count)
-    so you can pick the best ones for your workload.
+    Standalone (no gateway needed) — reads the router registry (built-in defaults
+    plus anything from `discover`), calls each model directly, and ranks them so
+    you can see which are fastest and most capable. Throttled to respect the
+    per-key rate limit.
     """
-    import asyncio
     import time
 
     import httpx
+    from rich.progress import BarColumn, Progress, TextColumn, TimeElapsedColumn
     from rich.table import Table
 
-    probe_host = "127.0.0.1" if host in ("0.0.0.0", "") else host
-    base = f"http://{probe_host}:{port}"
-    if not _gateway_healthy(f"{base}/health"):
-        console.print(f"[red]Gateway not reachable at {probe_host}:{port}.[/red]")
+    from nvidia_smartroute.routing.router import router
+
+    keys = settings.api_keys
+    if not keys:
+        console.print("[red]No API key configured — set NVIDIA_API_KEY in .env[/red]")
         raise typer.Exit(code=1)
+    key = keys[0]
+    url = f"{settings.nvidia_nim_base_url.rstrip('/')}/chat/completions"
+    if delay < 0:
+        delay = 60.0 / max(1, settings.rate_limit_per_key) + 0.2
 
-    models = httpx.get(f"{base}/v1/models", timeout=10.0).json().get("data", [])
-    console.print(f"[green]Benchmarking[/green] {len(models)} models "
-                  f"({per_model} requests each)...\n")
+    models = sorted(
+        router.model_registry.models.values(),
+        key=lambda m: m.parameters_b, reverse=True,
+    )
+    if top:
+        models = models[:top]
+
+    total_reqs = len(models) * per_model
+    console.print(
+        f"[green]Benchmarking[/green] {len(models)} models × {per_model} "
+        f"(~{total_reqs * delay / 60:.1f} min at {delay:.1f}s/req)\n"
+    )
     prompt = "Explain what an API gateway does in two short sentences."
+    headers = {"Authorization": f"Bearer {key}", "Accept": "application/json"}
 
-    async def _bench(client, model):
-        lats, ok, toks = [], 0, 0
-        for _ in range(per_model):
-            t0 = time.time()
-            try:
-                r = await client.post(
-                    f"{base}/v1/chat/completions",
-                    json={"model": model["id"], "messages": [{"role": "user", "content": prompt}],
-                          "max_tokens": max_tokens, "temperature": 0},
-                )
-                if r.status_code == 200:
-                    ok += 1
-                    lats.append((time.time() - t0) * 1000.0)
-                    toks += r.json().get("usage", {}).get("total_tokens", 0) or 0
-            except Exception:
-                pass
-        total_s = sum(lats) / 1000.0
-        return {
-            "model": model["id"],
-            "params": model.get("parameters_b", 0) or 0,
-            "ok": ok,
-            "p50_ms": _percentile(lats, 50),
-            "tps": round(toks / total_s, 1) if total_s > 0 else 0.0,
-        }
+    rows = []
+    with Progress(
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TextColumn("{task.completed}/{task.total}"),
+        TimeElapsedColumn(),
+        console=console,
+    ) as progress, httpx.Client(timeout=180.0) as client:
+        task_id = progress.add_task("benchmarking", total=total_reqs)
+        for model in models:
+            lats, ok, ctoks = [], 0, 0
+            for i in range(per_model):
+                t0 = time.time()
+                try:
+                    r = client.post(url, headers=headers, json={
+                        "model": model.model_id,
+                        "messages": [{"role": "user", "content": prompt}],
+                        "max_tokens": max_tokens, "temperature": 0,
+                    })
+                    if r.status_code == 200:
+                        ok += 1
+                        lats.append((time.time() - t0) * 1000.0)
+                        u = r.json().get("usage", {}) or {}
+                        ctoks += u.get("completion_tokens") or u.get("total_tokens") or 0
+                except Exception:
+                    pass
+                progress.advance(task_id)
+                if i < per_model - 1 or model is not models[-1]:
+                    time.sleep(delay)
+            total_s = sum(lats) / 1000.0
+            rows.append({
+                "model": model.model_id,
+                "params": model.parameters_b,
+                "ok": ok,
+                "p50_ms": _percentile(lats, 50),
+                "tps": round(ctoks / total_s, 1) if total_s > 0 else 0.0,
+            })
 
-    async def _run():
-        # Sequential across models to respect the per-key rate limit.
-        async with httpx.AsyncClient(timeout=180.0) as client:
-            return [await _bench(client, m) for m in models]
+    # Rank by success, then generation speed (tok/s).
+    rows.sort(key=lambda r: (-r["ok"], -r["tps"]))
 
-    rows = asyncio.run(_run())
-    rows.sort(key=lambda r: (-r["ok"], r["p50_ms"] or 1e9))
-
-    table = Table(title="Model leaderboard", show_header=True, header_style="bold")
+    table = Table(title="Model leaderboard (fastest first)", show_header=True, header_style="bold")
     table.add_column("Model")
     table.add_column("Params (B)", justify="right")
     table.add_column("OK", justify="right")
@@ -699,6 +726,13 @@ def benchmark(
             f"{r['tps']}" if r["tps"] else "-",
         )
     console.print(table)
+    winners = [r for r in rows if r["ok"] == per_model and r["tps"]]
+    if winners:
+        best = max(winners, key=lambda r: r["tps"])
+        console.print(
+            f"\n[green]Fastest reliable model:[/green] {best['model']} "
+            f"({best['params']:.0f}B, {best['tps']} tok/s)"
+        )
 
 
 # @spec[PROJECT_PROFILE.md#Token Budget Class]

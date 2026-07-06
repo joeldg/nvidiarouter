@@ -89,9 +89,19 @@ vision/function-calling), and writes `discovered_models.json`. The router loads
 that on top of the built-in defaults. Use `--limit N` to sample, or `--no-probe`
 to enrich the whole catalog without servability checks.
 
-`benchmark` then drives a few requests at each registered model and ranks them by
-success rate, p50 latency, and tokens/sec — so you can pick the biggest/fastest
-models that actually work for your key.
+`benchmark` is standalone (no gateway needed): it reads the registry, calls the
+top-N largest models directly, and ranks them by success, p50 latency, and
+generation tok/s — throttled to respect your rate limit. Use `--top N` and
+`--per-model K`. Example output:
+
+```
+Model leaderboard (fastest first)
+  nvidia/nemotron-3-super-120b   120B   683ms   70.3 tok/s
+  mistralai/mistral-large-3-675b 675B   740ms   64.8 tok/s
+  z-ai/glm-5.2                   355B  1420ms   32.7 tok/s
+  moonshotai/kimi-k2.6          1000B  1255ms   31.5 tok/s
+Fastest reliable model: nvidia/nemotron-3-super-120b (120B, 70.3 tok/s)
+```
 
 ### Watch it under load
 
