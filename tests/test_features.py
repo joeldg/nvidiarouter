@@ -373,7 +373,7 @@ def test_post_with_retries_fails_over_on_429(monkeypatch):
             used.append(key)
             return _FakeResp(429 if key == "k1" else 200)
 
-    monkeypatch.setattr(srv, "http_client", FakeClient())
+    monkeypatch.setattr(srv.runtime, "http_client", FakeClient())
     result = asyncio.run(srv.nim_client._post_with_retries("http://x/chat", {"model": "m"}))
     assert result == {"ok": True}
     assert "k1" in used and "k2" in used  # rotated off the rate-limited key
@@ -392,7 +392,7 @@ def test_post_with_retries_retries_5xx_same_key(monkeypatch):
         async def post(self, url, json=None, headers=None):
             return seq.pop(0)
 
-    monkeypatch.setattr(srv, "http_client", FakeClient())
+    monkeypatch.setattr(srv.runtime, "http_client", FakeClient())
     result = asyncio.run(srv.nim_client._post_with_retries("http://x/chat", {"model": "m"}))
     assert result == {"ok": True}
     assert seq == []
@@ -409,7 +409,7 @@ def test_post_with_retries_raises_on_4xx(monkeypatch):
         async def post(self, url, json=None, headers=None):
             return _FakeResp(400)
 
-    monkeypatch.setattr(srv, "http_client", FakeClient())
+    monkeypatch.setattr(srv.runtime, "http_client", FakeClient())
     with pytest.raises(RuntimeError):
         asyncio.run(srv.nim_client._post_with_retries("http://x/chat", {"model": "m"}))
 
@@ -481,7 +481,7 @@ def test_streaming_records_usage_from_chunk(monkeypatch):
     class FakeHTTP:
         def stream(self, *a, **k): return FakeStreamResp()
 
-    monkeypatch.setattr(srv, "http_client", FakeHTTP())
+    monkeypatch.setattr(srv.runtime, "http_client", FakeHTTP())
     monkeypatch.setattr(srv.nim_client, "key_pool", __import__("nvidia_smartroute.keypool", fromlist=["KeyPool"]).KeyPool(["k"], 10, 60))
     srv.metrics.reset()
 
@@ -585,7 +585,7 @@ def test_upstream_models_uses_key_pool_headers(monkeypatch):
                 def json(self): return {"object": "list", "data": [{"id": "x"}]}
             return R()
 
-    monkeypatch.setattr(srv, "http_client", FakeClient())
+    monkeypatch.setattr(srv.runtime, "http_client", FakeClient())
     monkeypatch.setattr(srv.nim_client, "key_pool", KeyPool(["poolkey"], per_key_limit=10, window=60))
     out = asyncio.run(srv.nim_client.models())
     assert out["data"] == [{"id": "x"}]
