@@ -417,22 +417,22 @@ def test_post_with_retries_raises_on_4xx(monkeypatch):
 # --- Remote image inlining ------------------------------------------------
 
 def test_inline_remote_images_replaces_url(monkeypatch):
-    import nvidia_smartroute.gateway.server as srv
+    import nvidia_smartroute.gateway.images as images
     from unittest.mock import AsyncMock
 
-    monkeypatch.setattr(srv.settings, "inline_remote_images", True)
-    monkeypatch.setattr(srv, "_fetch_as_data_url", AsyncMock(return_value="data:image/png;base64,AAAA"))
+    monkeypatch.setattr(images.settings, "inline_remote_images", True)
+    monkeypatch.setattr(images, "fetch_as_data_url", AsyncMock(return_value="data:image/png;base64,AAAA"))
 
     messages = [{"role": "user", "content": [
         {"type": "text", "text": "what is this"},
         {"type": "image_url", "image_url": {"url": "https://example.com/x.png"}},
     ]}]
-    out = asyncio.run(srv._inline_remote_images(messages))
+    out = asyncio.run(images.inline_remote_images(messages))
     img_part = out[0]["content"][1]
     assert img_part["image_url"]["url"].startswith("data:image/png;base64,")
     # A data URL should be left untouched (no fetch).
     already = [{"role": "user", "content": [{"type": "image_url", "image_url": {"url": "data:image/png;base64,ZZ"}}]}]
-    out2 = asyncio.run(srv._inline_remote_images(already))
+    out2 = asyncio.run(images.inline_remote_images(already))
     assert out2[0]["content"][0]["image_url"]["url"] == "data:image/png;base64,ZZ"
 
 
@@ -440,11 +440,12 @@ def test_inline_remote_images_replaces_url(monkeypatch):
 
 def test_streaming_records_latency(monkeypatch):
     import nvidia_smartroute.gateway.server as srv
+    import nvidia_smartroute.gateway.streaming as streaming
 
     async def fake_stream(model, messages, stream, max_tokens=None, temperature=None, **kwargs):
         yield 'data: {"choices":[{"delta":{"content":"hi"}}]}\n\n'
 
-    monkeypatch.setattr(srv, "_stream_nim_request", fake_stream)
+    monkeypatch.setattr(streaming, "stream_nim_request", fake_stream)
     srv.metrics.reset()
 
     async def consume():
