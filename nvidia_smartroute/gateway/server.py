@@ -3,14 +3,13 @@
 FastAPI server for NVIDIA-SmartRoute-CLI providing OpenAI-compatible endpoints.
 """
 
-import base64
 import time
 import uuid
 import json
 from pathlib import Path
 from collections import deque, defaultdict
 from contextlib import asynccontextmanager
-from typing import Optional, Dict, AsyncGenerator, Deque
+from typing import Optional, Dict, Deque
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
@@ -24,16 +23,31 @@ from ..config import settings
 from ..metrics import metrics
 from ..routing.router import router, RoutingDecision
 from ..agents import autoscale_engine
-from ..keypool import key_pool, KeyPoolExhaustedError, _mask as _mask_key
+from ..keypool import key_pool, KeyPoolExhaustedError
 from ..cache import response_cache, make_key
 from ..circuit import breaker
 from ..concurrency import gate, QueueFullError
 from ..cost import budget, compute_cost
-from ..bandit import adaptive_router, reward_from
+from ..bandit import adaptive_router
 from ..web import DASHBOARD_HTML
 from .. import logging_config  # noqa: F401  (configures structlog on import)
 from . import runtime
 from .nim_client import NIMClient, nim_client  # noqa: F401  (re-exported)
+from .images import fetch_as_data_url as _fetch_as_data_url, inline_remote_images as _inline_remote_images  # noqa: F401
+from .recording import (  # noqa: F401
+    record_cost as _record_cost,
+    record_throughput as _record_throughput,
+    record_stream_usage as _record_stream_usage,
+)
+from .streaming import (  # noqa: F401
+    format_streaming_chunk,
+    stream_chat_completion,
+    stream_nim_request as _stream_nim_request,
+)
+from .completion import (  # noqa: F401
+    should_fallback as _should_fallback,
+    complete_with_fallback as _complete_with_fallback,
+)
 
 # Structured logging (unified with the router/agent layers).
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
@@ -461,316 +475,6 @@ def format_chat_response(
         "system_fingerprint": f"fp_{int(time.time())}",
         "_request_id": request_id  # Custom field for tracing
     }
-
-
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-def format_streaming_chunk(
-    content: str,
-    model: str,
-    index: int = 0,
-    finish_reason: Optional[str] = None
-) -> dict:
-    """Format a streaming chunk in OpenAI format."""
-    chunk = {
-        "id": f"chatcmpl-{uuid.uuid4().hex}",
-        "object": "chat.completion.chunk",
-        "created": int(time.time()),
-        "model": model,
-        "choices": [
-            {
-                "index": index,
-                "delta": {},
-                "finish_reason": finish_reason
-            }
-        ]
-    }
-
-    if content:
-        chunk["choices"][0]["delta"]["content"] = content
-
-    return chunk
-
-
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-async def stream_chat_completion(
-    model: str,
-    messages: list,
-    request_id: str,
-    max_tokens: Optional[int] = None,
-    temperature: Optional[float] = None,
-    **kwargs
-) -> AsyncGenerator[str, None]:
-    """Stream a chat completion from NVIDIA NIM."""
-    start = time.time()
-    errored = False
-    try:
-        async for line in _stream_nim_request(
-            model, messages, True, max_tokens, temperature, **kwargs
-        ):
-            yield line
-    except Exception as e:
-        errored = True
-        logger.error(f"Error in stream_chat_completion: {e}")
-        # Yield an error chunk in OpenAI format
-        error_chunk = {
-            "error": {
-                "message": str(e) or repr(e),
-                "type": "internal_error",
-                "param": None,
-                "code": 500
-            }
-        }
-        yield f"data: {json.dumps(error_chunk)}\n\n"
-    finally:
-        # Record latency for the streaming path (tokens aren't tallied here).
-        if errored:
-            metrics.record_error(model)
-        else:
-            metrics.record_latency(model, (time.time() - start) * 1000.0)
-        yield "data: [DONE]\n\n"
-
-
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-async def _stream_nim_request(  # noqa: C901
-    model: str,
-    messages: list,
-    stream: bool,
-    max_tokens: Optional[int] = None,
-    temperature: Optional[float] = None,
-    **kwargs
-) -> AsyncGenerator[str, None]:
-    """Make a streaming request to NVIDIA NIM API."""
-    payload = {
-        "model": model,
-        "messages": messages,
-        "stream": stream
-    }
-
-    if max_tokens is not None:
-        payload["max_tokens"] = max_tokens
-    if temperature is not None:
-        payload["temperature"] = temperature
-
-    payload.update(kwargs)
-
-    url = f"{settings.nvidia_nim_base_url}/chat/completions"
-
-    # Rotate keys on 429 when opening the stream (can't retry mid-stream).
-    attempts = settings.upstream_max_retries + 1
-    for attempt in range(attempts):
-        key = await nim_client._acquire_key()
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-        if key:
-            headers["Authorization"] = f"Bearer {key}"
-
-        async with runtime.http_client.stream("POST", url, json=payload, headers=headers) as response:
-            if response.status_code == 429 and attempt < attempts - 1:
-                await response.aread()
-                retry_after = response.headers.get("Retry-After")
-                delay = (
-                    float(retry_after)
-                    if retry_after and retry_after.isdigit()
-                    else settings.per_key_rate_window
-                )
-                if key:
-                    key_pool.record_cooldown(key, delay)
-                logger.warning("upstream 429 on stream; rotating key", key=_mask_key(key))
-                continue
-
-            response.raise_for_status()
-            # Track the latest usage seen; upstream may send it cumulatively
-            # across chunks, so record it once at the end (not per chunk).
-            final_usage: dict = {}
-            async for line in response.aiter_lines():
-                if not line.startswith("data: "):
-                    continue
-                data = line[6:]  # Remove "data: " prefix
-                if data.strip() == "[DONE]":
-                    _record_stream_usage(model, final_usage)
-                    yield "data: [DONE]\n\n"
-                    return
-                try:
-                    # Parse the JSON data from NIM and forward it as-is.
-                    json_data = json.loads(data)
-                    usage = json_data.get("usage") if isinstance(json_data, dict) else None
-                    if isinstance(usage, dict) and usage.get("total_tokens"):
-                        final_usage = usage
-                    yield f"data: {json.dumps(json_data)}\n\n"
-                except json.JSONDecodeError:
-                    # If it's not JSON, wrap it in a basic chunk.
-                    yield f"data: {json.dumps({'choices': [{'delta': {'content': data}}]})}\n\n"
-            # Stream completed (no explicit [DONE]); record usage if seen.
-            _record_stream_usage(model, final_usage)
-            return
-
-
-# Auto-inline remote images (NVIDIA vision NIM requires base64, not URLs)
-# @spec[PROJECT_PROFILE.md#Requirements]
-async def _fetch_as_data_url(url: str) -> Optional[str]:
-    """Fetch a remote image and return it as a base64 data URL, or None."""
-    try:
-        resp = await runtime.http_client.get(
-            url, headers={"User-Agent": "Mozilla/5.0"}, follow_redirects=True
-        )
-        resp.raise_for_status()
-        data = resp.content
-        if len(data) > settings.image_fetch_max_bytes:
-            logger.warning("remote image too large; leaving as URL", bytes=len(data))
-            return None
-        mime = (resp.headers.get("Content-Type", "image/jpeg").split(";")[0].strip()
-                or "image/jpeg")
-        return f"data:{mime};base64," + base64.b64encode(data).decode()
-    except Exception as e:
-        logger.warning("failed to inline remote image", url=url, error=str(e))
-        return None
-
-
-# @spec[PROJECT_PROFILE.md#Requirements]
-async def _inline_remote_images(messages: list) -> list:
-    """Replace remote image_url parts with inlined base64 data URLs."""
-    if not settings.inline_remote_images:
-        return messages
-    result = []
-    for msg in messages:
-        content = msg.get("content")
-        if isinstance(content, list):
-            new_content = []
-            for part in content:
-                if (
-                    isinstance(part, dict)
-                    and part.get("type") == "image_url"
-                    and isinstance(part.get("image_url"), dict)
-                ):
-                    url = part["image_url"].get("url", "")
-                    if isinstance(url, str) and url.startswith(("http://", "https://")):
-                        data_url = await _fetch_as_data_url(url)
-                        if data_url:
-                            part = {**part, "image_url": {**part["image_url"], "url": data_url}}
-                new_content.append(part)
-            msg = {**msg, "content": new_content}
-        result.append(msg)
-    return result
-
-
-# @spec[PROJECT_PROFILE.md#Requirements]
-def _record_cost(model, usage: dict) -> None:
-    """Compute a request's USD cost from usage + model pricing and record it."""
-    cost = compute_cost(
-        model,
-        int(usage.get("prompt_tokens") or 0),
-        int(usage.get("completion_tokens") or 0),
-    )
-    if cost:
-        metrics.record_cost(model.model_id, cost)
-        budget.record(cost)
-
-
-# @spec[PROJECT_PROFILE.md#Requirements]
-def _record_throughput(model_id: str, usage: dict, latency_ms: float) -> None:
-    """Record per-request generation throughput (tokens/sec) as a peak."""
-    completion = int(usage.get("completion_tokens") or usage.get("total_tokens") or 0)
-    if completion and latency_ms > 0:
-        metrics.record_throughput(model_id, completion / (latency_ms / 1000.0))
-
-
-# @spec[PROJECT_PROFILE.md#Requirements]
-def _record_stream_usage(model_id: str, usage: dict) -> None:
-    """Record tokens + cost for a streamed response (usage in the final chunk)."""
-    if not usage or not usage.get("total_tokens"):
-        return
-    metrics.record_tokens(model_id, int(usage["total_tokens"]))
-    model = router.model_registry.get_model(model_id)
-    if model:
-        _record_cost(model, usage)
-
-
-# Model fallback chain
-# @spec[PROJECT_PROFILE.md#Requirements]
-def _should_fallback(exc: Exception) -> bool:
-    """Whether an upstream failure warrants trying a different model.
-
-    Fall back on 404 (model unavailable), 5xx, and transport errors; not on
-    other 4xx (a bad request will fail identically on every model).
-    """
-    resp = getattr(exc, "response", None)
-    if resp is not None:
-        code = resp.status_code
-        return code == 404 or code >= 500
-    return True
-
-
-# @spec[PROJECT_PROFILE.md#Requirements]
-async def _complete_with_fallback(  # noqa: C901
-    task_type,
-    primary,
-    messages: list,
-    max_tokens,
-    temperature,
-    extra: dict,
-):
-    """Call the primary model, failing over to next-best models on hard errors.
-
-    Returns (response_data, used_model, fallback_used).
-    """
-    candidates = [primary]
-    if settings.enable_model_fallback:
-        for m in router.model_registry.rank_models(task_type):
-            if all(m.model_id != c.model_id for c in candidates):
-                candidates.append(m)
-        candidates = candidates[: 1 + settings.max_model_fallbacks]
-
-    # Circuit breaker: skip models whose circuit is open. If that would leave
-    # nothing, keep the original list (better to try than to hard-fail).
-    if settings.circuit_breaker_enabled:
-        healthy = [m for m in candidates if breaker.allow(m.model_id)]
-        if healthy:
-            candidates = healthy
-
-    task = getattr(task_type, "value", str(task_type))
-    last_exc: Optional[Exception] = None
-    for index, model in enumerate(candidates):
-        nim_start = time.time()
-        try:
-            data = await nim_client.chat_completions(
-                model=model.model_id,
-                messages=messages,
-                stream=False,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                **extra,
-            )
-            latency_ms = (time.time() - nim_start) * 1000.0
-            metrics.record_latency(model.model_id, latency_ms)
-            usage = data.get("usage") if isinstance(data, dict) else None
-            if isinstance(usage, dict) and usage.get("total_tokens"):
-                metrics.record_tokens(model.model_id, int(usage["total_tokens"]))
-                _record_cost(model, usage)
-                _record_throughput(model.model_id, usage, latency_ms)
-            if settings.circuit_breaker_enabled:
-                breaker.record_success(model.model_id)
-            adaptive_router.record(task, model.model_id, reward_from(True, latency_ms))
-            return data, model, model.model_id != primary.model_id
-        except KeyPoolExhaustedError:
-            raise  # a key problem, not a model problem — don't fail over
-        except Exception as exc:
-            metrics.record_error(model.model_id)
-            # Only hard upstream failures count against the model's circuit.
-            if settings.circuit_breaker_enabled and _should_fallback(exc):
-                breaker.record_failure(model.model_id)
-            adaptive_router.record(task, model.model_id, 0.0)
-            last_exc = exc
-            if index + 1 < len(candidates) and _should_fallback(exc):
-                logger.warning(
-                    "model failed; trying fallback",
-                    model=model.model_id,
-                    error=str(exc) or repr(exc),
-                )
-                continue
-            raise
-    raise last_exc if last_exc else RuntimeError("no model candidates")
 
 
 # Record request performance in background
