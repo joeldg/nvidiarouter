@@ -10,7 +10,9 @@ Project-scoped for `github.com/joeldg/nvidiarouter`.
 Operators should get an explainable "best model per task" answer derived from the
 same data and scoring the gateway actually routes with — so model selection is a
 transparent, reproducible recommendation rather than guesswork. The advisor makes
-routing decisions inspectable without sending any traffic.
+routing decisions inspectable without sending any traffic, and it must be honest
+about how *confident* each recommendation is so a near-tie is not presented as a
+clear winner.
 
 ## Requirements
 1. For each `TaskType`, the advisor MUST recommend exactly one registered model
@@ -28,11 +30,18 @@ routing decisions inspectable without sending any traffic.
 5. The advisor MUST be read-only and pure: it MUST NOT make any upstream NIM
    call, mutate registry/metrics state, or require network access.
 6. `GET /v1/recommend` MUST return JSON keyed by task type with `{model,
-   basis, rationale, alternatives}` for every task; an optional `?task=<name>`
-   MUST return only that task (400 for an unknown task name).
+   basis, confidence, low_confidence, rationale, alternatives}` for every task;
+   an optional `?task=<name>` MUST return only that task (400 for an unknown
+   task name).
 7. The `recommend` CLI command MUST render the same recommendations as a table
    and MUST NOT require the gateway to be running.
 8. Recommendations MUST be deterministic for a fixed registry + metrics state.
+9. Each recommendation MUST include a numeric `confidence` in [0.0, 1.0] derived
+   from the winning model's score margin over the runner-up (a larger margin
+   means higher confidence; a task with no alternative is fully confident).
+   The advisor MUST set `low_confidence: true` when that margin is below a
+   configurable threshold, so operators are warned when the top pick is only
+   marginally ahead. The CLI MUST visibly mark low-confidence rows.
 
 ## Non-Goals
 This spec does not change routing behavior (`ROUTING.md`), does not benchmark or
@@ -46,8 +55,12 @@ the current registry, metrics, and configured weights.
   "no model".
 - A test asserts the advisor performs zero upstream calls (pure function).
 - A test covers the `?task=` filter and the unknown-task 400.
-- `GET /v1/recommend` returns all task types; `nvidia-smartroute recommend`
-  renders a table without a running gateway.
+- A test asserts `confidence` is in [0,1], rises with a larger score margin, and
+  that `low_confidence` flips true below the configured threshold (and that a
+  no-alternative task is fully confident).
+- `GET /v1/recommend` returns all task types with `confidence`/`low_confidence`;
+  `nvidia-smartroute recommend` renders a table (marking low-confidence rows)
+  without a running gateway.
 
 ## Token Budget Class
 Project contract. Load for work on the recommendation advisor, CLI, or endpoint.
@@ -62,5 +75,5 @@ Project contract. Load for work on the recommendation advisor, CLI, or endpoint.
 ## AI Agent Directives
 Keep the advisor's ranking identical to the router's scoring so recommendations
 never contradict real routing. Keep it read-only and side-effect free. Always
-surface the basis (measured vs estimated) and the losing alternatives so the
-recommendation is auditable.
+surface the basis (measured vs estimated), the confidence and low-confidence
+flag, and the losing alternatives so the recommendation is auditable.

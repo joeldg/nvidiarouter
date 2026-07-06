@@ -100,6 +100,13 @@ class Settings(BaseSettings):
         default="nvidia/nv-embedqa-e5-v5",
         description="Model used for /v1/embeddings when none is specified",
     )
+    # @spec[RECOMMENDATION.md#Requirements]
+    # A recommendation is flagged low-confidence when the winner's score margin
+    # over the runner-up is below this threshold.
+    recommend_low_confidence_margin: float = Field(
+        default=0.02, ge=0.0,
+        description="Score-margin threshold below which a recommendation is low-confidence",
+    )
 
     # Dynamic Agent Autoscale settings
     # @spec[GATEWAY_API.md#Requirements]

@@ -105,6 +105,36 @@ def test_cli_recommend_renders_without_gateway():
     assert CliRunner().invoke(cli.app, ["recommend", "--task", "bogus"]).exit_code == 1
 
 
+# req.9
+def test_confidence_reflects_score_margin_and_low_confidence_flag(monkeypatch):
+    import nvidia_smartroute.config as cfg
+    monkeypatch.setattr(cfg.settings, "recommend_low_confidence_margin", 0.02)
+    M.metrics.reset()
+
+    # Wide quality gap -> high confidence, not flagged.
+    wide = _registry([
+        _model("a", [TaskType.CHAT], quality=0.95, params=50, latency=500),
+        _model("b", [TaskType.CHAT], quality=0.50, params=50, latency=500),
+    ])
+    rec_wide = recommend_all(wide)["chat"]
+    assert 0.0 <= rec_wide["confidence"] <= 1.0
+    assert rec_wide["low_confidence"] is False
+
+    # Razor-thin gap -> lower confidence, flagged low.
+    thin = _registry([
+        _model("a", [TaskType.CHAT], quality=0.90, params=50, latency=500),
+        _model("b", [TaskType.CHAT], quality=0.89, params=50, latency=500),
+    ])
+    rec_thin = recommend_all(thin)["chat"]
+    assert rec_thin["confidence"] < rec_wide["confidence"]
+    assert rec_thin["low_confidence"] is True
+
+    # Sole supporting model -> fully confident, not flagged.
+    solo = _registry([_model("only", [TaskType.CHAT])])
+    rec_solo = recommend_all(solo)["chat"]
+    assert rec_solo["confidence"] == 1.0 and rec_solo["low_confidence"] is False
+
+
 def test_recommend_for_helper():
     assert recommend_for("nope") is None
     assert set(recommend_for("chat").keys()) == {"chat"}

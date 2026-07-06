@@ -789,16 +789,22 @@ def recommend(
     table.add_column("Params", justify="right")
     table.add_column("Latency", justify="right")
     table.add_column("Basis")
+    table.add_column("Confidence", justify="right")
     table.add_column("$/1k", justify="right")
     for task_name, rec in recs.items():
         if not rec["model"]:
-            table.add_row(task_name, "[dim]none[/dim]", "-", "-", "-", "-")
+            table.add_row(task_name, "[dim]none[/dim]", "-", "-", "-", "-", "-")
             continue
         r = rec["rationale"]
         params = f"{r['parameters_b']:.0f}B" if r["parameters_b"] else "?"
+        # Visibly mark low-confidence recommendations (RECOMMENDATION.md req.9).
+        if rec["low_confidence"]:
+            conf = f"[yellow]{rec['confidence']:.2f} ⚠ low[/yellow]"
+        else:
+            conf = f"{rec['confidence']:.2f}"
         table.add_row(
             task_name, rec["model"], params, f"{r['latency_ms']:.0f}ms",
-            rec["basis"], f"{r['output_cost_per_1k']}",
+            rec["basis"], conf, f"{r['output_cost_per_1k']}",
         )
     console.print(table)
 
