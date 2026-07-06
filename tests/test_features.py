@@ -1100,6 +1100,26 @@ def test_discover_probes_and_filters(monkeypatch):
     assert report["catalog_size"] == 3  # embedding removed before probing
 
 
+def test_apply_benchmark_updates_latency_and_throughput():
+    from nvidia_smartroute.discovery import apply_benchmark, deserialize
+    from nvidia_smartroute.model_catalog import infer_capability
+
+    caps = [
+        deserialize(infer_capability("moonshotai/kimi-k2.6")),
+        deserialize(infer_capability("meta/llama-3.1-8b-instruct")),
+    ]
+    results = {
+        "moonshotai/kimi-k2.6": {"ok": True, "p50_ms": 1255.0, "tps": 31.5},
+        "meta/llama-3.1-8b-instruct": {"ok": False, "p50_ms": 0.0, "tps": 0.0},  # skipped
+        "unknown/model": {"ok": True, "p50_ms": 100.0, "tps": 90.0},  # not present
+    }
+    updated = apply_benchmark(caps, results)
+    assert updated == 1
+    kimi = next(c for c in caps if c.model_id == "moonshotai/kimi-k2.6")
+    assert kimi.latency_ms == 1255
+    assert kimi.throughput_tps == 31.5
+
+
 def test_registry_loads_discovered_file(tmp_path, monkeypatch):
     from nvidia_smartroute.discovery import save_models, deserialize
     from nvidia_smartroute.model_catalog import infer_capability

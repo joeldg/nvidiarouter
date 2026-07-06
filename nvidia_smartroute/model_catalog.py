@@ -122,6 +122,9 @@ def infer_capability(model_id: str) -> Dict[str, Any]:
             tasks += _CODE_TASKS
     # Larger models are treated as higher-quality by default; small = faster.
     quality = min(0.75 + params_b / 800.0, 0.98) if params_b else 0.82
+    # Rough latency prior from size (bigger = slower); `benchmark --save`
+    # replaces this with measured p50 latency.
+    latency_ms = int(250 + params_b) if params_b else 500
 
     return {
         "model_id": model_id,
@@ -130,6 +133,7 @@ def infer_capability(model_id: str) -> Dict[str, Any]:
         "version": "1.0",
         "supported_tasks": tasks,
         "parameters_b": float(params_b),
+        "latency_ms": latency_ms,
         "context_window": int(curated.get("context_window", 32768)),
         "quality_score": round(quality, 3),
         "reliability_score": 0.85,

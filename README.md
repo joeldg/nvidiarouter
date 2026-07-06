@@ -92,7 +92,10 @@ to enrich the whole catalog without servability checks.
 `benchmark` is standalone (no gateway needed): it reads the registry, calls the
 top-N largest models directly, and ranks them by success, p50 latency, and
 generation tok/s — throttled to respect your rate limit. Use `--top N` and
-`--per-model K`. Example output:
+`--per-model K`. Add **`--save`** to write the measured latency/throughput back
+into the model profiles so the router prefers benchmarked-fast models (models
+also get a size-based latency prior at discovery time, refined by live traffic).
+Example output:
 
 ```
 Model leaderboard (fastest first)

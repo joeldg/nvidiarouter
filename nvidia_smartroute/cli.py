@@ -631,6 +631,9 @@ def benchmark(  # noqa: C901
     delay: float = typer.Option(
         -1.0, help="Seconds between requests (default: from the per-key rate limit)"
     ),
+    save: bool = typer.Option(
+        False, "--save", help="Write measured latency/throughput back to the model file"
+    ),
 ):
     """Benchmark registered models directly against NIM: latency + throughput.
 
@@ -733,6 +736,30 @@ def benchmark(  # noqa: C901
             f"\n[green]Fastest reliable model:[/green] {best['model']} "
             f"({best['params']:.0f}B, {best['tps']} tok/s)"
         )
+
+    # Feed measured performance back into routing.
+    if save:
+        import os
+
+        from nvidia_smartroute import discovery
+
+        if not os.path.exists(settings.models_file):
+            console.print(
+                f"\n[yellow]--save skipped: {settings.models_file} not found "
+                f"(run `discover` first).[/yellow]"
+            )
+        else:
+            caps = discovery.load_models(settings.models_file)
+            measured = {
+                r["model"]: {"ok": r["ok"] > 0, "p50_ms": r["p50_ms"], "tps": r["tps"]}
+                for r in rows
+            }
+            n = discovery.apply_benchmark(caps, measured)
+            discovery.save_models(settings.models_file, caps)
+            console.print(
+                f"\n[green]Saved measured latency/throughput for {n} model(s) to "
+                f"{settings.models_file}.[/green] Restart the gateway to use it."
+            )
 
 
 # @spec[PROJECT_PROFILE.md#Token Budget Class]
