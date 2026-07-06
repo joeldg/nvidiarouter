@@ -15,11 +15,11 @@ from ..metrics import metrics
 from ..config import settings
 from ..bandit import adaptive_router
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 logger = structlog.get_logger()
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 class TaskType(Enum):
     """Types of tasks that can be routed to different models."""
     CODE_GENERATION = "code_generation"
@@ -36,7 +36,7 @@ class TaskType(Enum):
     CHAT = "chat"
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 @dataclass
 class ModelCapability:
     """Represents the capabilities and characteristics of a model."""
@@ -77,7 +77,7 @@ class ModelCapability:
     tags: List[str] = field(default_factory=list)
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 @dataclass
 class RoutingDecision:
     """Represents a decision made by the router."""
@@ -88,7 +88,7 @@ class RoutingDecision:
     reasoning: str = ""
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 @dataclass
 class Classification:
     """Result of analysing a request: the task type plus scoring detail."""
@@ -103,7 +103,7 @@ class Classification:
 #   - kind "word":   matched on word boundaries (so "sum" != "summarize")
 #   - kind "phrase": matched as a substring (multi-word signals)
 # A pattern contributes its weight once if present (not once per occurrence).
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 _RULES: Dict[TaskType, List[Tuple[int, str, List[str]]]] = {
     TaskType.CODE_GENERATION: [
         (3, "phrase", ["write a", "create a", "build a", "make a", "generate a",
@@ -163,7 +163,7 @@ _RULES: Dict[TaskType, List[Tuple[int, str, List[str]]]] = {
 # Code-domain vocabulary — a weak signal that a request is code-related. Adds a
 # small boost to every CODE_* task so e.g. "write a function to calculate X"
 # routes to code, not maths.
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 _CODE_DOMAIN = [
     "python", "javascript", "typescript", "java", "kotlin", "swift", "rust",
     "golang", "ruby", "php", "html", "css", "sql", "bash", "function", "class",
@@ -178,7 +178,7 @@ _CODE_TASKS = [
 ]
 
 # Deterministic tie-break order (more specific tasks win ties).
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 _TASK_PRIORITY = [
     TaskType.VISION,
     TaskType.CODE_GENERATION,
@@ -206,11 +206,11 @@ def _phrase_score(patterns: List[str], text: str) -> int:
     return sum(1 for p in patterns if p in text)
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 class CapabilityAnalyzer:
     """Analyzes requests to determine task type via weighted keyword scoring."""
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[ROUTING.md#Requirements]
     @staticmethod
     def _extract_content(messages: List[Dict[str, Any]]) -> Tuple[str, bool]:
         """
@@ -244,7 +244,7 @@ class CapabilityAnalyzer:
                 texts.append(str(content))
         return " ".join(texts), has_image
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[ROUTING.md#Requirements]
     def classify(self, messages: List[Dict[str, Any]]) -> Classification:  # noqa: C901
         """
         Classify a request into a task type with a confidence score.
@@ -300,13 +300,13 @@ class CapabilityAnalyzer:
         logger.debug("capability scores", scores=readable, winner=winner.value)
         return Classification(winner, round(confidence, 2), readable)
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[ROUTING.md#Requirements]
     def analyze_request(self, messages: List[Dict[str, str]]) -> TaskType:
         """Return just the detected task type (see ``classify`` for detail)."""
         return self.classify(messages).task_type
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 class ModelRegistry:
     """Registry of available models."""
 
@@ -315,7 +315,7 @@ class ModelRegistry:
         self._initialize_default_models()
         self._load_discovered_models()
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[ROUTING.md#Requirements]
     def _load_discovered_models(self) -> None:
         """Load discovered models (from `discover`) on top of the defaults.
 
@@ -343,7 +343,7 @@ class ModelRegistry:
         except Exception as e:  # pragma: no cover - defensive
             logger.warning("failed to load discovered models", error=str(e) or repr(e))
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[ROUTING.md#Requirements]
     def _initialize_default_models(self):
         """Initialize with default NVIDIA NIM models (build.nvidia.com IDs).
 
@@ -445,7 +445,7 @@ class ModelRegistry:
             tags=["vision", "multimodal", "image-analysis"],
         )
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[ROUTING.md#Requirements]
     def get_model(self, model_id: str) -> Optional[ModelCapability]:
         """
         Look up a model by its identifier.
@@ -458,7 +458,7 @@ class ModelRegistry:
         """
         return self.models.get(model_id)
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[ROUTING.md#Requirements]
     def select_best_model(self, task_type: TaskType) -> Optional[ModelCapability]:
         """
         Select the best model for a given task type.
@@ -494,7 +494,7 @@ class ModelRegistry:
         # to real observed performance (the "latency tracker").
         return max(suitable_models, key=self._score_model)
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[ROUTING.md#Requirements]
     def rank_models(self, task_type: TaskType) -> List[ModelCapability]:
         """
         Return all suitable models for a task, best first.
@@ -509,7 +509,7 @@ class ModelRegistry:
             suitable = list(self.models.values())
         return sorted(suitable, key=self._score_model, reverse=True)
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[ROUTING.md#Requirements]
     def _score_model(self, model: ModelCapability) -> float:
         """
         Compute a routing score for a model (higher is better).
@@ -548,7 +548,7 @@ class ModelRegistry:
         return score
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 class RequestRouter:
     """Main router that combines capability analysis and model selection."""
 
@@ -557,7 +557,7 @@ class RequestRouter:
         self.model_registry = ModelRegistry()
         self._decision_history: List[Dict[str, Any]] = []
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[ROUTING.md#Requirements]
     def _select_model(self, task_type: TaskType) -> Optional[ModelCapability]:
         """Select a model via the adaptive bandit or static scoring."""
         if settings.routing_strategy == "adaptive":
@@ -570,7 +570,7 @@ class RequestRouter:
                 return model
         return self.model_registry.select_best_model(task_type)
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[ROUTING.md#Requirements]
     async def route_request(
         self,
         messages: List[Dict[str, str]],
@@ -655,7 +655,7 @@ class RequestRouter:
 
         return decision
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[ROUTING.md#Requirements]
     def get_routing_stats(self) -> dict:
         """
         Get routing statistics.
@@ -725,5 +725,5 @@ class RequestRouter:
 
 
 # Create a singleton instance
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[ROUTING.md#Requirements]
 router = RequestRouter()

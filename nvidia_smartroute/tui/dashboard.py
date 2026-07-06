@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[OBSERVABILITY.md#Requirements]
 """
 Rich Terminal User Interface (TUI) dashboard for NVIDIA-SmartRoute-CLI.
 
@@ -27,7 +27,7 @@ from ..config import settings
 _HISTORY = 60  # samples in the requests/sec sparkline
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[OBSERVABILITY.md#Requirements]
 class DashboardApp(App):
     """Textual dashboard polling the gateway's live metrics."""
 
@@ -64,7 +64,7 @@ class DashboardApp(App):
         self._last_total: Optional[int] = None
         self._last_t: Optional[float] = None
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
         yield Static("Connecting to gateway...", id="summary")
@@ -80,7 +80,7 @@ class DashboardApp(App):
                 yield RichLog(id="routing_log", highlight=True, markup=True)
         yield Footer()
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def on_mount(self) -> None:
         self.title = "NVIDIA-SmartRoute-CLI"
         self.sub_title = f"gateway @ {self.metrics_url}"
@@ -92,7 +92,7 @@ class DashboardApp(App):
         self.set_interval(self.refresh_rate, self.refresh_metrics)
         self.call_after_refresh(self.refresh_metrics)
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     async def refresh_metrics(self) -> None:
         """Poll the gateway and update the widgets."""
         try:
@@ -177,7 +177,7 @@ class DashboardApp(App):
         await self._client.aclose()
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[OBSERVABILITY.md#Requirements]
 def run_dashboard(metrics_url: Optional[str] = None, refresh_rate: Optional[float] = None) -> None:
     """Entry point used by the CLI to launch the dashboard."""
     DashboardApp(metrics_url=metrics_url, refresh_rate=refresh_rate).run()

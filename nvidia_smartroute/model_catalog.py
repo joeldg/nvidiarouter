@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[MODEL_DISCOVERY.md#Requirements]
 """
 Capability inference for build.nvidia.com (NIM) models.
 
@@ -32,7 +32,7 @@ _CODE_TASKS = [
 
 # Curated metadata for notable models (approx params in billions). Values are
 # best-effort and used for display/scoring, not billing.
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[MODEL_DISCOVERY.md#Requirements]
 _CURATED: Dict[str, Dict[str, Any]] = {
     # Kimi / GLM ship without a size token in the ID, so curate them explicitly.
     "moonshotai/kimi-k2.6": {"parameters_b": 1000, "context_window": 256000},
@@ -80,13 +80,13 @@ def _extract_params_b(model_id: str) -> float:
     return best
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[MODEL_DISCOVERY.md#Requirements]
 def is_embedding_model(model_id: str) -> bool:
     mid = model_id.lower()
     return any(h in mid for h in _EMBED_HINTS)
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[MODEL_DISCOVERY.md#Requirements]
 def is_routable(model_id: str) -> bool:
     """False for embeddings and specialized non-chat models (guard/safety/etc.)."""
     mid = model_id.lower()
@@ -95,7 +95,7 @@ def is_routable(model_id: str) -> bool:
     return not any(h in mid for h in _EXCLUDE_HINTS)
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[MODEL_DISCOVERY.md#Requirements]
 def infer_capability(model_id: str) -> Dict[str, Any]:
     """Return ModelCapability kwargs for a model ID (curated + inferred)."""
     mid = model_id.lower()
@@ -145,7 +145,7 @@ def infer_capability(model_id: str) -> Dict[str, Any]:
     }
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[MODEL_DISCOVERY.md#Requirements]
 def rank_by_capability(profiles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Sort capability profiles by size then quality (largest/best first)."""
     return sorted(

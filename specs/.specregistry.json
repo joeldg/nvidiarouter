@@ -1,15 +1,15 @@
 {
   "project_type": "CLI Tool / Developer Tooling",
-  "project": null,
+  "project": "github.com/joeldg/nvidiarouter",
   "channel": "stable",
-  "fetched_at": "2026-07-04T20:03:21.139Z",
+  "fetched_at": "2026-07-06T04:32:53.799Z",
   "specs": [
     {
       "filename": "AGENT_OPERATING_RULES.md",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "project_type": "Global",
       "scope": "global",
-      "sha256": "83d1011a0b7ce4de30bba37e82010fbb128356e5a2888862e0fa0efd7e04b44e"
+      "sha256": "5b0e269bf38f7bd50a75f14dd45e0c605904007e3963ff438ef4873c86ef505d"
     },
     {
       "filename": "CODING_STANDARDS.md",
@@ -30,7 +30,7 @@
       "version": "1.0.0",
       "project_type": "Global",
       "scope": "global",
-      "sha256": "46ae4611369a2e8b0f15afbb2313300e887d98d5c64fa0c7426a7a7c11790a2e"
+      "sha256": "a2459c93f52ebf392832dd949ed5a820c0235c543c85cf868ff02455638e50ee"
     },
     {
       "filename": "PROJECT_PROFILE.md",
@@ -80,8 +80,50 @@
       "project_type": "Global",
       "scope": "global",
       "sha256": "f616c339ba94f0b7bc54f8c7c75ec26a22cb6e31ca79789a2e06b3010539130c"
+    },
+    {
+      "filename": "GATEWAY_API.md",
+      "version": "1.0.0",
+      "project_type": "github.com/joeldg/nvidiarouter",
+      "scope": "project",
+      "sha256": "b39884a376c2e6e4019e6defd6294a797e93f8449deea520be2781c3fa5ea66c"
+    },
+    {
+      "filename": "ROUTING.md",
+      "version": "1.0.0",
+      "project_type": "github.com/joeldg/nvidiarouter",
+      "scope": "project",
+      "sha256": "467cf97330c95740f281ee07901f4a0540f33cb8df71d4269416070e9ee50683"
+    },
+    {
+      "filename": "COST.md",
+      "version": "1.0.0",
+      "project_type": "github.com/joeldg/nvidiarouter",
+      "scope": "project",
+      "sha256": "2e5cd2c2a5702edd3ed7ba5665c06e2251fa08614f7301102715e1722d8b7ab7"
+    },
+    {
+      "filename": "MODEL_DISCOVERY.md",
+      "version": "1.0.0",
+      "project_type": "github.com/joeldg/nvidiarouter",
+      "scope": "project",
+      "sha256": "fe396f5c416f4dcb005b6e9379e58bbd06044599b27f824b85cf914422a8e803"
+    },
+    {
+      "filename": "OBSERVABILITY.md",
+      "version": "1.0.0",
+      "project_type": "github.com/joeldg/nvidiarouter",
+      "scope": "project",
+      "sha256": "756d5faf4c624d0c928c6474090659e504bc028271bbf108000102b1c0d10e4c"
+    },
+    {
+      "filename": "SECURITY_AND_KEYS.md",
+      "version": "1.0.0",
+      "project_type": "github.com/joeldg/nvidiarouter",
+      "scope": "project",
+      "sha256": "a424208a10cbe963ff067dfd604197643f5ce90faccac14b4135c8264ae5f879"
     }
   ],
-  "signature": "9yBdEBH71IDMYG8lQOxCkXu1d0PRIKc1SUy2hIoKuPJdLqEvf6TnV7ROrqbN83TzRm+qwiowvR8Z5seCq+nQBQ==",
+  "signature": "3hdOzUOyRgcVSGxFULIHpma4nV6GGiCyYgyII2qV9xrThd8BCpnb5ENXZznP6CAVm0X/gY1ew8L3hpFkWhKjCg==",
   "signature_alg": "ed25519"
 }

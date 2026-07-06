@@ -50,15 +50,15 @@ from .completion import (  # noqa: F401
 )
 
 # Structured logging (unified with the router/agent layers).
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[OBSERVABILITY.md#Requirements]
 logger = structlog.get_logger()
 
 # Background task set retained for shutdown cleanup.
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 background_tasks = set()
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 def _load_metrics() -> None:
     """Restore persisted metrics on startup, if enabled and present."""
     if not settings.persist_metrics:
@@ -73,7 +73,7 @@ def _load_metrics() -> None:
         logger.warning("failed to restore metrics", error=str(e) or repr(e))
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 def _save_metrics() -> None:
     """Persist metrics counters to disk, if enabled."""
     if not settings.persist_metrics:
@@ -84,7 +84,7 @@ def _save_metrics() -> None:
         logger.warning("failed to persist metrics", error=str(e) or repr(e))
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 async def _periodic_metrics_save() -> None:
     """Background task: persist metrics on an interval."""
     while True:
@@ -92,7 +92,7 @@ async def _periodic_metrics_save() -> None:
         _save_metrics()
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialise and tear down the shared HTTP client and background tasks."""
@@ -123,7 +123,7 @@ async def lifespan(app: FastAPI):
 
 
 # Create FastAPI app
-# @spec[PROJECT_PROFILE.md#Token Budget Class]
+# @spec[GATEWAY_API.md#Requirements]
 app = FastAPI(
     title="NVIDIA-SmartRoute-CLI API",
     description="OpenAI-compatible API gateway for NVIDIA NIM models",
@@ -134,7 +134,7 @@ app = FastAPI(
 )
 
 # Add CORS middleware
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[SECURITY_AND_KEYS.md#Requirements]
 # Allowing credentials together with a wildcard origin is rejected by browsers,
 # so only enable credentials when origins are explicitly configured.
 _cors_origins = settings.cors_origins
@@ -148,7 +148,7 @@ app.add_middleware(
 
 
 # Inbound rate limiter (sliding window per client IP, applied to /v1/*).
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 _rate_windows: Dict[str, Deque[float]] = defaultdict(deque)
 
 
@@ -180,7 +180,7 @@ async def rate_limit(request: Request, call_next):
 
 
 # Inbound client API-key authentication (optional, applied to /v1/*).
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @app.middleware("http")
 async def api_key_auth(request: Request, call_next):
     """Require a valid client API key on /v1/* when auth is enabled."""
@@ -208,7 +208,7 @@ async def api_key_auth(request: Request, call_next):
 
 
 # Middleware for request logging and timing
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     """Log incoming requests and their processing time."""
@@ -252,7 +252,7 @@ async def log_requests(request: Request, call_next):
 
 
 # Global exception handler
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Handle unexpected exceptions."""
@@ -279,7 +279,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # Health check endpoint
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @app.get("/health")
 async def health_check():
     """Health check endpoint for load balancers and orchestration."""
@@ -292,7 +292,7 @@ async def health_check():
 
 
 # Root endpoint
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @app.get("/")
 async def root():
     """Root endpoint with service information."""
@@ -311,14 +311,14 @@ async def root():
 
 
 # Web dashboard + playground (self-contained HTML)
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page():
     """Serve the live web dashboard + prompt playground."""
     return HTMLResponse(content=DASHBOARD_HTML)
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 @app.post("/explain")
 async def explain(request: Request):
     """Route a prompt and return the answer *plus* why it routed that way."""
@@ -400,7 +400,7 @@ async def explain(request: Request):
 
 
 # Readiness check endpoint
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @app.get("/ready")
 async def readiness_check():
     """Readiness check endpoint."""
@@ -426,7 +426,7 @@ async def readiness_check():
 
 
 # Live metrics endpoint (consumed by the TUI dashboard)
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[OBSERVABILITY.md#Requirements]
 def _full_snapshot() -> dict:
     """Assemble the full live-metrics snapshot from every subsystem."""
     snapshot = metrics.snapshot()
@@ -446,7 +446,7 @@ async def get_metrics():
     return _full_snapshot()
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 @app.get("/metrics/prometheus")
 async def get_metrics_prometheus():
     """Prometheus text exposition of the live metrics (for scraping)."""
@@ -461,7 +461,7 @@ async def get_metrics_prometheus():
 
 
 # Helper functions for response formatting
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 def format_chat_response(
     content: str,
     model: str,
@@ -495,7 +495,7 @@ def format_chat_response(
 
 
 # Record request performance in background
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 async def _record_request_performance(
     request_id: str,
     routing_decision: RoutingDecision,
@@ -522,7 +522,7 @@ async def _record_request_performance(
 
 # OpenAI-compatible endpoints with actual routing implementation
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 @app.post("/v1/chat/completions")
 async def chat_completions(request: Request, background_tasks: BackgroundTasks):  # noqa: C901
     """OpenAI-compatible chat completions endpoint with intelligent routing."""
@@ -783,7 +783,7 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
         )
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @app.post("/v1/embeddings")
 async def embeddings(request: Request):
     """OpenAI-compatible embeddings endpoint."""
@@ -860,7 +860,7 @@ async def embeddings(request: Request):
         )
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @app.get("/v1/models")
 async def list_models(source: str = "router"):
     """

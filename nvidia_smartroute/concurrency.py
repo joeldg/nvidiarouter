@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 """
 Concurrency gate with bounded queueing (backpressure).
 
@@ -12,12 +12,12 @@ import asyncio
 from typing import Any, Dict, Optional
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 class QueueFullError(Exception):
     """Raised when the concurrency queue is full or the wait times out."""
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 class ConcurrencyGate:
     """Bounded-concurrency admission gate with a wait queue."""
 
@@ -78,7 +78,7 @@ class ConcurrencyGate:
         }
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 def build_default_gate() -> ConcurrencyGate:
     from .config import settings
 

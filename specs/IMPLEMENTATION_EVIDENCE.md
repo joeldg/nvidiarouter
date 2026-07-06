@@ -14,6 +14,7 @@ Completed work should prove what changed, which specs governed it, what was veri
 5. Generated specs and examples must be reviewed separately from implementation evidence.
 6. CI annotations should identify drift, unmapped code entities, stale local specs, and audit findings when available.
 7. Reviewers must be able to trace acceptance evidence back to specific spec sections or explicit gaps.
+8. Git commit messages for implementation work must include compact SpecRegistry compliance evidence: the `SpecRegistry-Compliance:`, `SpecRegistry-Signals:`, and `SpecRegistry-Command:` trailer emitted by `specreg comply`, or equivalent `finish_task` evidence with verdict, objective score, and session id.
 
 ## Non-Goals
 This spec does not prescribe a single PR template. It defines the minimum evidence required for SDD confidence.

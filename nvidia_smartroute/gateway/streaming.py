@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 """
 Streaming chat completions: SSE relay from NVIDIA NIM with key rotation on
 connect-time 429s, plus token/latency accounting for the streamed path.
@@ -21,7 +21,7 @@ from .recording import record_stream_usage
 logger = structlog.get_logger()
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 def format_streaming_chunk(
     content: str, model: str, index: int = 0, finish_reason: Optional[str] = None
 ) -> dict:
@@ -38,7 +38,7 @@ def format_streaming_chunk(
     return chunk
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 async def stream_chat_completion(
     model: str,
     messages: list,
@@ -76,7 +76,7 @@ async def stream_chat_completion(
         yield "data: [DONE]\n\n"
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 async def stream_nim_request(  # noqa: C901
     model: str,
     messages: list,

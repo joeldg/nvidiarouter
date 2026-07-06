@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[OBSERVABILITY.md#Requirements]
 """
 Central logging configuration.
 
@@ -11,7 +11,7 @@ import logging
 import structlog
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[OBSERVABILITY.md#Requirements]
 def configure_logging(level: str = "info", json_logs: bool = False) -> None:
     """Configure structlog (and the stdlib root logger) once for the process."""
     log_level = getattr(logging, level.upper(), logging.INFO)

@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[ROUTING.md#Requirements]
 """
 Per-model circuit breaker.
 
@@ -13,7 +13,7 @@ import time
 from typing import Any, Dict, List
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[ROUTING.md#Requirements]
 class CircuitBreaker:
     """Thread-safe per-model failure circuit breaker."""
 
@@ -25,7 +25,7 @@ class CircuitBreaker:
         self._half_open: Dict[str, bool] = {}
         self._lock = threading.Lock()
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[ROUTING.md#Requirements]
     def allow(self, model_id: str) -> bool:
         """Whether a request may be sent to this model right now.
 
@@ -43,14 +43,14 @@ class CircuitBreaker:
                 return True
             return False
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[ROUTING.md#Requirements]
     def record_success(self, model_id: str) -> None:
         with self._lock:
             self._failures[model_id] = 0
             self._half_open.pop(model_id, None)
             self._opened_at.pop(model_id, None)
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[ROUTING.md#Requirements]
     def record_failure(self, model_id: str) -> None:
         now = time.time()
         with self._lock:
@@ -89,7 +89,7 @@ class CircuitBreaker:
             self._half_open.clear()
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[ROUTING.md#Requirements]
 def build_default_breaker() -> CircuitBreaker:
     from .config import settings
 

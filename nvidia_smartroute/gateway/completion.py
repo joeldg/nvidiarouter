@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[ROUTING.md#Requirements]
 """
 Non-streaming completion with model fallback + circuit breaker + adaptive
 routing feedback. Tries the routed model, then the next-best models for the task
@@ -22,7 +22,7 @@ from .recording import record_cost, record_throughput
 logger = structlog.get_logger()
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[ROUTING.md#Requirements]
 def should_fallback(exc: Exception) -> bool:
     """Whether an upstream failure warrants trying a different model.
 
@@ -36,7 +36,7 @@ def should_fallback(exc: Exception) -> bool:
     return True
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[ROUTING.md#Requirements]
 async def complete_with_fallback(  # noqa: C901
     task_type,
     primary,

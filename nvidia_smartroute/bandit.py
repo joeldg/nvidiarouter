@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[ROUTING.md#Requirements]
 """
 Adaptive routing via an epsilon-greedy multi-armed bandit.
 
@@ -13,7 +13,7 @@ import threading
 from typing import Any, Dict, List, Optional, Tuple
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[ROUTING.md#Requirements]
 def reward_from(success: bool, latency_ms: float) -> float:
     """Map an outcome to a reward in [0, 1]: success minus a latency penalty."""
     if not success:
@@ -22,7 +22,7 @@ def reward_from(success: bool, latency_ms: float) -> float:
     return 1.0 - 0.5 * latency_penalty
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[ROUTING.md#Requirements]
 class AdaptiveRouter:
     """Epsilon-greedy bandit over models, keyed by task type."""
 
@@ -38,7 +38,7 @@ class AdaptiveRouter:
         # Optimistic initialisation encourages trying unseen models.
         return entry[1] if entry else self._optimistic
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[ROUTING.md#Requirements]
     def record(self, task: str, model_id: str, reward: float) -> None:
         """Update the running mean reward for a (task, model) arm."""
         with self._lock:
@@ -47,7 +47,7 @@ class AdaptiveRouter:
             mean += (reward - mean) / count
             self._stats[(task, model_id)] = (count, mean)
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[ROUTING.md#Requirements]
     def select(self, task: str, candidates: List[str]) -> Optional[str]:
         """Pick a model: explore with prob epsilon, else exploit best reward."""
         if not candidates:
@@ -69,7 +69,7 @@ class AdaptiveRouter:
             self._stats.clear()
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[ROUTING.md#Requirements]
 def build_default_bandit() -> AdaptiveRouter:
     from .config import settings
 

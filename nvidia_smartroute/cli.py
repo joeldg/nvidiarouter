@@ -19,7 +19,7 @@ app = typer.Typer(help="NVIDIA SmartRoute CLI - AI-powered API gateway")
 console = Console()
 
 
-# @spec[PROJECT_PROFILE.md#Intent]
+# @spec[GATEWAY_API.md#Requirements]
 def _display_banner():
     """Display the application banner."""
     banner = r"""
@@ -33,7 +33,7 @@ def _display_banner():
     console.print(Panel(styled_banner, title="NVIDIA SmartRoute", border_style="blue"))
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 @app.command()
 def start(
     host: str = typer.Option(settings.host, help="Host to bind to"),
@@ -84,7 +84,7 @@ def start(
     )
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @app.command()
 def stop():
     """Stop the running NVIDIA SmartRoute gateway (via its PID file)."""
@@ -117,7 +117,7 @@ def stop():
     console.print("[green]Sent SIGTERM. Gateway is shutting down.[/green]")
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @app.command()
 def status(
     host: str = typer.Option(settings.host, help="Gateway host to probe"),
@@ -144,7 +144,7 @@ def status(
         console.print(f"[dim]{exc}[/dim]")
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 def _gateway_healthy(health_url: str, timeout: float = 2.0) -> bool:
     """Return True if the gateway responds 200 at its health endpoint."""
     import httpx
@@ -155,7 +155,7 @@ def _gateway_healthy(health_url: str, timeout: float = 2.0) -> bool:
         return False
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 def _start_gateway(host: str, port: int, health_url: str, wait_seconds: int = 40):
     """
     Launch the gateway as a background subprocess and wait until it is ready.
@@ -197,7 +197,7 @@ def _start_gateway(host: str, port: int, health_url: str, wait_seconds: int = 40
     raise typer.Exit(code=1)
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 @app.command()
 def dashboard(
     host: str = typer.Option(settings.host, help="Gateway host to connect to"),
@@ -250,8 +250,8 @@ def dashboard(
                 proc.kill()
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-# @spec[PROJECT_PROFILE.md#Token Budget Class]
+# @spec[GATEWAY_API.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 @app.command()
 def config():
     """Show the current configuration."""
@@ -263,7 +263,7 @@ def config():
         console.print(f"{key}: {value}")
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[MODEL_DISCOVERY.md#Requirements]
 def _probe_model(model_id: str, headers: dict) -> str:
     """Send a 1-token chat request to check a model is servable for this account."""
     import httpx
@@ -287,7 +287,7 @@ def _probe_model(model_id: str, headers: dict) -> str:
         return f"[red]error: {type(exc).__name__}[/red]"
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 @app.command()
 def doctor(
     probe_models: bool = typer.Option(
@@ -358,7 +358,7 @@ def doctor(
 
 # A varied prompt mix so different tasks/models light up on the dashboard.
 # Some prompts repeat across a run, which also exercises the response cache.
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 _STRESS_PROMPTS = [
     "What is 17 * 23?",
     "Write a Python function to reverse a string",
@@ -373,7 +373,7 @@ _STRESS_PROMPTS = [
 ]
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 def _percentile(values, pct: float) -> float:
     """Return the pct-th percentile (0..100) of a list of numbers."""
     if not values:
@@ -385,7 +385,7 @@ def _percentile(values, pct: float) -> float:
     return ordered[lo] + (ordered[hi] - ordered[lo]) * (k - lo)
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 def _summarize_stress(results: list, elapsed: float) -> dict:
     """Aggregate stress-run results into a stats dict (pure; unit-tested)."""
     total = len(results)
@@ -414,7 +414,7 @@ def _summarize_stress(results: list, elapsed: float) -> dict:
     }
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 @app.command()
 def stress(
     host: str = typer.Option(settings.host, help="Gateway host"),
@@ -526,7 +526,7 @@ def stress(
     console.print("\n[dim]Watch live detail on the dashboard's /metrics view.[/dim]")
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 @app.command()
 def discover(  # noqa: C901
     output: str = typer.Option(settings.models_file, help="Where to write discovered models"),
@@ -622,7 +622,7 @@ def discover(  # noqa: C901
     )
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 @app.command()
 def benchmark(  # noqa: C901
     per_model: int = typer.Option(3, help="Requests per model"),
@@ -762,7 +762,7 @@ def benchmark(  # noqa: C901
             )
 
 
-# @spec[PROJECT_PROFILE.md#Token Budget Class]
+# @spec[GATEWAY_API.md#Requirements]
 @app.command()
 def version():
     """Show the version of NVIDIA SmartRoute."""
