@@ -158,7 +158,9 @@ Response headers expose routing decisions: `X-Selected-Model`, `X-Task-Type`,
 | `POST /v1/chat/completions` | Routed chat (streaming + autoscale) |
 | `POST /v1/embeddings` | Embeddings (defaults to `nv-embedqa-e5-v5`) |
 | `GET /v1/models` | Router registry (`?source=upstream` for NVIDIA's catalog) |
-| `GET /metrics` | Live metrics, routing stats, per-key budgets |
+| `GET /metrics` | Live metrics, routing stats, per-key budgets (JSON) |
+| `GET /metrics/prometheus` | Prometheus text exposition for scraping |
+| `GET /dashboard` | Web dashboard + prompt playground |
 | `GET /health`, `GET /ready` | Liveness / readiness |
 
 ## Configuration
@@ -203,6 +205,21 @@ another key on a 429.
 docker build -t nvidia-smartroute .
 docker run -p 9000:9000 -e NVIDIA_API_KEY=nvapi-... nvidia-smartroute
 ```
+
+### Full observability stack (Prometheus + Grafana)
+
+```bash
+NVIDIA_API_KEY=nvapi-... docker compose up --build
+```
+
+- Gateway → <http://localhost:9000> (web dashboard at `/dashboard`)
+- Prometheus → <http://localhost:9090> (scrapes `/metrics/prometheus`)
+- Grafana → <http://localhost:3000> (anonymous access; a "NVIDIA SmartRoute"
+  dashboard is auto-provisioned)
+
+The gateway exposes Prometheus-format metrics at `GET /metrics/prometheus`
+(`nsr_total_requests`, per-model latency/requests/errors/cost, cache, budget,
+backpressure) alongside the richer JSON `GET /metrics` used by the dashboards.
 
 ## Development
 

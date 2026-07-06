@@ -30,6 +30,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   logging, `/metrics`, health/readiness, `start`/`stop` (PID file), `doctor`
   diagnostics, Dockerfile, CI (ruff + pytest on 3.9/3.11/3.12).
 
+- **Observability stack**: Prometheus text exposition at `/metrics/prometheus`,
+  plus a `docker compose` stack (gateway + Prometheus + Grafana with an
+  auto-provisioned dashboard).
+- **Packaging**: PyPI-ready metadata, MIT `LICENSE`, and a tag-triggered release
+  workflow (Trusted Publishing).
+
 ### Notes
 - Verified live against build.nvidia.com throughout development.
 

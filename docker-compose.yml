@@ -1,0 +1,42 @@
+# Full observability stack: the gateway + Prometheus + Grafana.
+#
+#   NVIDIA_API_KEY=nvapi-... docker compose up --build
+#
+# Gateway:    http://localhost:9000  (dashboard at /dashboard)
+# Prometheus: http://localhost:9090
+# Grafana:    http://localhost:3000  (admin / admin)
+
+services:
+  gateway:
+    build: .
+    ports:
+      - "9000:9000"
+    environment:
+      - NVIDIA_API_KEY=${NVIDIA_API_KEY:-}
+      - NVIDIA_API_KEYS=${NVIDIA_API_KEYS:-}
+      - HOST=0.0.0.0
+      - PORT=9000
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - gateway
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    volumes:
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
