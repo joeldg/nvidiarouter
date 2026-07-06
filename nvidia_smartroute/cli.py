@@ -762,6 +762,47 @@ def benchmark(  # noqa: C901
             )
 
 
+# @spec[RECOMMENDATION.md#Requirements]
+@app.command()
+def recommend(
+    task: str = typer.Option(None, help="Only recommend for this task type"),
+):
+    """Recommend the best model per task from the registry + live metrics.
+
+    Read-only and standalone — no gateway required.
+    """
+    from rich.table import Table
+
+    from nvidia_smartroute.recommend import is_task, recommend_all
+
+    if task is not None and not is_task(task):
+        console.print(f"[red]Unknown task '{task}'.[/red]")
+        raise typer.Exit(code=1)
+
+    recs = recommend_all()
+    if task is not None:
+        recs = {task: recs[task]}
+
+    table = Table(title="Recommended model per task", show_header=True, header_style="bold")
+    table.add_column("Task")
+    table.add_column("Recommended model")
+    table.add_column("Params", justify="right")
+    table.add_column("Latency", justify="right")
+    table.add_column("Basis")
+    table.add_column("$/1k", justify="right")
+    for task_name, rec in recs.items():
+        if not rec["model"]:
+            table.add_row(task_name, "[dim]none[/dim]", "-", "-", "-", "-")
+            continue
+        r = rec["rationale"]
+        params = f"{r['parameters_b']:.0f}B" if r["parameters_b"] else "?"
+        table.add_row(
+            task_name, rec["model"], params, f"{r['latency_ms']:.0f}ms",
+            rec["basis"], f"{r['output_cost_per_1k']}",
+        )
+    console.print(table)
+
+
 # @spec[GATEWAY_API.md#Requirements]
 @app.command()
 def version():
