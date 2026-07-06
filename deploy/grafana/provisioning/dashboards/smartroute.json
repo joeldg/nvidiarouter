@@ -1,0 +1,58 @@
+{
+  "title": "NVIDIA SmartRoute",
+  "uid": "smartroute",
+  "schemaVersion": 39,
+  "editable": true,
+  "time": { "from": "now-15m", "to": "now" },
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total requests",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "nsr_total_requests", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "In-flight",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "expr": "nsr_inflight_requests", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Total cost (USD)",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [{ "expr": "nsr_total_cost_usd", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Cache hits",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [{ "expr": "nsr_cache_hits", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests / sec",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [{ "expr": "rate(nsr_total_requests[1m])", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Avg latency per model (ms)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [{ "expr": "nsr_model_avg_latency_ms", "legendFormat": "{{model}}", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests per model",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [{ "expr": "nsr_model_requests", "legendFormat": "{{model}}", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Errors per model",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [{ "expr": "nsr_model_errors", "legendFormat": "{{model}}", "refId": "A" }]
+    }
+  ]
+}

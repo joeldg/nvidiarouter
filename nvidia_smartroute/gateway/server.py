@@ -13,7 +13,7 @@ from typing import Optional, Dict, Deque
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
-from fastapi.responses import JSONResponse, StreamingResponse, HTMLResponse
+from fastapi.responses import JSONResponse, StreamingResponse, HTMLResponse, PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import asyncio
@@ -427,9 +427,8 @@ async def readiness_check():
 
 # Live metrics endpoint (consumed by the TUI dashboard)
 # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
-@app.get("/metrics")
-async def get_metrics():
-    """Return live gateway metrics and routing statistics."""
+def _full_snapshot() -> dict:
+    """Assemble the full live-metrics snapshot from every subsystem."""
     snapshot = metrics.snapshot()
     snapshot["routing_stats"] = router.get_routing_stats()
     snapshot["api_keys"] = key_pool.snapshot()
@@ -439,6 +438,24 @@ async def get_metrics():
     snapshot["budget"] = budget.snapshot()
     snapshot["adaptive_routing"] = adaptive_router.snapshot()
     return snapshot
+
+
+@app.get("/metrics")
+async def get_metrics():
+    """Return live gateway metrics and routing statistics (JSON)."""
+    return _full_snapshot()
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
+@app.get("/metrics/prometheus")
+async def get_metrics_prometheus():
+    """Prometheus text exposition of the live metrics (for scraping)."""
+    from ..prometheus import render_prometheus
+
+    return PlainTextResponse(
+        render_prometheus(_full_snapshot()),
+        media_type="text/plain; version=0.0.4",
+    )
 
 
 

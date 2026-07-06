@@ -547,6 +547,35 @@ def test_keypool_snapshot_masks_keys():
     assert snap[0]["key"].startswith("testkey01")
 
 
+def test_prometheus_exposition_format():
+    from nvidia_smartroute.prometheus import render_prometheus
+
+    snap = {
+        "total_requests": 5, "active_connections": 1, "uptime_seconds": 12,
+        "total_cost_usd": 0.01,
+        "cache": {"hits": 3, "misses": 2},
+        "concurrency": {"inflight": 1, "queued": 0, "rejected": 0},
+        "budget": {"spend_usd": 0.01},
+        "models": [{"model_id": "meta/x-70b", "request_count": 5, "error_count": 0,
+                    "total_tokens": 100, "avg_latency_ms": 700, "max_tps": 50,
+                    "total_cost_usd": 0.01}],
+    }
+    text = render_prometheus(snap)
+    assert "# TYPE nsr_total_requests counter" in text
+    assert "nsr_total_requests 5" in text
+    assert 'nsr_model_requests{model="meta/x-70b"} 5' in text
+    assert 'nsr_model_avg_latency_ms{model="meta/x-70b"} 700' in text
+
+
+def test_metrics_prometheus_endpoint():
+    from nvidia_smartroute.gateway.server import app
+
+    r = TestClient(app).get("/metrics/prometheus")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("text/plain")
+    assert "nsr_total_requests" in r.text
+
+
 def test_metrics_endpoint_includes_key_pool():
     from nvidia_smartroute.gateway.server import app
 
