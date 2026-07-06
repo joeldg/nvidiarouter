@@ -49,6 +49,24 @@ def load_models(path: str) -> List[ModelCapability]:
 
 
 # @spec[PROJECT_PROFILE.md#Requirements]
+def apply_benchmark(caps: List[ModelCapability], results: Dict[str, Dict[str, Any]]) -> int:
+    """Write measured p50 latency + throughput into matching model profiles.
+
+    ``results`` maps model_id -> {"ok": bool, "p50_ms": float, "tps": float}.
+    Returns the number of models updated. Mutates ``caps`` in place.
+    """
+    by_id = {c.model_id: c for c in caps}
+    updated = 0
+    for model_id, r in results.items():
+        cap = by_id.get(model_id)
+        if cap and r.get("ok") and r.get("p50_ms"):
+            cap.latency_ms = int(r["p50_ms"])
+            cap.throughput_tps = float(r.get("tps") or 0.0)
+            updated += 1
+    return updated
+
+
+# @spec[PROJECT_PROFILE.md#Requirements]
 def fetch_catalog(base_url: str, api_key: str, timeout: float = 20.0) -> List[str]:
     """Return the list of model IDs from the NIM /models endpoint."""
     resp = httpx.get(

@@ -516,10 +516,18 @@ class ModelRegistry:
 
         Combines static quality and reliability with a latency penalty derived
         from the live latency tracker when samples exist, otherwise the model's
-        declared latency. Latency is normalised against a 2000ms reference.
+        declared (or benchmark-measured) latency. Latency is normalised against a
+        2000ms reference.
         """
         live_latency = metrics.get_avg_latency_ms(model.model_id)
-        latency_ms = live_latency if live_latency is not None else float(model.latency_ms)
+        if live_latency is not None:
+            latency_ms = live_latency
+        elif model.latency_ms > 0:
+            latency_ms = float(model.latency_ms)
+        else:
+            # Unknown latency: estimate from size so 0 doesn't read as "instant"
+            # and out-rank models with real measured latency.
+            latency_ms = 250.0 + model.parameters_b
         # Normalise to a 0..1 penalty (clamped); lower latency -> smaller penalty.
         latency_penalty = min(latency_ms / 2000.0, 1.0)
 
