@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[COST.md#Requirements]
 """
 Cost accounting and daily budget guardrail.
 
@@ -12,7 +12,7 @@ import time
 from typing import Any, Dict, Optional
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[COST.md#Requirements]
 def compute_cost(model: Any, prompt_tokens: int, completion_tokens: int) -> float:
     """USD cost for a request given a model's per-1k pricing."""
     in_rate = getattr(model, "input_cost_per_1k", 0.0) or 0.0
@@ -20,7 +20,7 @@ def compute_cost(model: Any, prompt_tokens: int, completion_tokens: int) -> floa
     return (prompt_tokens / 1000.0) * in_rate + (completion_tokens / 1000.0) * out_rate
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[COST.md#Requirements]
 class BudgetTracker:
     """Tracks spend within a rolling 24h window against a daily cap."""
 
@@ -36,7 +36,7 @@ class BudgetTracker:
             self._spend = 0.0
             self._window_start = now
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[COST.md#Requirements]
     def allow(self) -> bool:
         """Whether spend is still under the daily budget (unlimited if <= 0)."""
         if self.daily_budget_usd <= 0:
@@ -45,7 +45,7 @@ class BudgetTracker:
             self._roll(time.time())
             return self._spend < self.daily_budget_usd
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[COST.md#Requirements]
     def record(self, usd: float) -> None:
         with self._lock:
             self._roll(time.time())
@@ -74,7 +74,7 @@ class BudgetTracker:
             self._window_start = time.time()
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[COST.md#Requirements]
 def build_default_budget() -> BudgetTracker:
     from .config import settings
 

@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 """
 Render the gateway metrics snapshot as Prometheus text exposition format.
 
@@ -19,7 +19,7 @@ def _metric(lines: List[str], name: str, mtype: str, help_text: str, value) -> N
     lines.append(f"{name} {value}")
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 def render_prometheus(snapshot: Dict[str, Any]) -> str:
     """Convert a /metrics snapshot dict into Prometheus exposition text."""
     lines: List[str] = []

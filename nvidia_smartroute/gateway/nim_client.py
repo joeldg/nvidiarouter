@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 """
 NVIDIA NIM API client: key rotation, retry/backoff, and the chat/embeddings/
 models calls. Uses the shared runtime HTTP client so the app lifespan owns its
@@ -17,7 +17,7 @@ from . import runtime
 logger = structlog.get_logger()
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 class NIMClient:
     """Client for interacting with NVIDIA NIM API."""
 
@@ -48,7 +48,7 @@ class NIMClient:
             raise KeyPoolExhaustedError("all API keys are rate-limited; retry later")
         raise KeyPoolExhaustedError("all API keys are rate-limited; retry later")
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[GATEWAY_API.md#Requirements]
     async def _post_with_retries(self, url: str, payload: dict) -> dict:
         """POST with key rotation + backoff on 429/5xx, honoring Retry-After."""
         attempts = settings.upstream_max_retries + 1
@@ -102,7 +102,7 @@ class NIMClient:
             raise last_exc
         raise RuntimeError("request failed without a response")
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[GATEWAY_API.md#Requirements]
     async def chat_completions(
         self,
         model: str,
@@ -121,7 +121,7 @@ class NIMClient:
         payload.update(kwargs)
         return await self._post_with_retries(f"{self.base_url}/chat/completions", payload)
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[GATEWAY_API.md#Requirements]
     async def embeddings(
         self,
         model: str,
@@ -135,7 +135,7 @@ class NIMClient:
         payload.update({k: v for k, v in kwargs.items() if v is not None})
         return await self._post_with_retries(f"{self.base_url}/embeddings", payload)
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[GATEWAY_API.md#Requirements]
     async def models(self) -> dict:
         """Get available models from NVIDIA NIM."""
         key = await self._acquire_key()
@@ -147,5 +147,5 @@ class NIMClient:
 
 
 # Process-wide NIM client.
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 nim_client = NIMClient(base_url=settings.nvidia_nim_base_url, key_pool=key_pool)

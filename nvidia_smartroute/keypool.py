@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[SECURITY_AND_KEYS.md#Requirements]
 """
 API key pool with per-key rolling-window budgeting and cooldown.
 
@@ -14,7 +14,7 @@ from collections import deque
 from typing import Any, Deque, Dict, List, Optional, Tuple
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[SECURITY_AND_KEYS.md#Requirements]
 class KeyPoolExhaustedError(Exception):
     """Raised when no key has remaining budget within the allowed wait."""
 
@@ -26,7 +26,7 @@ def _mask(key: str) -> str:
     return f"{key[:9]}...{key[-3:]}"
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[SECURITY_AND_KEYS.md#Requirements]
 class KeyPool:
     """Thread-safe rotating pool of API keys with per-key budgets."""
 
@@ -51,7 +51,7 @@ class KeyPool:
         while dq and dq[0] < cutoff:
             dq.popleft()
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[SECURITY_AND_KEYS.md#Requirements]
     def acquire(self) -> Tuple[Optional[str], float]:
         """
         Reserve a request slot on the best available key.
@@ -87,7 +87,7 @@ class KeyPool:
             wait = max(0.0, soonest - now) if soonest is not None else float(self._window)
             return None, wait
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[SECURITY_AND_KEYS.md#Requirements]
     def record_cooldown(self, key: str, seconds: float) -> None:
         """Cool a key down for `seconds` (e.g. after an upstream 429)."""
         with self._lock:
@@ -96,7 +96,7 @@ class KeyPool:
                     self._cooldown_until[key], time.time() + max(0.0, seconds)
                 )
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[SECURITY_AND_KEYS.md#Requirements]
     def snapshot(self) -> List[Dict[str, Any]]:
         """Per-key usage/budget snapshot with masked keys (for /metrics)."""
         now = time.time()
@@ -124,7 +124,7 @@ class KeyPool:
                 self._cooldown_until[key] = 0.0
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[SECURITY_AND_KEYS.md#Requirements]
 def build_default_pool() -> KeyPool:
     """Construct the process-wide key pool from settings."""
     from .config import settings

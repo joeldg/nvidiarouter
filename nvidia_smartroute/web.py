@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 """
 Self-contained web dashboard + prompt playground.
 
@@ -8,7 +8,7 @@ a request routed the way it did (task scores, confidence, selected model,
 cache/fallback, latency, tokens, cost). No external assets — everything inline.
 """
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 DASHBOARD_HTML = r"""<!doctype html>
 <html lang="en">
 <head>

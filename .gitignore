@@ -161,3 +161,4 @@ discovered_models.json
 
 # Claude Code local tooling
 .claude/
+.spec/credentials.json

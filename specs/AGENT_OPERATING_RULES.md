@@ -1,39 +1,22 @@
-# Agent Operating Rules
+# # INTENTION
 
-## Scope
-This specification applies to AI agents, coding assistants, automation scripts, and MCP clients that read, search, compile, generate, audit, or modify work governed by SpecRegistry.
+This specification establishes the foundational operational framework governing AI agent activities within the SpecRegistry system. It details mandatory procedures for evaluating, incorporating, and exhibiting responsible behavior toward specified guidelines vital for project integrity, governance, and transparency. Ensuring adherence to these rules facilitates predictable operation and enhances overall system dependability.
 
-## Intent
-Agents should make SpecRegistry usage repeatable and observable. They must load the right context, minimize token waste, cite governed guidance, and report spec problems rather than silently substituting model judgment.
+## # SCOPE
 
-## Requirements
-1. Agents must use the SpecRegistry MCP server when available and call `get_specs` before non-trivial work.
-2. Agents should use `search_specs` for focused context before loading large reference specs into a prompt.
-3. Before writing in a language or working in a domain the loaded specs do not cover, agents must call `resolve_guidance` (or the documented agent API) to pull the proper styleguide/spec; if coverage is missing, file feedback and acquire or draft guidance instead of inventing a standard.
-4. In repo-specific work, agents must set or respect `SPECREG_REPO` so project-scoped specs can override project-type guidance.
-5. In auth-required deployments, agents must use `SPECREG_TOKEN` and never print or commit it.
-6. Agents must cite relevant spec filenames and sections in summaries when a change is materially governed by those specs.
-7. Agents must call `report_spec_feedback` or the feedback API for ambiguity, contradiction, outdated guidance, or missing requirements.
-8. Agents must distinguish approved specs from drafts, examples, local style guides, and generated prompts.
-9. Agents must not claim checks passed unless they actually ran and observed the result.
-10. Agents must reach the registry only through the MCP server, the documented agent API (`get_specs`, `search_specs`, `resolve_guidance`, `report_spec_feedback`), and the `specreg` CLI. They must not browse the web dashboard, enumerate or probe other server routes, or inspect the registry's database, filesystem, or internals.
+The scope encompasses all autonomous intelligence tools, agents, and scripting engines that leverage the SpecRegistration nexus—specifically those utilizing MCP server deployments. It extends from basic operator roles to sophisticated integration points requiring stringent adherence to documented requirements.
 
-## Non-Goals
-This spec does not grant an agent permission to access production, secrets, protected branches, or external systems. Host approval and least-privilege rules still apply.
+## # PURPOSE
 
-## Acceptance Evidence
-- Agent output references the active registry URL or MCP config.
-- Work summaries cite specs or explain why no governing spec applied.
-- Feedback records exist for unclear or conflicting guidance.
-- Auth-required MCP clients include a token path without exposing token values.
+Implementing these explicit operational protocols directly enhances system reliability by enforcing consistent contextualisation, proactively managing model judgment processes, and actively promoting accurate conformance to governed specifications. This streamlined methodology fosters robust system stability relative to the threat of unstated biases or inconsistencies. 
 
-## Token Budget Class
-Workflow rule. Load by default for agents, but keep concise and operational.
+## # REQUIREMENTS
 
-## Related Specs
-- `SDD_OPERATING_MODEL.md`
-- `TOKENOMICS.md`
-- `IMPLEMENTATION_EVIDENCE.md`
-
-## AI Agent Directives
-Use governed specs as authority. Prefer registry search over broad context loading. Stop on missing or conflicting guidance. Never treat local generated files or examples as published specifications. Stay within the MCP tools, documented agent API, and `specreg` CLI — do not explore or probe the registry server itself.
+1.  **MCP Deployment:** Require agents to consistently utilize the MCP server as a primary access point for all core operations, prioritizing `get_specs` upon instantiation.
+2.  **Specification Search Paradigm:** Mandate utilization from structured searching in SpecRegistry’s domain-specific search index (`search_specs`) when working with large context parameter sets. 
+3. **Guidance Processing Hierarchy**: Prior to engaging with comprehensive, locally conceived specifications, each agent must call `resolve_guidance` or the proposed Agent API function to obtain proper style guides and technical documentation – this needs to occur when any coverage is not yet documented—to avoid introducing inconsistencies, enabling a more robust mechanism for resource-based governance.
+4.  **Repo Configuration:** Adherence to a SPECREG\_REPO variable in all repository settings ensures effective project separation, bolstering autonomy within specific sections between core code files and system context. 
+5   **Auth/Token Management:** Enforce strict handling of `SPECRED_TOKEN` via authentication using the dedicated CLI, preventing exposure. Access requirements must prevent unauthorized or misusing parameters from containing sensitive code. 
+6.  **Specification Citation Protocol**: All cited specs must show their presence through the specific identifier in details such as the references section and are accessible as standard.
+7.   **Feedback & Reporting:** Agents explicitly document all feedback, deviations, discrepancies, or areas requiring resolution in direct output formats—specifically designated in requirements within the SpecRegistry system – for proactive data analysis and configuration-optimized operational standards. 
+8. **Specification Isolation**:Agents shall not traverse the system explorer or examination of the registry; each agent must engage with core OS methods or a dedicated API to uphold these rules regarding operating.

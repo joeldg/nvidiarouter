@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[GATEWAY_API.md#Requirements]
 """
 Shared gateway runtime state.
 

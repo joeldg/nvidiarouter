@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[OBSERVABILITY.md#Requirements]
 """
 Live metrics tracking for NVIDIA-SmartRoute-CLI.
 
@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from typing import Any, Deque, Dict, Optional
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[OBSERVABILITY.md#Requirements]
 @dataclass
 class ModelMetrics:
     """Rolling performance metrics for a single model."""
@@ -47,7 +47,7 @@ class ModelMetrics:
         return self.total_tokens / elapsed
 
 
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[OBSERVABILITY.md#Requirements]
 class MetricsTracker:
     """Thread-safe, process-wide metrics registry."""
 
@@ -60,17 +60,17 @@ class MetricsTracker:
         self._started_at = time.time()
 
     # -- connection gauges ------------------------------------------------
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def connection_opened(self) -> None:
         with self._lock:
             self._active_connections += 1
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def connection_closed(self) -> None:
         with self._lock:
             self._active_connections = max(0, self._active_connections - 1)
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def note_request(self) -> None:
         """Count a real API request (not health/metrics polling)."""
         with self._lock:
@@ -89,7 +89,7 @@ class MetricsTracker:
             self._models[model_id] = model
         return model
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def record_latency(self, model_id: str, latency_ms: float) -> None:
         """Record a completed request's latency for a model."""
         with self._lock:
@@ -99,22 +99,22 @@ class MetricsTracker:
             model.last_used = time.time()
             model.latencies_ms.append(latency_ms)
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def record_tokens(self, model_id: str, tokens: int) -> None:
         with self._lock:
             self._get_model(model_id).total_tokens += tokens
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def record_error(self, model_id: str) -> None:
         with self._lock:
             self._get_model(model_id).error_count += 1
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[OBSERVABILITY.md#Requirements]
     def record_cost(self, model_id: str, usd: float) -> None:
         with self._lock:
             self._get_model(model_id).total_cost_usd += max(0.0, usd)
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[OBSERVABILITY.md#Requirements]
     def record_throughput(self, model_id: str, tokens_per_sec: float) -> None:
         """Track the peak per-request generation throughput for a model."""
         with self._lock:
@@ -122,7 +122,7 @@ class MetricsTracker:
             if tokens_per_sec > model.max_tps:
                 model.max_tps = tokens_per_sec
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def get_avg_latency_ms(self, model_id: str) -> Optional[float]:
         """Live average latency for a model, or None if never observed."""
         with self._lock:
@@ -132,7 +132,7 @@ class MetricsTracker:
             return model.avg_latency_ms
 
     # -- routing log ------------------------------------------------------
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def log_routing(
         self,
         request_id: str,
@@ -152,7 +152,7 @@ class MetricsTracker:
             )
 
     # -- snapshot ---------------------------------------------------------
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def snapshot(self) -> Dict[str, Any]:
         """Return a JSON-serialisable snapshot of all live metrics."""
         with self._lock:
@@ -183,7 +183,7 @@ class MetricsTracker:
             }
 
     # -- persistence ------------------------------------------------------
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[OBSERVABILITY.md#Requirements]
     def dump(self) -> Dict[str, Any]:
         """Serialise durable counters (per-model + totals) for persistence."""
         with self._lock:
@@ -206,7 +206,7 @@ class MetricsTracker:
                 ],
             }
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[OBSERVABILITY.md#Requirements]
     def load(self, data: Dict[str, Any]) -> None:
         """Restore counters from a `dump()` payload (uptime stays process-local)."""
         with self._lock:
@@ -225,7 +225,7 @@ class MetricsTracker:
                 model.last_used = float(md.get("last_used", 0.0))
                 self._models[model.model_id] = model
 
-    # @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+    # @spec[OBSERVABILITY.md#Requirements]
     def reset(self) -> None:
         """Clear all recorded metrics (primarily for tests)."""
         with self._lock:
@@ -237,5 +237,5 @@ class MetricsTracker:
 
 
 # Process-wide singleton.
-# @spec[PROJECT_PROFILE.md#Acceptance Evidence]
+# @spec[OBSERVABILITY.md#Requirements]
 metrics = MetricsTracker()

@@ -15,6 +15,10 @@ Before editing code, configuration, tests, docs, or generated artifacts:
 7. Use MCP `search_specs` and `resolve_guidance` before guessing missing standards.
 8. Report unclear, contradictory, outdated, or missing-intent specs with `report_spec_feedback`; report uncovered topics with the same tool using `error_type: "missing_guidance"`.
 9. Before claiming completion, call MCP `finish_task` with the `session_id` from `begin_task` or run `specreg comply`. Use MCP `check_compliance` for direct compliance checks.
+10. Remediate failed compliance with targeted evidence only. Add `@spec[FILE#section]` annotations only when that exact section truly governs the code entity. Do not blanket-map files to `PROJECT_PROFILE.md`, broad requirements sections, or convenient specs just to raise coverage; report a missing-guidance gap or propose the needed spec instead.
+11. If repeated `finish_task`, `check_compliance`, or `specreg comply` attempts still fail, halt autonomous remediation and show the user the exact latest output.
+12. Before creating a git commit for implementation work, run `specreg comply` or `finish_task`. Put the compact `SpecRegistry-Compliance:`, `SpecRegistry-Signals:`, and `SpecRegistry-Command:` trailer emitted by `specreg comply` (or equivalent `finish_task` evidence) in the commit message body.
+13. If `finish_task`, `check_compliance`, or `specreg comply` cannot run, cannot reach the registry, or exits non-zero from a server/MCP availability failure, halt before claiming completion or committing. Notify the user that objective SpecRegistry compliance could not be verified and include the exact tool or command output.
 
 Local governance files:
 

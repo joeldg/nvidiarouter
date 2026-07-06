@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 """
 In-memory TTL + LRU response cache.
 
@@ -15,14 +15,14 @@ from collections import OrderedDict
 from typing import Any, Dict, Optional
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 def make_key(payload: Dict[str, Any]) -> str:
     """Stable cache key from a request payload (order-independent)."""
     blob = json.dumps(payload, sort_keys=True, default=str)
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 class ResponseCache:
     """Thread-safe TTL + LRU cache with hit/miss counters."""
 
@@ -79,7 +79,7 @@ class ResponseCache:
             }
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 def build_default_cache() -> ResponseCache:
     from .config import settings
 

@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 """
 Auto-inline remote image URLs as base64 data URLs.
 
@@ -17,7 +17,7 @@ from . import runtime
 logger = structlog.get_logger()
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 async def fetch_as_data_url(url: str) -> Optional[str]:
     """Fetch a remote image and return it as a base64 data URL, or None."""
     try:
@@ -37,7 +37,7 @@ async def fetch_as_data_url(url: str) -> Optional[str]:
         return None
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 async def inline_remote_images(messages: list) -> list:
     """Replace remote image_url parts with inlined base64 data URLs."""
     if not settings.inline_remote_images:

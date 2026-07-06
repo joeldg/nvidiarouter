@@ -230,5 +230,10 @@ pytest -q
 
 ## Governance
 
-Developed under SpecRegistry governance. See [SPECREGISTRY.md](./SPECREGISTRY.md)
-and [AGENTS.md](./AGENTS.md). Outstanding work is tracked in [TODO.md](./TODO.md).
+Governed by SpecRegistry. The application is covered by six project-scoped specs
+in [`specs/`](./specs) — `GATEWAY_API`, `ROUTING`, `MODEL_DISCOVERY`,
+`SECURITY_AND_KEYS`, `OBSERVABILITY`, `COST` — plus the global SDD spec set. Code
+entities carry `@spec[FILE#section]` annotations tracing to the governing
+sections. Latest `specreg comply`: **PASS (97% coverage, 3% drift)**. See
+[SPECREGISTRY.md](./SPECREGISTRY.md) and [AGENTS.md](./AGENTS.md); outstanding
+work is in [TODO.md](./TODO.md).

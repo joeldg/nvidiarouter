@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 """
 Dynamic Agent Autoscale Engine.
 
@@ -29,7 +29,7 @@ logger = structlog.get_logger()
 NIMCaller = Callable[..., Awaitable[Dict[str, Any]]]
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 @dataclass
 class SubAgent:
     """A specialized sub-agent with its own role and system prompt."""
@@ -39,7 +39,7 @@ class SubAgent:
     system_prompt: str
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 @dataclass
 class SubAgentResult:
     """The outcome of a single sub-agent execution."""
@@ -54,7 +54,7 @@ class SubAgentResult:
     error: Optional[str] = None
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 # Multi-step signals in a code request that justify fanning out to sub-agents.
 _MULTISTEP_MARKERS = (
     "and test",
@@ -78,7 +78,7 @@ _CODE_TASKS = {
 }
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 class AutoscaleEngine:
     """Coordinates specialized sub-agents for complex tasks."""
 
@@ -86,7 +86,7 @@ class AutoscaleEngine:
         self.max_concurrent = max_concurrent or settings.max_concurrent_agents
         self.timeout = timeout or settings.agent_timeout
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[GATEWAY_API.md#Requirements]
     def should_scale(self, task_type: TaskType, messages: List[Dict[str, Any]]) -> bool:
         """
         Decide whether a request warrants multi-agent orchestration.
@@ -112,7 +112,7 @@ class AutoscaleEngine:
         # Long, code-generation requests tend to be multi-step.
         return task_type == TaskType.CODE_GENERATION and len(text) > 400
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[GATEWAY_API.md#Requirements]
     async def _run_agent(
         self,
         agent: SubAgent,
@@ -169,7 +169,7 @@ class AutoscaleEngine:
                     error=message,
                 )
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[GATEWAY_API.md#Requirements]
     async def orchestrate(
         self,
         messages: List[Dict[str, Any]],
@@ -240,7 +240,7 @@ class AutoscaleEngine:
         results.extend(followups)
         return self._compose(results)
 
-    # @spec[PROJECT_PROFILE.md#Requirements]
+    # @spec[GATEWAY_API.md#Requirements]
     @staticmethod
     def _compose(results: List[SubAgentResult]) -> Dict[str, Any]:
         """Merge sub-agent outputs into a single structured result."""
@@ -280,7 +280,7 @@ class AutoscaleEngine:
         }
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 def _extract_content(response: Dict[str, Any]) -> str:
     """Pull assistant content out of an OpenAI-format chat completion."""
     try:
@@ -290,5 +290,5 @@ def _extract_content(response: Dict[str, Any]) -> str:
 
 
 # Process-wide engine instance.
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 autoscale_engine = AutoscaleEngine()

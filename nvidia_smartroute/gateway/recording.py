@@ -1,4 +1,4 @@
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[GATEWAY_API.md#Requirements]
 """
 Per-request accounting helpers: cost, throughput, and streamed-response usage.
 Shared by the completion and streaming paths.
@@ -9,7 +9,7 @@ from ..cost import budget, compute_cost
 from ..routing.router import router
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[COST.md#Requirements]
 def record_cost(model, usage: dict) -> None:
     """Compute a request's USD cost from usage + model pricing and record it."""
     cost = compute_cost(
@@ -22,7 +22,7 @@ def record_cost(model, usage: dict) -> None:
         budget.record(cost)
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 def record_throughput(model_id: str, usage: dict, latency_ms: float) -> None:
     """Record per-request generation throughput (tokens/sec) as a peak."""
     completion = int(usage.get("completion_tokens") or usage.get("total_tokens") or 0)
@@ -30,7 +30,7 @@ def record_throughput(model_id: str, usage: dict, latency_ms: float) -> None:
         metrics.record_throughput(model_id, completion / (latency_ms / 1000.0))
 
 
-# @spec[PROJECT_PROFILE.md#Requirements]
+# @spec[OBSERVABILITY.md#Requirements]
 def record_stream_usage(model_id: str, usage: dict) -> None:
     """Record tokens + cost for a streamed response (usage in the final chunk)."""
     if not usage or not usage.get("total_tokens"):
