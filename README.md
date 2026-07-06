@@ -1,5 +1,9 @@
 # NVIDIA-SmartRoute-CLI
 
+[![CI](https://github.com/joeldg/nvidiarouter/actions/workflows/ci.yml/badge.svg)](https://github.com/joeldg/nvidiarouter/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.9%20%7C%203.11%20%7C%203.12-blue)](https://github.com/joeldg/nvidiarouter)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+
 An OpenAI-compatible API gateway for [build.nvidia.com](https://build.nvidia.com)
 (NVIDIA NIM) models, with intelligent request routing, a dynamic agent autoscale
 engine, multi-key rotation for throughput, and a rich terminal dashboard.
