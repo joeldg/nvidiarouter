@@ -860,6 +860,32 @@ async def embeddings(request: Request):
         )
 
 
+# @spec[RECOMMENDATION.md#Requirements]
+@app.get("/v1/recommend")
+async def recommend_endpoint(task: Optional[str] = None):
+    """Recommend the best model per task from the registry + live metrics.
+
+    Read-only: no upstream NIM call. Returns all tasks, or one via `?task=<name>`
+    (400 for an unknown task).
+    """
+    from ..recommend import is_task, recommend_all
+
+    if task is not None:
+        if not is_task(task):
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": {
+                        "message": f"unknown task '{task}'",
+                        "type": "invalid_request_error",
+                        "code": 400,
+                    }
+                },
+            )
+        return {task: recommend_all()[task]}
+    return recommend_all()
+
+
 # @spec[GATEWAY_API.md#Requirements]
 @app.get("/v1/models")
 async def list_models(source: str = "router"):
