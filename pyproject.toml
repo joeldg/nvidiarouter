@@ -4,14 +4,31 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nvidia-smartroute"
-description = "NVIDIA-SmartRoute-CLI: OpenAI-compatible API gateway for NVIDIA NIM with dynamic agent scaling"
+description = "OpenAI-compatible API gateway for NVIDIA NIM: intelligent model routing, discovery, multi-key rotation, caching, and a live dashboard"
 version = "0.1.0"
 authors = [
-    {name = "NVIDIA-SmartRoute-CLI Developer", email = "dev@example.com"}
+    {name = "joeldg"}
 ]
 license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.9"
+keywords = [
+    "nvidia", "nim", "llm", "openai", "api-gateway", "router",
+    "model-routing", "inference", "proxy", "cli",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Internet :: Proxy Servers",
+]
 dependencies = [
     "typer[all]>=0.9.0",
     "fastapi>=0.100.0",
@@ -26,6 +43,12 @@ dependencies = [
     "structlog>=23.0.0"
 ]
 
+[project.urls]
+Homepage = "https://github.com/joeldg/nvidiarouter"
+Repository = "https://github.com/joeldg/nvidiarouter"
+Issues = "https://github.com/joeldg/nvidiarouter/issues"
+Changelog = "https://github.com/joeldg/nvidiarouter/blob/main/CHANGELOG.md"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
@@ -35,7 +58,9 @@ dev = [
     "ruff>=0.1.0",
     "black>=23.0.0",
     "mypy>=1.0.0",
-    "pytest-cov>=4.0.0"
+    "pytest-cov>=4.0.0",
+    "build>=1.0.0",
+    "twine>=5.0.0"
 ]
 
 [project.scripts]
