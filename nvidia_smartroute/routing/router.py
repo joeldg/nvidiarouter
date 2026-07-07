@@ -14,6 +14,8 @@ import structlog
 from ..metrics import metrics
 from ..config import settings
 from ..bandit import adaptive_router
+from ..circuit import breaker
+from ..affinity import session_affinity
 
 # @spec[ROUTING.md#Requirements]
 logger = structlog.get_logger()
@@ -86,6 +88,7 @@ class RoutingDecision:
     selected_model: Optional[ModelCapability]
     confidence: float  # 0.0 to 1.0
     reasoning: str = ""
+    from_session: bool = False  # True when the model came from a session pin
 
 
 # @spec[ROUTING.md#Requirements]
@@ -571,12 +574,30 @@ class RequestRouter:
         return self.model_registry.select_best_model(task_type)
 
     # @spec[ROUTING.md#Requirements]
-    async def route_request(
+    def _session_pin(self, session_key: str) -> Optional[ModelCapability]:
+        """Return a session's healthy pinned model, or None (ROUTING.md req.10).
+
+        Fails safe: a pin whose model is deregistered or circuit-broken yields
+        None so the caller re-routes by normal scoring.
+        """
+        pinned_id = session_affinity.get(session_key)
+        if not pinned_id:
+            return None
+        pinned = self.model_registry.get_model(pinned_id)
+        if pinned is None:
+            return None
+        if settings.circuit_breaker_enabled and not breaker.allow(pinned_id):
+            return None
+        return pinned
+
+    # @spec[ROUTING.md#Requirements]
+    async def route_request(  # noqa: C901
         self,
         messages: List[Dict[str, str]],
         model: Optional[str] = None,
         max_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
+        session_key: Optional[str] = None,
         **kwargs
     ) -> RoutingDecision:
         """
@@ -587,6 +608,7 @@ class RequestRouter:
             model: Optional specific model to use
             max_tokens: Maximum tokens to generate
             temperature: Sampling temperature
+            session_key: Optional stable conversation key for session affinity
             **kwargs: Additional parameters
 
         Returns:
@@ -602,6 +624,7 @@ class RequestRouter:
 
         # If a specific model is requested, use it if available
         selected_model = None
+        from_session = False
         if model:
             specific_model = self.model_registry.get_model(model)
             if specific_model:
@@ -612,18 +635,35 @@ class RequestRouter:
                 if specific_model.supported_tasks:
                     task_type = specific_model.supported_tasks[0]
 
-        # If no specific model was requested or found, select the best model for
-        # the task — via the adaptive bandit or static scoring.
+        # Session affinity (ROUTING.md req.9): when enabled and the request
+        # carries a session key — and no explicit model override was given —
+        # reuse this session's previously pinned model instead of re-scoring.
+        affinity_on = settings.session_affinity and bool(session_key) and not model
+        if affinity_on and selected_model is None:
+            pinned = self._session_pin(session_key)
+            if pinned is not None:
+                selected_model = pinned
+                from_session = True
+
+        # If no specific/pinned model was chosen, select the best model for the
+        # task — via the adaptive bandit or static scoring.
         if not selected_model:
             selected_model = self._select_model(task_type)
 
         if not selected_model:
             confidence = min(confidence, 0.5)
 
+        # Record / re-pin the session to the model actually chosen (req.9/req.10).
+        # An explicit model override (affinity_on is False) is never stored.
+        if affinity_on and selected_model is not None:
+            session_affinity.set(session_key, selected_model.model_id)
+
         # Generate reasoning
         reasoning = f"Selected {selected_model.name if selected_model else 'no model'} for {task_type.value} task"
         if selected_model and selected_model.supported_tasks:
             reasoning += f" based on capabilities: {', '.join([t.value for t in selected_model.supported_tasks])}"
+        if from_session:
+            reasoning += " (session-pinned)"
 
         # Create the decision
         decision = RoutingDecision(
@@ -631,7 +671,8 @@ class RequestRouter:
             task_type=task_type,
             selected_model=selected_model,
             confidence=confidence,
-            reasoning=reasoning
+            reasoning=reasoning,
+            from_session=from_session,
         )
 
         # Surface the decision on the live routing log for the TUI/metrics.

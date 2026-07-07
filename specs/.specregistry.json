@@ -2,7 +2,7 @@
   "project_type": "CLI Tool / Developer Tooling",
   "project": "github.com/joeldg/nvidiarouter",
   "channel": "stable",
-  "fetched_at": "2026-07-06T20:14:23.342Z",
+  "fetched_at": "2026-07-07T03:42:38.471Z",
   "specs": [
     {
       "filename": "AGENT_OPERATING_RULES.md",
@@ -90,10 +90,10 @@
     },
     {
       "filename": "ROUTING.md",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "project_type": "github.com/joeldg/nvidiarouter",
       "scope": "project",
-      "sha256": "467cf97330c95740f281ee07901f4a0540f33cb8df71d4269416070e9ee50683"
+      "sha256": "92b11910cb6971fa3c858d964f173ffcb0e87215f0056f338cfb3cf8a1971ca1"
     },
     {
       "filename": "COST.md",
@@ -131,6 +131,6 @@
       "sha256": "a424208a10cbe963ff067dfd604197643f5ce90faccac14b4135c8264ae5f879"
     }
   ],
-  "signature": "yh+0/gt3+mtgSkGSwzweoO4TPf1A/mOrNZqO+WOYvF5BNERAVvfrVLg/oiFWYUDRc7XFq9h/2ZwMaoNtMTsGCQ==",
+  "signature": "El2H6uVn3u8xLvuMpHSoUfFHi8S5ChtrSAc7xDTzVnzag/OLYwGEi2+wOgdcuTZkyiyWLiFGyp4JywEgwx/JAg==",
   "signature_alg": "ed25519"
 }

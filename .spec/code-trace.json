@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-06T04:36:52.742Z",
+  "generated_at": "2026-07-07T04:01:46.060Z",
   "root": "nvidiarouter",
   "specs_dir": "specs",
-  "spec_count": 17,
-  "entity_count": 586,
+  "spec_count": 18,
+  "entity_count": 650,
   "links": [
     {
       "entity_id": "code:class:00ecb5aa5fe7b787",
@@ -619,6 +619,17 @@
       ]
     },
     {
+      "entity_id": "code:class:a016ab6afc2abd15",
+      "entity_name": "SessionAffinity",
+      "entity_kind": "class",
+      "spec_filename": "ROUTING.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
+      ]
+    },
+    {
       "entity_id": "code:class:a3c57c0496b830ae",
       "entity_name": "TaskType",
       "entity_kind": "class",
@@ -1147,6 +1158,17 @@
       "entity_id": "code:function:083b50cb9a0fb923",
       "entity_name": "explain",
       "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: explain, explain, request"
+      ]
+    },
+    {
+      "entity_id": "code:function:083b50cb9a0fb923",
+      "entity_name": "explain",
+      "entity_kind": "function",
       "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
       "confidence": 0.79,
       "reasons": [
@@ -1322,6 +1344,16 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:0c7efcf20b2bb78a",
+      "entity_name": "fake_stream",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: model, stream"
       ]
     },
     {
@@ -2192,6 +2224,17 @@
       ]
     },
     {
+      "entity_id": "code:function:1e945b0fb4b2bd4a",
+      "entity_name": "is_task",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
+      ]
+    },
+    {
       "entity_id": "code:function:204596e8ad39d1f9",
       "entity_name": "load_models",
       "entity_kind": "function",
@@ -2688,6 +2731,46 @@
       ]
     },
     {
+      "entity_id": "code:function:353dfa2fea276913",
+      "entity_name": "_router",
+      "entity_kind": "function",
+      "spec_filename": "COST.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, models"
+      ]
+    },
+    {
+      "entity_id": "code:function:353dfa2fea276913",
+      "entity_name": "_router",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, models"
+      ]
+    },
+    {
+      "entity_id": "code:function:353dfa2fea276913",
+      "entity_name": "_router",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, models"
+      ]
+    },
+    {
+      "entity_id": "code:function:353dfa2fea276913",
+      "entity_name": "_router",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, models"
+      ]
+    },
+    {
       "entity_id": "code:function:3981a2880a1b6e70",
       "entity_name": "build_default_gate",
       "entity_kind": "function",
@@ -2961,6 +3044,17 @@
       ]
     },
     {
+      "entity_id": "code:function:4200b7db3c3b45c2",
+      "entity_name": "build_default_affinity",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
+      ]
+    },
+    {
       "entity_id": "code:function:439ca975fc22b398",
       "entity_name": "test_budget_unlimited_allows",
       "entity_kind": "function",
@@ -3032,6 +3126,94 @@
       ]
     },
     {
+      "entity_id": "code:function:5029b2e019eae5b8",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model, quality"
+      ]
+    },
+    {
+      "entity_id": "code:function:5029b2e019eae5b8",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5029b2e019eae5b8",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5029b2e019eae5b8",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5029b2e019eae5b8",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5029b2e019eae5b8",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5029b2e019eae5b8",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5029b2e019eae5b8",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, _model"
+      ]
+    },
+    {
       "entity_id": "code:function:5089d63da807a56c",
       "entity_name": "test_explain_requires_prompt",
       "entity_kind": "function",
@@ -3095,6 +3277,16 @@
       "entity_id": "code:function:531c2b3f6c164970",
       "entity_name": "test_classifier_robust_cases",
       "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, text, tests/test_routing.py"
+      ]
+    },
+    {
+      "entity_id": "code:function:531c2b3f6c164970",
+      "entity_name": "test_classifier_robust_cases",
+      "entity_kind": "function",
       "spec_filename": "COST.md",
       "confidence": 0.59,
       "reasons": [
@@ -3129,16 +3321,6 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, text"
-      ]
-    },
-    {
-      "entity_id": "code:function:531c2b3f6c164970",
-      "entity_name": "test_classifier_robust_cases",
-      "entity_kind": "function",
-      "spec_filename": "ROUTING.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, tests/test_routing.py"
       ]
     },
     {
@@ -3530,6 +3712,126 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, tests/test_routing.py"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, key, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, key, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, key, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, key, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_KEYS.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, key, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, key, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "COST.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: key, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:5b5be021615110c7",
+      "entity_name": "_route",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, model"
       ]
     },
     {
@@ -4222,6 +4524,17 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, tests/test_features.py"
+      ]
+    },
+    {
+      "entity_id": "code:function:680267422307cddd",
+      "entity_name": "_rationale",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
       ]
     },
     {
@@ -5490,7 +5803,29 @@
       "entity_id": "code:function:871b73a4a7c7b403",
       "entity_name": "run",
       "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: run, run"
+      ]
+    },
+    {
+      "entity_id": "code:function:871b73a4a7c7b403",
+      "entity_name": "run",
+      "entity_kind": "function",
       "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: run, run"
+      ]
+    },
+    {
+      "entity_id": "code:function:871b73a4a7c7b403",
+      "entity_name": "run",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
       "confidence": 0.79,
       "reasons": [
         "entity name appears in spec",
@@ -6188,6 +6523,17 @@
       "entity_id": "code:function:9b91e2e882be9b65",
       "entity_name": "one",
       "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: one, def, one, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:9b91e2e882be9b65",
+      "entity_name": "one",
+      "entity_kind": "function",
       "spec_filename": "SPEC_AUTHORING_STANDARD.md",
       "confidence": 0.95,
       "reasons": [
@@ -6204,6 +6550,17 @@
       "reasons": [
         "entity name appears in spec",
         "matched tokens: one, def, one, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:9b91e2e882be9b65",
+      "entity_name": "one",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: one, one, int"
       ]
     },
     {
@@ -6241,16 +6598,6 @@
       "entity_name": "one",
       "entity_kind": "function",
       "spec_filename": "PROJECT_PROFILE.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, int"
-      ]
-    },
-    {
-      "entity_id": "code:function:9b91e2e882be9b65",
-      "entity_name": "one",
-      "entity_kind": "function",
-      "spec_filename": "ROUTING.md",
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, int"
@@ -6354,6 +6701,17 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, tests/test_features.py"
+      ]
+    },
+    {
+      "entity_id": "code:function:9d4ebe1055d2a8d2",
+      "entity_name": "_confidence",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
       ]
     },
     {
@@ -6782,6 +7140,136 @@
       ]
     },
     {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "COST.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, optional, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, optional, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, optional, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, optional, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_KEYS.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, optional, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: optional, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:b504fa1d0d21f623",
+      "entity_name": "recommend_endpoint",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
       "entity_id": "code:function:b628d07a8faa43b3",
       "entity_name": "_display_banner",
       "entity_kind": "function",
@@ -6874,6 +7362,46 @@
       ]
     },
     {
+      "entity_id": "code:function:b997428c121e2c4b",
+      "entity_name": "_registry",
+      "entity_kind": "function",
+      "spec_filename": "COST.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, models"
+      ]
+    },
+    {
+      "entity_id": "code:function:b997428c121e2c4b",
+      "entity_name": "_registry",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, models"
+      ]
+    },
+    {
+      "entity_id": "code:function:b997428c121e2c4b",
+      "entity_name": "_registry",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, models"
+      ]
+    },
+    {
+      "entity_id": "code:function:b997428c121e2c4b",
+      "entity_name": "_registry",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, models"
+      ]
+    },
+    {
       "entity_id": "code:function:ba0079184eea4ea3",
       "entity_name": "test_model_selection",
       "entity_kind": "function",
@@ -6962,6 +7490,154 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, tests/test_routing.py"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model, tasks"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model, tasks, latency"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model, quality, latency, cost"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model, tasks"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, def, _model"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.83,
+      "reasons": [
+        "matched tokens: tasks, latency, 0.0, cost"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: _model, _model"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, latency, cost"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, latency, cost"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "COST.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, cost"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_KEYS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, tps"
+      ]
+    },
+    {
+      "entity_id": "code:function:cbad5a96678fb0a2",
+      "entity_name": "_model",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, cost"
       ]
     },
     {
@@ -7577,6 +8253,17 @@
       ]
     },
     {
+      "entity_id": "code:function:da0c9ecf6147d234",
+      "entity_name": "recommend_for",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
+      ]
+    },
+    {
       "entity_id": "code:function:dad23137bc0c0e06",
       "entity_name": "signal_handler",
       "entity_kind": "function",
@@ -8185,6 +8872,16 @@
       "entity_id": "code:function:ef03b7fd85d3b3b3",
       "entity_name": "fake_chat",
       "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: model, stream"
+      ]
+    },
+    {
+      "entity_id": "code:function:ef03b7fd85d3b3b3",
+      "entity_name": "fake_chat",
+      "entity_kind": "function",
       "spec_filename": "SDD_OPERATING_MODEL.md",
       "confidence": 0.59,
       "reasons": [
@@ -8219,6 +8916,16 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:ef03b7fd85d3b3b3",
+      "entity_name": "fake_chat",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: model, stream"
       ]
     },
     {
@@ -8319,6 +9026,16 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:ef7b2b6bdd2b2752",
+      "entity_name": "list_models",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: str, router"
       ]
     },
     {
@@ -8896,6 +9613,17 @@
       ]
     },
     {
+      "entity_id": "code:function:ffc3d463a096519a",
+      "entity_name": "recommend_all",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
+      ]
+    },
+    {
       "entity_id": "code:method:050e9073f7c21ab8",
       "entity_name": "record_error",
       "entity_kind": "method",
@@ -9194,6 +9922,16 @@
       "entity_id": "code:method:10db817fd09f64e0",
       "entity_name": "_update_models",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:10db817fd09f64e0",
+      "entity_name": "_update_models",
+      "entity_kind": "method",
       "spec_filename": "SDD_OPERATING_MODEL.md",
       "confidence": 0.71,
       "reasons": [
@@ -9449,6 +10187,17 @@
       "entity_id": "code:method:21bea021bdcb9015",
       "entity_name": "json",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: json, json"
+      ]
+    },
+    {
+      "entity_id": "code:method:21bea021bdcb9015",
+      "entity_name": "json",
+      "entity_kind": "method",
       "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
       "confidence": 0.79,
       "reasons": [
@@ -9650,6 +10399,16 @@
       "entity_id": "code:method:2845cb8c5ac91563",
       "entity_name": "__init__",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: str, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:2845cb8c5ac91563",
+      "entity_name": "__init__",
+      "entity_kind": "method",
       "spec_filename": "TOKENOMICS.md",
       "confidence": 0.59,
       "reasons": [
@@ -9739,6 +10498,17 @@
       "reasons": [
         "entity name appears in spec",
         "matched tokens: size, def, size"
+      ]
+    },
+    {
+      "entity_id": "code:method:306c74e3814a5b9f",
+      "entity_name": "size",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: size, size"
       ]
     },
     {
@@ -9891,6 +10661,151 @@
       "reasons": [
         "explicit @spec annotation",
         "section: Requirements"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "COST.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: set, def, set, self, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: set, def, set, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: set, def, set, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: set, set, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: set, set, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, self, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "SECURITY_AND_KEYS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:32c445ee24cb67db",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
       ]
     },
     {
@@ -10222,6 +11137,16 @@
       "entity_id": "code:method:3fbc4b920a9a424f",
       "entity_name": "_update_rate",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:3fbc4b920a9a424f",
+      "entity_name": "_update_rate",
+      "entity_kind": "method",
       "spec_filename": "SDD_OPERATING_MODEL.md",
       "confidence": 0.71,
       "reasons": [
@@ -10438,6 +11363,16 @@
       "entity_id": "code:method:5119ad5bb7fd5f0d",
       "entity_name": "snapshot",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:5119ad5bb7fd5f0d",
+      "entity_name": "snapshot",
+      "entity_kind": "method",
       "spec_filename": "SDD_OPERATING_MODEL.md",
       "confidence": 0.71,
       "reasons": [
@@ -10592,6 +11527,16 @@
       "entity_id": "code:method:53ff0105acff4bbe",
       "entity_name": "snapshot",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:53ff0105acff4bbe",
+      "entity_name": "snapshot",
+      "entity_kind": "method",
       "spec_filename": "SDD_OPERATING_MODEL.md",
       "confidence": 0.71,
       "reasons": [
@@ -10706,6 +11651,16 @@
       "confidence": 0.71,
       "reasons": [
         "matched tokens: def, self, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:55c1fc7ecda4f2d5",
+      "entity_name": "_update_summary",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
       ]
     },
     {
@@ -11007,6 +11962,182 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "COST.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, self, str, optional"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, str, optional"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, self, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, str, optional"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, get, str, optional"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, str, optional"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "SECURITY_AND_KEYS.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, str, optional"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, get, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, def, get"
+      ]
+    },
+    {
+      "entity_id": "code:method:6275e6550382e2bd",
+      "entity_name": "get",
+      "entity_kind": "method",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, get, str"
       ]
     },
     {
@@ -11392,6 +12523,49 @@
       ]
     },
     {
+      "entity_id": "code:method:79e8dc1bd751f9a0",
+      "entity_name": "size",
+      "entity_kind": "method",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: size, def, size, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:79e8dc1bd751f9a0",
+      "entity_name": "size",
+      "entity_kind": "method",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: size, def, size"
+      ]
+    },
+    {
+      "entity_id": "code:method:79e8dc1bd751f9a0",
+      "entity_name": "size",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: size, size"
+      ]
+    },
+    {
+      "entity_id": "code:method:79e8dc1bd751f9a0",
+      "entity_name": "size",
+      "entity_kind": "method",
+      "spec_filename": "COST.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
       "entity_id": "code:method:7a099b3b7958ec41",
       "entity_name": "reset",
       "entity_kind": "method",
@@ -11450,6 +12624,17 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:83422ae3ac46b24a",
+      "entity_name": "_session_pin",
+      "entity_kind": "method",
+      "spec_filename": "ROUTING.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
       ]
     },
     {
@@ -11554,6 +12739,17 @@
       "reasons": [
         "entity name appears in spec",
         "matched tokens: stream, def, stream, return, tests/test_features.py"
+      ]
+    },
+    {
+      "entity_id": "code:method:83c21ea68edea4c7",
+      "entity_name": "stream",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: stream, stream, return"
       ]
     },
     {
@@ -12004,6 +13200,16 @@
       "entity_id": "code:method:843eecf21e10f3b2",
       "entity_name": "snapshot",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:843eecf21e10f3b2",
+      "entity_name": "snapshot",
+      "entity_kind": "method",
       "spec_filename": "SDD_OPERATING_MODEL.md",
       "confidence": 0.71,
       "reasons": [
@@ -12229,6 +13435,17 @@
       "entity_id": "code:method:8b32a9ceef20ad1b",
       "entity_name": "get",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, get"
+      ]
+    },
+    {
+      "entity_id": "code:method:8b32a9ceef20ad1b",
+      "entity_name": "get",
+      "entity_kind": "method",
       "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
       "confidence": 0.79,
       "reasons": [
@@ -12328,6 +13545,16 @@
       "confidence": 0.71,
       "reasons": [
         "matched tokens: def, self, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:956090e3a8a8a541",
+      "entity_name": "snapshot",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
       ]
     },
     {
@@ -12465,6 +13692,16 @@
       "entity_id": "code:method:9bb4e484f1783731",
       "entity_name": "_update_log",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:9bb4e484f1783731",
+      "entity_name": "_update_log",
+      "entity_kind": "method",
       "spec_filename": "SDD_OPERATING_MODEL.md",
       "confidence": 0.71,
       "reasons": [
@@ -12561,6 +13798,17 @@
       "reasons": [
         "entity name appears in spec",
         "matched tokens: json, def, json, return, tests/test_features.py"
+      ]
+    },
+    {
+      "entity_id": "code:method:9c3081632e47cfde",
+      "entity_name": "json",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: json, json, return, data"
       ]
     },
     {
@@ -12726,6 +13974,17 @@
       "confidence": 0.95,
       "reasons": [
         "matched tokens: def, str, any, optional, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:a1bff7346271d451",
+      "entity_name": "set",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: set, set, str, any, optional, int"
       ]
     },
     {
@@ -12994,6 +14253,17 @@
       "entity_id": "code:method:a3e80efff4e49bee",
       "entity_name": "clear",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: clear, clear"
+      ]
+    },
+    {
+      "entity_id": "code:method:a3e80efff4e49bee",
+      "entity_name": "clear",
+      "entity_kind": "method",
       "spec_filename": "COST.md",
       "confidence": 0.59,
       "reasons": [
@@ -13091,6 +14361,16 @@
       "confidence": 0.71,
       "reasons": [
         "matched tokens: def, self, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:a45b36c6b4859f62",
+      "entity_name": "snapshot",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
       ]
     },
     {
@@ -13205,6 +14485,27 @@
       ]
     },
     {
+      "entity_id": "code:method:aab0c63a29501b8a",
+      "entity_name": "reset",
+      "entity_kind": "method",
+      "spec_filename": "COST.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: reset, def, reset, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:aab0c63a29501b8a",
+      "entity_name": "reset",
+      "entity_kind": "method",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
       "entity_id": "code:method:aac4dd2d13c132e3",
       "entity_name": "gateway_api_key_set",
       "entity_kind": "method",
@@ -13240,6 +14541,17 @@
       "entity_name": "state",
       "entity_kind": "method",
       "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: state, def, state, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:ad07813a4572ca24",
+      "entity_name": "state",
+      "entity_kind": "method",
+      "spec_filename": "ROUTING.md",
       "confidence": 0.95,
       "reasons": [
         "entity name appears in spec",
@@ -13294,6 +14606,17 @@
       "entity_id": "code:method:ad07813a4572ca24",
       "entity_name": "state",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: state, state, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:ad07813a4572ca24",
+      "entity_name": "state",
+      "entity_kind": "method",
       "spec_filename": "COST.md",
       "confidence": 0.71,
       "reasons": [
@@ -13325,16 +14648,6 @@
       "entity_name": "state",
       "entity_kind": "method",
       "spec_filename": "PROJECT_PROFILE.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:method:ad07813a4572ca24",
-      "entity_name": "state",
-      "entity_kind": "method",
-      "spec_filename": "ROUTING.md",
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, str"
@@ -13532,6 +14845,146 @@
       ]
     },
     {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "COST.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, self, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, self, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "GLOBAL_SECURITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "SECURITY_AND_KEYS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:bc6bfcb39014289a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
       "entity_id": "code:method:bd0df8b282ac6e59",
       "entity_name": "get_routing_stats",
       "entity_kind": "method",
@@ -13691,6 +15144,16 @@
       "entity_id": "code:method:cb03a919e4b482e5",
       "entity_name": "__init__",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: optional, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:cb03a919e4b482e5",
+      "entity_name": "__init__",
+      "entity_kind": "method",
       "spec_filename": "SDD_OPERATING_MODEL.md",
       "confidence": 0.59,
       "reasons": [
@@ -13805,6 +15268,16 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:method:cba1a6b750efa77d",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: 0.0, int"
       ]
     },
     {
@@ -14485,6 +15958,16 @@
       "entity_id": "code:method:f031257f27894f41",
       "entity_name": "_headers",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: optional, str, dict"
+      ]
+    },
+    {
+      "entity_id": "code:method:f031257f27894f41",
+      "entity_name": "_headers",
+      "entity_kind": "method",
       "spec_filename": "ROUTING.md",
       "confidence": 0.71,
       "reasons": [
@@ -14854,6 +16337,17 @@
       "entity_id": "code:method:faebb79299a96301",
       "entity_name": "get",
       "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: get, get, str, optional, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:faebb79299a96301",
+      "entity_name": "get",
+      "entity_kind": "method",
       "spec_filename": "ROUTING.md",
       "confidence": 0.95,
       "reasons": [
@@ -15059,6 +16553,17 @@
       ]
     },
     {
+      "entity_id": "code:route:a7cf37a079fb62d4",
+      "entity_name": "GET /v1/recommend",
+      "entity_kind": "route",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
+      ]
+    },
+    {
       "entity_id": "code:route:d01cd1217da24d22",
       "entity_name": "GET /",
       "entity_kind": "route",
@@ -15110,6 +16615,17 @@
       "confidence": 0.95,
       "reasons": [
         "entity name appears in spec",
+        "route path appears in spec",
+        "matched tokens: get, /metrics, get, /metrics, /metrics"
+      ]
+    },
+    {
+      "entity_id": "code:route:d95d86217b999cea",
+      "entity_name": "GET /metrics",
+      "entity_kind": "route",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.95,
+      "reasons": [
         "route path appears in spec",
         "matched tokens: get, /metrics, get, /metrics, /metrics"
       ]
@@ -15253,7 +16769,7 @@
       "path": "nvidia_smartroute/gateway/server.py",
       "name": "health_check",
       "signature": "async def health_check():",
-      "start_line": 284
+      "start_line": 285
     },
     {
       "id": "code:function:c5ba1ae00dc55509",
@@ -15261,7 +16777,7 @@
       "path": "nvidia_smartroute/gateway/server.py",
       "name": "root",
       "signature": "async def root():",
-      "start_line": 297
+      "start_line": 298
     },
     {
       "id": "code:function:f29cc72c77b17dab",
@@ -15269,7 +16785,7 @@
       "path": "nvidia_smartroute/gateway/server.py",
       "name": "dashboard_page",
       "signature": "async def dashboard_page():",
-      "start_line": 316
+      "start_line": 317
     },
     {
       "id": "code:function:ddbfe37e4b54bc40",
@@ -15277,7 +16793,7 @@
       "path": "nvidia_smartroute/gateway/server.py",
       "name": "readiness_check",
       "signature": "async def readiness_check():",
-      "start_line": 405
+      "start_line": 406
     },
     {
       "id": "code:function:539a32bfe7d00be7",
@@ -15285,7 +16801,7 @@
       "path": "nvidia_smartroute/gateway/server.py",
       "name": "get_metrics",
       "signature": "async def get_metrics():",
-      "start_line": 444
+      "start_line": 445
     },
     {
       "id": "code:function:8f17c311d313bb1b",
@@ -15293,7 +16809,7 @@
       "path": "nvidia_smartroute/gateway/server.py",
       "name": "get_metrics_prometheus",
       "signature": "async def get_metrics_prometheus():",
-      "start_line": 451
+      "start_line": 452
     },
     {
       "id": "code:function:f54cdec478facecc",
@@ -15318,30 +16834,166 @@
       "name": "_isolate_models_file",
       "signature": "def _isolate_models_file(monkeypatch):",
       "start_line": 9
+    },
+    {
+      "id": "code:function:9cdd3f07d3e517d3",
+      "kind": "function",
+      "path": "tests/test_affinity.py",
+      "name": "_clean",
+      "signature": "def _clean():",
+      "start_line": 42
+    },
+    {
+      "id": "code:function:f7a080724bc3ce0c",
+      "kind": "function",
+      "path": "tests/test_affinity.py",
+      "name": "test_affinity_off_is_stateless",
+      "signature": "def test_affinity_off_is_stateless(monkeypatch):",
+      "start_line": 52
+    },
+    {
+      "id": "code:function:1031117334c8af32",
+      "kind": "function",
+      "path": "tests/test_affinity.py",
+      "name": "test_affinity_reuses_pinned_model",
+      "signature": "def test_affinity_reuses_pinned_model(monkeypatch):",
+      "start_line": 64
+    },
+    {
+      "id": "code:function:85eeaacd09fe8d53",
+      "kind": "function",
+      "path": "tests/test_affinity.py",
+      "name": "test_affinity_on_but_no_key_is_stateless",
+      "signature": "def test_affinity_on_but_no_key_is_stateless(monkeypatch):",
+      "start_line": 80
+    },
+    {
+      "id": "code:function:a08f7494413e03e5",
+      "kind": "function",
+      "path": "tests/test_affinity.py",
+      "name": "test_affinity_failsafe_on_deregistered_pin",
+      "signature": "def test_affinity_failsafe_on_deregistered_pin(monkeypatch):",
+      "start_line": 90
+    },
+    {
+      "id": "code:function:66583bc343e3a79c",
+      "kind": "function",
+      "path": "tests/test_affinity.py",
+      "name": "test_affinity_failsafe_on_circuit_broken_pin",
+      "signature": "def test_affinity_failsafe_on_circuit_broken_pin(monkeypatch):",
+      "start_line": 101
+    },
+    {
+      "id": "code:function:448093e6a7669c5b",
+      "kind": "function",
+      "path": "tests/test_affinity.py",
+      "name": "test_explicit_model_beats_pin_and_is_not_stored",
+      "signature": "def test_explicit_model_beats_pin_and_is_not_stored(monkeypatch):",
+      "start_line": 116
+    },
+    {
+      "id": "code:function:be34ea120e145245",
+      "kind": "function",
+      "path": "tests/test_affinity.py",
+      "name": "test_affinity_store_is_bounded_and_ttl_expires",
+      "signature": "def test_affinity_store_is_bounded_and_ttl_expires():",
+      "start_line": 127
+    },
+    {
+      "id": "code:function:139f819750be0b7d",
+      "kind": "function",
+      "path": "tests/test_recommend.py",
+      "name": "test_recommends_top_scored_supporting_model_and_is_deterministic",
+      "signature": "def test_recommends_top_scored_supporting_model_and_is_deterministic():",
+      "start_line": 30
+    },
+    {
+      "id": "code:function:983aa8be48d96335",
+      "kind": "function",
+      "path": "tests/test_recommend.py",
+      "name": "test_reports_no_model_for_unsupported_task",
+      "signature": "def test_reports_no_model_for_unsupported_task():",
+      "start_line": 45
+    },
+    {
+      "id": "code:function:e912daa8f8e9cb53",
+      "kind": "function",
+      "path": "tests/test_recommend.py",
+      "name": "test_rationale_is_explainable_with_alternatives",
+      "signature": "def test_rationale_is_explainable_with_alternatives():",
+      "start_line": 54
+    },
+    {
+      "id": "code:function:4a08ddf1c51150c6",
+      "kind": "function",
+      "path": "tests/test_recommend.py",
+      "name": "test_basis_prefers_measured_latency_over_estimate",
+      "signature": "def test_basis_prefers_measured_latency_over_estimate():",
+      "start_line": 68
+    },
+    {
+      "id": "code:function:b8abb115ec0745c2",
+      "kind": "function",
+      "path": "tests/test_recommend.py",
+      "name": "test_advisor_runs_without_gateway_or_network",
+      "signature": "def test_advisor_runs_without_gateway_or_network():",
+      "start_line": 80
+    },
+    {
+      "id": "code:function:2dde46539b0253d6",
+      "kind": "function",
+      "path": "tests/test_recommend.py",
+      "name": "test_endpoint_all_one_and_unknown",
+      "signature": "def test_endpoint_all_one_and_unknown(monkeypatch):",
+      "start_line": 87
+    },
+    {
+      "id": "code:function:a69fb0bc12bdfd66",
+      "kind": "function",
+      "path": "tests/test_recommend.py",
+      "name": "test_cli_recommend_renders_without_gateway",
+      "signature": "def test_cli_recommend_renders_without_gateway():",
+      "start_line": 99
+    },
+    {
+      "id": "code:function:963ec488c6e24898",
+      "kind": "function",
+      "path": "tests/test_recommend.py",
+      "name": "test_confidence_reflects_score_margin_and_low_confidence_flag",
+      "signature": "def test_confidence_reflects_score_margin_and_low_confidence_flag(monkeypatch):",
+      "start_line": 109
+    },
+    {
+      "id": "code:function:7245cf1f8a75cc45",
+      "kind": "function",
+      "path": "tests/test_recommend.py",
+      "name": "test_recommend_for_helper",
+      "signature": "def test_recommend_for_helper():",
+      "start_line": 138
     }
   ],
   "aliases": [],
   "coverage": {
-    "governed_entity_count": 318,
-    "linked_entity_count": 309,
-    "unlinked_entity_count": 9,
-    "coverage_ratio": 0.9717,
+    "governed_entity_count": 355,
+    "linked_entity_count": 329,
+    "unlinked_entity_count": 26,
+    "coverage_ratio": 0.9268,
     "linked_by_kind": {
-      "class": 36,
-      "method": 105,
-      "function": 158,
-      "route": 10
+      "class": 37,
+      "method": 111,
+      "function": 170,
+      "route": 11
     },
     "unlinked_by_kind": {
-      "function": 9
+      "function": 26
     }
   },
   "drift": {
-    "score": 0.0283,
+    "score": 0.0732,
     "severity": "low",
     "signals": [
-      "9 of 318 governable code entities have no local spec link",
-      "17 local spec documents scanned"
+      "26 of 355 governable code entities have no local spec link",
+      "18 local spec documents scanned"
     ]
   },
   "embedding_profile": {
