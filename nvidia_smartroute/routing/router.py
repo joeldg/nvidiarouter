@@ -574,7 +574,24 @@ class RequestRouter:
         return self.model_registry.select_best_model(task_type)
 
     # @spec[ROUTING.md#Requirements]
-    async def route_request(
+    def _session_pin(self, session_key: str) -> Optional[ModelCapability]:
+        """Return a session's healthy pinned model, or None (ROUTING.md req.10).
+
+        Fails safe: a pin whose model is deregistered or circuit-broken yields
+        None so the caller re-routes by normal scoring.
+        """
+        pinned_id = session_affinity.get(session_key)
+        if not pinned_id:
+            return None
+        pinned = self.model_registry.get_model(pinned_id)
+        if pinned is None:
+            return None
+        if settings.circuit_breaker_enabled and not breaker.allow(pinned_id):
+            return None
+        return pinned
+
+    # @spec[ROUTING.md#Requirements]
+    async def route_request(  # noqa: C901
         self,
         messages: List[Dict[str, str]],
         model: Optional[str] = None,
@@ -621,19 +638,12 @@ class RequestRouter:
         # Session affinity (ROUTING.md req.9): when enabled and the request
         # carries a session key — and no explicit model override was given —
         # reuse this session's previously pinned model instead of re-scoring.
-        # Fail safe (req.10): ignore a pin whose model is deregistered or
-        # circuit-broken and fall through to normal selection + re-pin.
         affinity_on = settings.session_affinity and bool(session_key) and not model
         if affinity_on and selected_model is None:
-            pinned_id = session_affinity.get(session_key)
-            if pinned_id:
-                pinned = self.model_registry.get_model(pinned_id)
-                healthy = pinned is not None and (
-                    not settings.circuit_breaker_enabled or breaker.allow(pinned_id)
-                )
-                if pinned is not None and healthy:
-                    selected_model = pinned
-                    from_session = True
+            pinned = self._session_pin(session_key)
+            if pinned is not None:
+                selected_model = pinned
+                from_session = True
 
         # If no specific/pinned model was chosen, select the best model for the
         # task — via the adaptive bandit or static scoring.

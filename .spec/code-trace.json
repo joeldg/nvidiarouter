@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-07T03:53:10.402Z",
+  "generated_at": "2026-07-07T04:01:46.060Z",
   "root": "nvidiarouter",
   "specs_dir": "specs",
   "spec_count": 18,
-  "entity_count": 649,
+  "entity_count": 650,
   "links": [
     {
       "entity_id": "code:class:00ecb5aa5fe7b787",
@@ -12627,6 +12627,17 @@
       ]
     },
     {
+      "entity_id": "code:method:83422ae3ac46b24a",
+      "entity_name": "_session_pin",
+      "entity_kind": "method",
+      "spec_filename": "ROUTING.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
+      ]
+    },
+    {
       "entity_id": "code:method:8371552e524cfeb6",
       "entity_name": "__init__",
       "entity_kind": "method",
@@ -16963,13 +16974,13 @@
   ],
   "aliases": [],
   "coverage": {
-    "governed_entity_count": 354,
-    "linked_entity_count": 328,
+    "governed_entity_count": 355,
+    "linked_entity_count": 329,
     "unlinked_entity_count": 26,
-    "coverage_ratio": 0.9266,
+    "coverage_ratio": 0.9268,
     "linked_by_kind": {
       "class": 37,
-      "method": 110,
+      "method": 111,
       "function": 170,
       "route": 11
     },
@@ -16978,10 +16989,10 @@
     }
   },
   "drift": {
-    "score": 0.0734,
+    "score": 0.0732,
     "severity": "low",
     "signals": [
-      "26 of 354 governable code entities have no local spec link",
+      "26 of 355 governable code entities have no local spec link",
       "18 local spec documents scanned"
     ]
   },

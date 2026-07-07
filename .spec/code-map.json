@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-07T03:53:10.402Z",
+  "generated_at": "2026-07-07T04:01:46.060Z",
   "root": "nvidiarouter",
-  "entity_count": 649,
+  "entity_count": 650,
   "languages": [
     "Python"
   ],
@@ -1551,8 +1551,8 @@
       "signature": "nvidia_smartroute/routing/router.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 761,
-      "hash": "56665b2234af6cfafbf15db2"
+      "end_line": 771,
+      "hash": "f4bd2327d1cc994d1dcf9e1b"
     },
     {
       "id": "code:import:0180e23036e6d549",
@@ -2029,15 +2029,32 @@
       }
     },
     {
+      "id": "code:method:83422ae3ac46b24a",
+      "kind": "method",
+      "language": "Python",
+      "path": "nvidia_smartroute/routing/router.py",
+      "name": "_session_pin",
+      "signature": "def _session_pin(self, session_key: str) -> Optional[ModelCapability]:",
+      "start_line": 577,
+      "start_column": 5,
+      "end_line": 577,
+      "hash": "b8197c7157da2ed476e60bac",
+      "parent_id": "code:class:c1ba9f916c3b2a54",
+      "metadata": {
+        "async": false,
+        "spec_ref": "ROUTING.md#Requirements"
+      }
+    },
+    {
       "id": "code:method:bd0df8b282ac6e59",
       "kind": "method",
       "language": "Python",
       "path": "nvidia_smartroute/routing/router.py",
       "name": "get_routing_stats",
       "signature": "def get_routing_stats(self) -> dict:",
-      "start_line": 690,
+      "start_line": 700,
       "start_column": 5,
-      "end_line": 690,
+      "end_line": 700,
       "hash": "5d88faf37a523a88587c7bb6",
       "parent_id": "code:class:c1ba9f916c3b2a54",
       "metadata": {
@@ -10334,13 +10351,13 @@
     }
   ],
   "coverage": {
-    "governed_entity_count": 354,
-    "linked_entity_count": 328,
+    "governed_entity_count": 355,
+    "linked_entity_count": 329,
     "unlinked_entity_count": 26,
-    "coverage_ratio": 0.9266,
+    "coverage_ratio": 0.9268,
     "linked_by_kind": {
       "class": 37,
-      "method": 110,
+      "method": 111,
       "function": 170,
       "route": 11
     },
@@ -10349,10 +10366,10 @@
     }
   },
   "drift": {
-    "score": 0.0734,
+    "score": 0.0732,
     "severity": "low",
     "signals": [
-      "26 of 354 governable code entities have no local spec link",
+      "26 of 355 governable code entities have no local spec link",
       "18 local spec documents scanned"
     ]
   }
