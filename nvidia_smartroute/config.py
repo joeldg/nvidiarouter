@@ -88,6 +88,24 @@ class Settings(BaseSettings):
         default=0.1, ge=0.0, le=1.0,
         description="Exploration rate for adaptive routing (0..1)",
     )
+    # @spec[ROUTING.md#Requirements]
+    # Optional, default-off conversation continuity: when enabled and a request
+    # carries a stable session key (X-Session-Id header or the OpenAI `user`
+    # field), the router reuses that session's previously selected model.
+    session_affinity: bool = Field(
+        default=False,
+        description="Pin a conversation to its first-selected model by session key",
+    )
+    # @spec[ROUTING.md#Requirements]
+    session_affinity_ttl: int = Field(
+        default=900, ge=1,
+        description="Seconds a session's model pin stays valid",
+    )
+    # @spec[ROUTING.md#Requirements]
+    session_affinity_max: int = Field(
+        default=10000, ge=1,
+        description="Maximum pinned sessions retained (LRU eviction beyond this)",
+    )
     # @spec[MODEL_DISCOVERY.md#Requirements]
     # Discovered models file (written by `nvidia-smartroute discover`). When
     # present, the router loads these on top of the built-in defaults.

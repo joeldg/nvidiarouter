@@ -26,6 +26,7 @@ from ..agents import autoscale_engine
 from ..keypool import key_pool, KeyPoolExhaustedError
 from ..cache import response_cache, make_key
 from ..circuit import breaker
+from ..affinity import session_affinity
 from ..concurrency import gate, QueueFullError
 from ..cost import budget, compute_cost
 from ..bandit import adaptive_router
@@ -537,6 +538,9 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
         stream = body.get("stream", False)
         max_tokens = body.get("max_tokens")
         temperature = body.get("temperature")
+        # Session affinity key: explicit X-Session-Id header, else the OpenAI
+        # `user` field. Only consulted when session_affinity is enabled.
+        session_key = request.headers.get("X-Session-Id") or body.get("user")
 
         # Remove parameters we handle/pass separately so they aren't forwarded
         # twice (as explicit args and again via **body_without_model).
@@ -572,6 +576,7 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             model=model,
             max_tokens=max_tokens,
             temperature=temperature,
+            session_key=session_key,
             **body_without_model
         )
 
@@ -640,7 +645,8 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
                     "X-Request-ID": request_id,
                     "X-Selected-Model": selected_model.model_id,
                     "X-Task-Type": routing_decision.task_type.value,
-                    "X-Routing-Confidence": str(routing_decision.confidence)
+                    "X-Routing-Confidence": str(routing_decision.confidence),
+                    "X-Session-Affinity": str(routing_decision.from_session).lower(),
                 }
             )
 
@@ -650,6 +656,7 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             "X-Selected-Model": selected_model.model_id,
             "X-Task-Type": routing_decision.task_type.value,
             "X-Routing-Confidence": str(routing_decision.confidence),
+            "X-Session-Affinity": str(routing_decision.from_session).lower(),
         }
 
         # Non-streaming response.
@@ -723,6 +730,10 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
                 if fell_back:
                     response_headers["X-Selected-Model"] = used_model.model_id
                     response_headers["X-Model-Fallback"] = "true"
+                    # Re-pin the session to the model that actually served, so a
+                    # pinned conversation follows a mid-call fallback (req.10).
+                    if settings.session_affinity and session_key and not model:
+                        session_affinity.set(session_key, used_model.model_id)
 
             # Cache the successful response for identical future requests.
             if cache_key is not None:
