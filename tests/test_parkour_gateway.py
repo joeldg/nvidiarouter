@@ -66,8 +66,10 @@ def test_parkour_response_headers_and_opt_in_trace(monkeypatch):
     assert body["usage"]["total_tokens"] == 8
     assert body["parkour"]["nodes"] == [{
         "id": "one", "status": "succeeded", "model": "worker-model",
-        "context_truncated": False,
+        "context_truncated": False, "citations": 0,
     }]
+    # Research lane is disabled by default, so no research summary is attached.
+    assert "research" not in body["parkour"]
     assert response.headers["x-autoscale-type"] == "parkour"
     assert response.headers["x-agent-count"] == "1"
     assert len(response.headers["x-parkour-run-id"]) == 36

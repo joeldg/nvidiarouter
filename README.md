@@ -217,6 +217,13 @@ All settings are environment variables (see [.env.example](./.env.example)):
 | `PARKOUR_MAX_CALLS` / `PARKOUR_TIMEOUT_SECONDS` | `12` / `300` | PARKOUR call and wall-clock bounds |
 | `PARKOUR_MAX_CONTEXT_CHARS` / `PARKOUR_MAX_OUTPUT_CHARS` | `24000` / `24000` | PARKOUR per-node context/output bounds |
 | `PARKOUR_MAX_TOKENS` / `PARKOUR_MAX_COST_USD` | `64000` / `1.0` | PARKOUR aggregate token and estimated-cost bounds |
+| `ENABLE_PARKOUR_RESEARCH` | `False` | Allow PARKOUR workers to use the built-in web-research lane |
+| `PARKOUR_RESEARCH_ENDPOINT` / `PARKOUR_RESEARCH_API_KEY` | – / – | HTTPS search-provider endpoint and key (key masked wherever surfaced) |
+| `PARKOUR_RESEARCH_MAX_SEARCHES_PER_RUN` / `..._PER_NODE` | `6` / `2` | Research search-count bounds |
+| `PARKOUR_RESEARCH_MAX_QUERY_CHARS` / `..._MAX_RESULTS` / `..._SNIPPET_CHARS` | `256` / `5` / `500` | Per-query, per-result, and snippet bounds |
+| `PARKOUR_RESEARCH_MAX_BYTES` / `..._TIMEOUT_SECONDS` | `200000` / `15` | Research bytes-retained and wall-clock bounds |
+| `PARKOUR_RESEARCH_COST_PER_SEARCH_USD` / `..._MAX_COST_USD` | `0.005` / `0.1` | Estimated per-search and per-run research spend (rolled into PARKOUR cost) |
+| `PARKOUR_RESEARCH_ALLOW_DOMAINS` / `..._BLOCK_DOMAINS` | – / – | Comma-separated research domain allow/block lists (block wins) |
 | `DEFAULT_EMBEDDING_MODEL` | `nvidia/nv-embedqa-e5-v5` | Embeddings model |
 | `LOG_LEVEL` / `LOG_JSON` | `INFO` / `False` | Logging level / JSON output |
 
@@ -271,6 +278,32 @@ usually takes longer than a normal completion. Tune `PARKOUR_MAX_NODES`,
 streaming progress events, but it does not provide true upstream token streaming
 for internal worker calls. It still rejects tool execution. Keep the feature
 disabled for clients that do not explicitly opt into that tradeoff.
+
+### PARKOUR governed research lane
+
+A separate, server-owned web-research capability lets PARKOUR workers ground
+answers in current sources. It is disabled by default and independent of
+`ENABLE_PARKOUR`. Set `ENABLE_PARKOUR_RESEARCH=True` and configure
+`PARKOUR_RESEARCH_ENDPOINT` (plus `PARKOUR_RESEARCH_API_KEY` if the provider
+needs one) to enable it. Arbitrary client-supplied `tools` are still rejected;
+only the built-in, bounded `parkour_web_search` capability is available, and
+only to server-selected research nodes.
+
+All research egress passes through one adapter that blocks private, loopback,
+link-local, and other non-public targets (SSRF protection, including after DNS
+resolution), enforces the `PARKOUR_RESEARCH_ALLOW_DOMAINS` /
+`PARKOUR_RESEARCH_BLOCK_DOMAINS` lists, and never exposes the provider key or
+`Authorization` header to workers, logs, or streaming events. Every run is
+bounded by the `PARKOUR_RESEARCH_*` search-count, query-length, result-count,
+snippet, bytes, wall-clock, and cost limits above; research spend rolls into the
+PARKOUR aggregate cost and budget. Identical queries are deduplicated within a
+run, and research telemetry is exposed in both JSON `/metrics` and
+`/metrics/prometheus` (`nsr_parkour_research_*`).
+
+**Privacy and freshness:** enabling research sends generated search queries to
+the configured provider, and answer quality depends on that provider's coverage
+and recency. Workers using search return bounded citations; synthesis preserves
+cited claims where possible and marks uncited claims as model-derived.
 
 ## Governance
 

@@ -64,6 +64,21 @@ def render_prometheus(snapshot: Dict[str, Any]) -> str:
     ]:
         _metric(lines, name, mtype, help_text, parkour.get(key, 0))
 
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    research = parkour.get("research") or {}
+    for name, mtype, help_text, key in [
+        ("nsr_parkour_research_searches", "counter", "PARKOUR research searches", "searches"),
+        ("nsr_parkour_research_failures", "counter", "PARKOUR research failures", "failures"),
+        ("nsr_parkour_research_cache_hits", "counter", "PARKOUR research cache hits", "cache_hits"),
+        ("nsr_parkour_research_limit_stops", "counter", "PARKOUR research limit stops", "limit_stops"),
+        ("nsr_parkour_research_results", "counter", "PARKOUR research results retained", "results_retained"),
+        ("nsr_parkour_research_bytes", "counter", "PARKOUR research bytes retained", "bytes_retained"),
+        ("nsr_parkour_research_truncations", "counter", "PARKOUR research truncations", "truncations"),
+        ("nsr_parkour_research_domains", "gauge", "PARKOUR research distinct domains", "distinct_domains"),
+        ("nsr_parkour_research_cost_usd", "gauge", "PARKOUR research cost", "total_cost_usd"),
+    ]:
+        _metric(lines, name, mtype, help_text, research.get(key, 0))
+
     # Per-model gauges/counters (labelled by model).
     models = snapshot.get("models") or []
     for family, mtype, help_text, key in [

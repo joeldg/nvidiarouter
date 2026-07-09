@@ -3,7 +3,7 @@
 
 import asyncio
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Dict, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple
 
 from .planning import ExecutionPlan, SubtaskSpec
 
@@ -25,6 +25,9 @@ class WorkerResult:
     model_id: str
     tokens: int = 0
     cost_usd: float = 0.0
+    # Bounded source provenance from the research lane; empty for ordinary nodes.
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    citations: Tuple[Dict[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -37,6 +40,8 @@ class NodeResult:
     context_truncated: bool
     status: str = "succeeded"
     error: Optional[str] = None
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    citations: Tuple[Dict[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -208,6 +213,7 @@ class DagScheduler:
             result.tokens,
             result.cost_usd,
             any(context.truncated for context in contexts),
+            citations=result.citations,
         )
         await self._emit({
             "type": "node_completed",
@@ -245,6 +251,7 @@ async def routed_gateway_worker(
     task: SubtaskSpec,
     contexts: List[DependencyContext],
     progress: Optional[ProgressCallback] = None,
+    research: Optional[Any] = None,
 ) -> WorkerResult:
     """Run one node through the gateway's existing route/fallback/control path."""
     from ..cost import compute_cost
@@ -257,6 +264,9 @@ async def routed_gateway_worker(
     messages = [{"role": "system", "content": task.system_prompt}]
     if context_text:
         messages.append({"role": "system", "content": context_text})
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    # Server-owned research: only when the node opts in and the lane is enabled.
+    citations = await _inject_research(task, messages, research, progress)
     messages.append({"role": "user", "content": task.user_prompt})
     decision = await router.route_request(messages)
     if not decision.selected_model or decision.selected_model.model_id == "parkour":
@@ -279,4 +289,42 @@ async def routed_gateway_worker(
         int(usage.get("completion_tokens") or 0),
     )
     content = data["choices"][0]["message"].get("content", "")
-    return WorkerResult(content, used_model.model_id, tokens, cost)
+    return WorkerResult(content, used_model.model_id, tokens, cost, citations=citations)
+
+
+# @spec[PARKOUR_RESEARCH.md#Requirements]
+async def _inject_research(
+    task: SubtaskSpec,
+    messages: List[Dict[str, Any]],
+    research: Optional[Any],
+    progress: Optional[ProgressCallback],
+) -> Tuple[Dict[str, str], ...]:
+    """Run one bounded search for a research node and inject sourced snippets.
+
+    Returns the bounded citations. A research failure is non-fatal: the node
+    proceeds without sources rather than failing the whole run.
+    """
+    if research is None or not getattr(task, "research", False):
+        return ()
+    try:
+        result = await research.search(task.user_prompt, task.id, progress=progress)
+    except Exception:
+        return ()  # research errors never break the worker; run continues uncited
+    if not result.citations:
+        return ()
+    sources = "\n\n".join(
+        f"[{i + 1}] {c.title or c.url}\n{c.url}\n{c.snippet}"
+        for i, c in enumerate(result.citations)
+    )
+    messages.append({
+        "role": "system",
+        "content": (
+            "Use the following web sources. Cite claims with their [n] source "
+            "and mark any claim not supported by a source as model-derived.\n\n"
+            + sources
+        ),
+    })
+    return tuple(
+        {"url": c.url, "title": c.title, "snippet": c.snippet}
+        for c in result.citations
+    )

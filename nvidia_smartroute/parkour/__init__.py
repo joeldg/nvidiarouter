@@ -23,6 +23,23 @@ from .scheduler import (
     routed_gateway_worker,
 )
 from .engine import EngineResult, ParkourEngine, ParkourExecutionError
+from .research import (
+    Citation,
+    HttpSearchProvider,
+    ResearchBlockedError,
+    ResearchError,
+    ResearchLimitError,
+    ResearchLimits,
+    ResearchResult,
+    ResearchSession,
+    ResearchTelemetry,
+    RawResult,
+    build_research_session,
+    domain_allowed,
+    guard_url,
+    mask_secret,
+    research_telemetry,
+)
 
 __all__ = [
     "ExecutionPlan",
@@ -45,4 +62,19 @@ __all__ = [
     "EngineResult",
     "ParkourEngine",
     "ParkourExecutionError",
+    "Citation",
+    "HttpSearchProvider",
+    "ResearchBlockedError",
+    "ResearchError",
+    "ResearchLimitError",
+    "ResearchLimits",
+    "ResearchResult",
+    "ResearchSession",
+    "ResearchTelemetry",
+    "RawResult",
+    "build_research_session",
+    "domain_allowed",
+    "guard_url",
+    "mask_secret",
+    "research_telemetry",
 ]

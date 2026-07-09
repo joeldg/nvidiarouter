@@ -45,6 +45,10 @@ class SubtaskSpec(BaseModel):
     user_prompt: str = Field(min_length=1)
     dependencies: List[str] = Field(default_factory=list)
     optional: bool = False
+    # Server/conductor-controlled opt-in to the governed research lane. Ignored
+    # unless ENABLE_PARKOUR_RESEARCH is set; never client-parameterizable.
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    research: bool = False
 
 
 # @spec[PARKOUR.md#Requirements]
