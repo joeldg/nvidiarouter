@@ -91,6 +91,7 @@ DASHBOARD_HTML = r"""<!doctype html>
     <h2>Requests / sec</h2>
     <canvas id="chart"></canvas>
   </div>
+  <div class="panel"><h2>PARKOUR recent runs</h2><div id="parkour"></div></div>
 
   <div class="panel">
     <h2>Model performance</h2>
@@ -177,6 +178,10 @@ async function poll(){
         <td>${fmt(m.avg_latency_ms)}</td><td>${fmt(m.throughput_tps,1)}</td><td>${fmt(m.max_tps,1)}</td>
         <td>${fmt(m.total_cost_usd,4)}</td><td>${fmt(m.error_count)}</td><td>${pill}</td></tr>`;
     }).join('') || '<tr><td colspan="9" style="color:var(--muted)">no traffic yet</td></tr>';
+  const pk=d.parkour||{};
+  document.getElementById('parkour').innerHTML=(pk.recent_runs||[]).slice(-10).reverse().map(r=>
+    `<div><span class="t">${r.run_id}</span> ${r.outcome} · ${r.nodes} nodes · ${r.tokens} tokens</div>`
+  ).join('') || '<span style="color:var(--muted)">no PARKOUR runs yet</span>';
 
   const log=document.getElementById('log');
   log.innerHTML = (d.routing_log||[]).slice(-60).map(e=>{

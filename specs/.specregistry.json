@@ -2,7 +2,7 @@
   "project_type": "CLI Tool / Developer Tooling",
   "project": "github.com/joeldg/nvidiarouter",
   "channel": "stable",
-  "fetched_at": "2026-07-07T03:42:38.471Z",
+  "fetched_at": "2026-07-08T20:46:50.825Z",
   "specs": [
     {
       "filename": "AGENT_OPERATING_RULES.md",
@@ -83,10 +83,10 @@
     },
     {
       "filename": "GATEWAY_API.md",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "project_type": "github.com/joeldg/nvidiarouter",
       "scope": "project",
-      "sha256": "b39884a376c2e6e4019e6defd6294a797e93f8449deea520be2781c3fa5ea66c"
+      "sha256": "6256cd4c6522a7b99dd8f39136e6569a85fd83d004db00e34df0b4e14e41a9e2"
     },
     {
       "filename": "ROUTING.md",
@@ -117,6 +117,13 @@
       "sha256": "756d5faf4c624d0c928c6474090659e504bc028271bbf108000102b1c0d10e4c"
     },
     {
+      "filename": "PARKOUR.md",
+      "version": "1.0.0",
+      "project_type": "github.com/joeldg/nvidiarouter",
+      "scope": "project",
+      "sha256": "4a573d0590ef0c5f3f33cf6d9c6a1c75ba3c8aa0ab7aa362bb407c39d1dc4b64"
+    },
+    {
       "filename": "RECOMMENDATION.md",
       "version": "1.1.0",
       "project_type": "github.com/joeldg/nvidiarouter",
@@ -131,6 +138,6 @@
       "sha256": "a424208a10cbe963ff067dfd604197643f5ce90faccac14b4135c8264ae5f879"
     }
   ],
-  "signature": "El2H6uVn3u8xLvuMpHSoUfFHi8S5ChtrSAc7xDTzVnzag/OLYwGEi2+wOgdcuTZkyiyWLiFGyp4JywEgwx/JAg==",
+  "signature": "L0N6xsOYAGWiDXAwYqIo/JHcX3hPimCWCwvGCPjMpIC+cja9CYkYxz3IH5VFf6jL2LavfFF7PG7LkhwOD+nPDQ==",
   "signature_alg": "ed25519"
 }

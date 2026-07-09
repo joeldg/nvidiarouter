@@ -586,9 +586,10 @@ def test_metrics_endpoint_includes_key_pool():
 
 # --- /v1/models returns router registry -----------------------------------
 
-def test_models_endpoint_returns_router_registry():
-    from nvidia_smartroute.gateway.server import app, router
+def test_models_endpoint_returns_router_registry(monkeypatch):
+    from nvidia_smartroute.gateway.server import app, router, settings
 
+    monkeypatch.setattr(settings, "enable_parkour", False)
     data = TestClient(app).get("/v1/models").json()
     assert data["object"] == "list"
     ids = {m["id"] for m in data["data"]}
@@ -596,6 +597,54 @@ def test_models_endpoint_returns_router_registry():
     # Router metadata is exposed and OpenAI shape is preserved.
     sample = data["data"][0]
     assert sample["object"] == "model" and "supported_tasks" in sample
+
+
+def test_models_endpoint_includes_enabled_parkour(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+
+    monkeypatch.setattr(srv.settings, "enable_parkour", True)
+    data = TestClient(srv.app).get("/v1/models").json()["data"]
+    parkour = next(model for model in data if model["id"] == "parkour")
+    assert parkour["object"] == "model"
+    assert parkour["owned_by"] == "nvidia-smartroute"
+    assert parkour["model_type"] == "virtual"
+    assert parkour["execution_strategy"] == "multi_agent_dag"
+    assert parkour["supports_streaming"] is False
+    # A virtual execution strategy must never become a routing candidate.
+    assert "parkour" not in srv.router.model_registry.models
+
+
+def test_upstream_models_never_injects_parkour(monkeypatch):
+    import nvidia_smartroute.gateway.server as srv
+
+    async def upstream_models():
+        return {"object": "list", "data": [{"id": "upstream-model"}]}
+
+    monkeypatch.setattr(srv.settings, "enable_parkour", True)
+    monkeypatch.setattr(srv.nim_client, "models", upstream_models)
+    data = TestClient(srv.app).get("/v1/models?source=upstream").json()
+    assert data["data"] == [{"id": "upstream-model"}]
+
+
+def test_parkour_settings_are_bounded_and_default_off(monkeypatch):
+    from pydantic import ValidationError
+    from nvidia_smartroute.config import Settings
+
+    monkeypatch.delenv("ENABLE_PARKOUR", raising=False)
+    monkeypatch.delenv("PARKOUR_MAX_NODES", raising=False)
+    settings = Settings(_env_file=None)
+    assert settings.enable_parkour is False
+    assert settings.parkour_max_nodes == 8
+    assert settings.parkour_max_depth == 3
+    assert settings.parkour_max_concurrency == 4
+    assert settings.parkour_max_calls == 12
+    assert settings.parkour_timeout_seconds == 300
+    assert settings.parkour_max_tokens == 64_000
+    assert settings.parkour_max_cost_usd == 1.0
+
+    monkeypatch.setenv("PARKOUR_MAX_NODES", "0")
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)
 
 
 def test_upstream_models_uses_key_pool_headers(monkeypatch):

@@ -149,6 +149,63 @@ class Settings(BaseSettings):
         default=300, ge=1, description="Timeout (seconds) for a sub-agent task"
     )
 
+    # PARKOUR virtual multi-agent model (explicit opt-in, disabled by default)
+    # @spec[PARKOUR.md#Requirements]
+    enable_parkour: bool = Field(
+        default=False,
+        description="Expose the explicit PARKOUR virtual model",
+    )
+    # @spec[PARKOUR.md#Requirements]
+    parkour_conductor_model: str = Field(
+        default="meta/llama-3.1-70b-instruct",
+        min_length=1,
+        description="Upstream model used to create PARKOUR execution plans",
+    )
+    # @spec[PARKOUR.md#Requirements]
+    parkour_synthesizer_model: str = Field(
+        default="meta/llama-3.1-70b-instruct",
+        min_length=1,
+        description="Upstream model used to synthesize PARKOUR results",
+    )
+    # @spec[PARKOUR.md#Requirements]
+    parkour_max_nodes: int = Field(
+        default=8, ge=1, le=64, description="Maximum nodes in a PARKOUR graph"
+    )
+    # @spec[PARKOUR.md#Requirements]
+    parkour_max_depth: int = Field(
+        default=3, ge=1, le=16, description="Maximum dependency depth"
+    )
+    # @spec[PARKOUR.md#Requirements]
+    parkour_max_concurrency: int = Field(
+        default=4, ge=1, le=32, description="Maximum concurrent PARKOUR workers"
+    )
+    # @spec[PARKOUR.md#Requirements]
+    parkour_max_calls: int = Field(
+        default=12, ge=1, le=128, description="Maximum upstream calls per run"
+    )
+    # @spec[PARKOUR.md#Requirements]
+    parkour_timeout_seconds: float = Field(
+        default=300.0, gt=0, le=3600, description="Maximum PARKOUR run duration"
+    )
+    # @spec[PARKOUR.md#Requirements]
+    parkour_max_context_chars: int = Field(
+        default=24_000,
+        ge=256,
+        description="Maximum dependency context injected into one node",
+    )
+    # @spec[PARKOUR.md#Requirements]
+    parkour_max_output_chars: int = Field(
+        default=24_000, ge=256, description="Maximum retained output per node"
+    )
+    # @spec[PARKOUR.md#Requirements]
+    parkour_max_tokens: int = Field(
+        default=64_000, ge=1, description="Maximum aggregate tokens per run"
+    )
+    # @spec[PARKOUR.md#Requirements]
+    parkour_max_cost_usd: float = Field(
+        default=1.0, gt=0, description="Maximum estimated upstream cost per run"
+    )
+
     # Response cache
     # @spec[GATEWAY_API.md#Requirements]
     enable_cache: bool = Field(

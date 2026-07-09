@@ -51,6 +51,19 @@ def render_prometheus(snapshot: Dict[str, Any]) -> str:
     _metric(lines, "nsr_budget_spend_usd", "gauge", "Spend in the current budget window",
             float(budget.get("spend_usd", 0.0)))
 
+    parkour = snapshot.get("parkour") or {}
+    for name, mtype, help_text, key in [
+        ("nsr_parkour_runs", "counter", "PARKOUR runs", "runs"),
+        ("nsr_parkour_failures", "counter", "PARKOUR failed runs", "failures"),
+        ("nsr_parkour_partial_runs", "counter", "PARKOUR partial runs", "partial_runs"),
+        ("nsr_parkour_limit_stops", "counter", "PARKOUR limit stops", "limit_stops"),
+        ("nsr_parkour_active_runs", "gauge", "Active PARKOUR runs", "active_runs"),
+        ("nsr_parkour_calls", "counter", "PARKOUR upstream calls", "total_calls"),
+        ("nsr_parkour_tokens", "counter", "PARKOUR aggregate tokens", "total_tokens"),
+        ("nsr_parkour_cost_usd", "gauge", "PARKOUR aggregate cost", "total_cost_usd"),
+    ]:
+        _metric(lines, name, mtype, help_text, parkour.get(key, 0))
+
     # Per-model gauges/counters (labelled by model).
     models = snapshot.get("models") or []
     for family, mtype, help_text, key in [
