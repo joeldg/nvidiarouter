@@ -19,9 +19,9 @@ predictable and OpenAI-shaped.
 1. `POST /v1/chat/completions` MUST accept the OpenAI chat schema (`messages`,
    optional `model`, `stream`, `max_tokens`, `temperature`, `tools`,
    `tool_choice`) and return an OpenAI-format completion or, when `stream:true`,
-   a `text/event-stream` of `data:` chunks terminated by `data: [DONE]`, except
-   where a selected virtual model's governed contract explicitly rejects
-   streaming.
+   a `text/event-stream` of `data:` chunks terminated by `data: [DONE]`.
+   Virtual models MAY stream bounded, namespaced progress metadata when their
+   governed contract permits it.
 2. Unspecified `model` MUST be resolved by the router (see `ROUTING.md`); an
    explicit `model` MUST be honored when registered. An enabled virtual model
    MUST be dispatched to its governed execution strategy rather than sent
@@ -53,9 +53,11 @@ predictable and OpenAI-shaped.
     follow `PARKOUR.md`. The response MUST report `model: "parkour"` while
     internal telemetry retains the actual conductor, worker, and synthesizer
     models.
-11. PARKOUR v1 requests with `stream: true` MUST be rejected before graph
-    execution with an OpenAI-shaped 400 error and stable code. The gateway MUST
-    NOT imitate live streaming by rapidly replaying a buffered final response.
+11. PARKOUR requests with `stream: true` MUST follow `PARKOUR.md`: they MAY
+    emit bounded `parkour_event` progress chunks and final answer
+    `choices[].delta.content` chunks, MUST use `text/event-stream`, and MUST
+    terminate with `data: [DONE]`. The gateway MUST NOT imitate true upstream
+    token streaming by rapidly replaying buffered intermediate worker output.
 12. Virtual-model graph metadata MUST be opt-in, bounded, namespaced, and
     redacted. Default completion responses MUST remain usable by ordinary
     OpenAI clients that ignore unknown response fields.
@@ -70,7 +72,7 @@ This spec does not define model-selection scoring (`ROUTING.md`), key handling
   streaming, tool passthrough, error codes, and the models/explain surfaces.
 - PARKOUR gateway tests cover explicit selection, enabled/disabled discovery,
   virtual versus upstream model listing, public model identity, compact headers,
-  opt-in bounded metadata, tools policy, and v1 streaming rejection.
+  opt-in bounded metadata, tools policy, and progress-event streaming.
 - Live verification against build.nvidia.com is recorded in PR summaries.
 - OpenAI clients can call ordinary `/v1/chat/completions` without modification
   and can select enabled PARKOUR through the standard `model` field.

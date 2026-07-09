@@ -146,6 +146,12 @@ response = client.chat.completions.create(
 )
 ```
 
+PARKOUR also accepts `stream=True`. While the multi-agent run executes, the
+gateway emits OpenAI-compatible SSE chunks with bounded `parkour_event` metadata
+such as planning, worker model calls, node completion, and synthesis. The final
+synthesized answer is emitted as ordinary streamed assistant content; progress
+metadata is not a dump of prompts, outputs, keys, or the full graph.
+
 If the gateway logs `POST /chat/completions ... 404`, the configured base URL
 is missing `/v1`; change it from `http://localhost:9000` to
 `http://localhost:9000/v1`.
@@ -261,9 +267,10 @@ and explicitly request `model="parkour"`. A PARKOUR run may make a conductor
 call, several bounded worker calls, and a synthesis call, so it costs more and
 usually takes longer than a normal completion. Tune `PARKOUR_MAX_NODES`,
 `PARKOUR_MAX_CONCURRENCY`, `PARKOUR_MAX_CALLS`, `PARKOUR_TIMEOUT_SECONDS`,
-`PARKOUR_MAX_TOKENS`, and `PARKOUR_MAX_COST_USD` together. Version 1 rejects
-streaming and tool execution. Keep the feature disabled for clients that do not
-explicitly opt into that tradeoff.
+`PARKOUR_MAX_TOKENS`, and `PARKOUR_MAX_COST_USD` together. PARKOUR supports
+streaming progress events, but it does not provide true upstream token streaming
+for internal worker calls. It still rejects tool execution. Keep the feature
+disabled for clients that do not explicitly opt into that tradeoff.
 
 ## Governance
 

@@ -59,9 +59,16 @@ observability controls. Ordinary requests must not pay a conductor-call penalty.
     report the public model as `parkour`. Token usage and cost MUST aggregate
     conductor, worker, and synthesizer calls without double counting. Internal
     accounting MUST retain the actual model and role for every upstream call.
-11. PARKOUR v1 MUST reject `stream: true` with an OpenAI-shaped 400 error.
-    Buffered or synthetic output MUST NOT be represented as live upstream
-    token streaming. Adding streaming requires a reviewed spec change.
+11. PARKOUR MAY accept `stream: true` by returning OpenAI-compatible
+    `text/event-stream` chunks. Streaming chunks MAY include bounded,
+    namespaced `parkour_event` progress metadata for orchestration state such
+    as planning, conductor selection, worker start, worker model call, worker
+    completion, synthesis start, and run completion. Progress chunks MUST NOT
+    include full prompts, full outputs, API keys, authorization data, or full
+    execution graphs. Buffered or synthetic progress MUST NOT be represented as
+    true upstream token streaming. The final synthesized answer MAY be emitted
+    as ordinary `choices[].delta.content` chunks and the stream MUST terminate
+    with `data: [DONE]`.
 12. Full execution graphs MUST NOT be serialized into HTTP headers. Responses
     MAY include an opt-in, bounded, namespaced graph-summary extension; headers
     MUST be limited to compact state such as autoscale type, node count, and an
@@ -81,10 +88,10 @@ observability controls. Ordinary requests must not pay a conductor-call penalty.
 
 ## Non-Goals
 
-PARKOUR v1 does not provide true token streaming, recursive orchestration,
-persistent or resumable graphs, cross-process scheduling, tool execution,
-conversation storage, or public retrieval of full graph traces. It does not
-replace the router's model-scoring algorithm or the gateway's existing
+PARKOUR v1 does not provide true upstream token streaming, recursive
+orchestration, persistent or resumable graphs, cross-process scheduling, tool
+execution, conversation storage, or public retrieval of full graph traces. It
+does not replace the router's model-scoring algorithm or the gateway's existing
 resilience and security controls.
 
 ## Acceptance Evidence
@@ -99,8 +106,9 @@ resilience and security controls.
   partial synthesis, no-useful-result errors, deadlines, token/cost/call limits,
   and deterministic context truncation.
 - Gateway tests cover explicit opt-in, disabled behavior, `/v1/models` virtual
-  versus upstream sources, OpenAI response/error shapes, v1 streaming rejection,
-  bounded metadata, and the tools policy.
+  versus upstream sources, OpenAI response/error shapes, PARKOUR streaming
+  progress events and final answer chunks, bounded metadata, and the tools
+  policy.
 - Accounting and observability tests reconcile per-call with aggregate tokens
   and cost, assert JSON/Prometheus parity, and verify secrets and full prompts
   are absent from logs.
@@ -125,7 +133,6 @@ registration, graph scheduling, synthesis, graph metadata, or PARKOUR UI.
 
 Keep PARKOUR explicit, disabled by default, bounded, non-recursive, and routed
 through existing controls. Validate the full graph before execution and enforce
-limits again at runtime. Never describe buffered output as true streaming,
-never place full graphs in headers, and never execute worker tools without a
-separately reviewed security contract.
-
+limits again at runtime. Never describe buffered progress as true upstream token
+streaming, never place full graphs in headers, and never execute worker tools
+without a separately reviewed security contract.
