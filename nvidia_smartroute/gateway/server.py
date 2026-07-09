@@ -30,6 +30,11 @@ from ..affinity import session_affinity
 from ..concurrency import gate, QueueFullError
 from ..cost import budget, compute_cost
 from ..bandit import adaptive_router
+from ..virtual_models import list_virtual_models
+from ..parkour.engine import ParkourExecutionError
+from ..parkour.scheduler import ParkourLimitError
+from ..parkour.service import run_parkour
+from ..parkour.telemetry import parkour_telemetry
 from ..web import DASHBOARD_HTML
 from .. import logging_config  # noqa: F401  (configures structlog on import)
 from . import runtime
@@ -57,6 +62,88 @@ logger = structlog.get_logger()
 # Background task set retained for shutdown cleanup.
 # @spec[GATEWAY_API.md#Requirements]
 background_tasks = set()
+
+
+# @spec[PARKOUR.md#Requirements]
+async def _handle_parkour(body: dict, request_id: str):
+    """Validate and execute an explicitly selected PARKOUR request."""
+    if not settings.enable_parkour:
+        return JSONResponse(
+            status_code=400,
+            content={"error": {"message": "PARKOUR is disabled",
+                               "type": "invalid_request_error",
+                               "code": "parkour_disabled"}},
+        )
+    if body.get("stream"):
+        return JSONResponse(
+            status_code=400,
+            content={"error": {"message": "PARKOUR v1 does not support streaming",
+                               "type": "invalid_request_error",
+                               "code": "parkour_streaming_unsupported"}},
+        )
+    if body.get("tools") or body.get("tool_choice"):
+        return JSONResponse(
+            status_code=400,
+            content={"error": {"message": "PARKOUR v1 does not execute tools",
+                               "type": "invalid_request_error",
+                               "code": "parkour_tools_unsupported"}},
+        )
+    parkour_telemetry.start()
+    started = time.time()
+    try:
+        result = await run_parkour(body.get("messages", []))
+    except ParkourExecutionError as exc:
+        parkour_telemetry.fail()
+        return JSONResponse(status_code=502, content=exc.to_openai_error())
+    except ParkourLimitError as exc:
+        parkour_telemetry.fail(limit=True)
+        return JSONResponse(
+            status_code=503,
+            content={"error": {"message": str(exc), "type": "parkour_limit_error",
+                               "code": "parkour_limit_exceeded"}},
+        )
+
+    run_id = str(uuid.uuid4())
+    parkour_telemetry.finish(run_id, result, (time.time() - started) * 1000)
+    logger.info("parkour run completed", request_id=request_id, run_id=run_id,
+                partial=result.partial, nodes=len(result.scheduler.nodes),
+                calls=result.scheduler.total_calls, tokens=result.total_tokens,
+                cost_usd=result.total_cost_usd)
+    for node in result.scheduler.nodes.values():
+        logger.info("parkour node completed", request_id=request_id, run_id=run_id,
+                    node_id=node.node_id, status=node.status,
+                    model=node.model_id or None,
+                    context_truncated=node.context_truncated)
+    response = {
+        "id": f"chatcmpl-parkour-{run_id}",
+        "object": "chat.completion",
+        "created": int(time.time()),
+        "model": "parkour",
+        "choices": [{"index": 0, "message": {"role": "assistant",
+                                             "content": result.output},
+                     "finish_reason": "stop"}],
+        "usage": {"prompt_tokens": 0, "completion_tokens": 0,
+                  "total_tokens": result.total_tokens},
+    }
+    if body.get("parkour_trace"):
+        response["parkour"] = {
+            "run_id": run_id,
+            "partial": result.partial,
+            "conductor_fallback": result.conductor_fallback,
+            "nodes": [
+                {"id": node.node_id, "status": node.status,
+                 "model": node.model_id or None,
+                 "context_truncated": node.context_truncated}
+                for node in result.scheduler.nodes.values()
+            ],
+        }
+    return JSONResponse(
+        content=response,
+        headers={"X-Request-ID": request_id, "X-Selected-Model": "parkour",
+                 "X-Autoscaled": "true", "X-Autoscale-Type": "parkour",
+                 "X-Agent-Count": str(result.scheduler.total_calls),
+                 "X-Parkour-Run-ID": run_id},
+    )
 
 
 # @spec[OBSERVABILITY.md#Requirements]
@@ -438,6 +525,7 @@ def _full_snapshot() -> dict:
     snapshot["concurrency"] = gate.snapshot()
     snapshot["budget"] = budget.snapshot()
     snapshot["adaptive_routing"] = adaptive_router.snapshot()
+    snapshot["parkour"] = parkour_telemetry.snapshot()
     return snapshot
 
 
@@ -554,6 +642,11 @@ async def chat_completions(request: Request, background_tasks: BackgroundTasks):
             stream=stream,
             model_hint=model,
         )
+
+        # PARKOUR is an explicit virtual execution strategy, intercepted before
+        # cache lookup and ordinary upstream model routing.
+        if model == "parkour":
+            return await _handle_parkour(body, request_id)
 
         # Response cache: identical non-streaming requests are served from cache,
         # skipping routing and the upstream NIM call entirely.
@@ -939,6 +1032,11 @@ async def list_models(source: str = "router"):
                 "supports_streaming": model.supports_streaming,
             }
         )
+    # @spec[PARKOUR.md#Requirements]
+    # Virtual models are explicit local execution strategies. Keep them out of
+    # ModelRegistry so routing, fallback, recommendations, and affinity cannot
+    # select one as though it were an upstream NIM model.
+    data.extend(list_virtual_models(settings, created))
     return {"object": "list", "data": data}
 
 

@@ -130,6 +130,26 @@ and prints a latency/throughput/routing summary at the end.
 
 ## API
 
+When using the OpenAI Python client, include `/v1` in `base_url`. The client
+appends `chat/completions` itself:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:9000/v1",
+    api_key="unused",  # or your gateway key when REQUIRE_API_KEY=True
+)
+response = client.chat.completions.create(
+    model="parkour",
+    messages=[{"role": "user", "content": "Design and test a cache"}],
+)
+```
+
+If the gateway logs `POST /chat/completions ... 404`, the configured base URL
+is missing `/v1`; change it from `http://localhost:9000` to
+`http://localhost:9000/v1`.
+
 ```bash
 # Chat (routed automatically to the best model for the task)
 curl http://localhost:9000/v1/chat/completions \
@@ -185,6 +205,12 @@ All settings are environment variables (see [.env.example](./.env.example)):
 | `DAILY_BUDGET_USD` / `COST_WEIGHT` | `0` / `0` | Daily spend cap / cost-aware routing |
 | `REQUIRE_API_KEY` / `GATEWAY_API_KEYS` | `False` / – | Optional inbound client auth |
 | `AUTOSCALE_SEQUENTIAL` | `True` | Run sub-agents one at a time (free-tier safe) |
+| `ENABLE_PARKOUR` | `False` | Expose the explicit `parkour` virtual multi-agent model |
+| `PARKOUR_CONDUCTOR_MODEL` / `PARKOUR_SYNTHESIZER_MODEL` | `meta/llama-3.1-70b-instruct` | Models used to plan and synthesize PARKOUR runs |
+| `PARKOUR_MAX_NODES` / `PARKOUR_MAX_DEPTH` / `PARKOUR_MAX_CONCURRENCY` | `8` / `3` / `4` | PARKOUR graph and worker bounds |
+| `PARKOUR_MAX_CALLS` / `PARKOUR_TIMEOUT_SECONDS` | `12` / `300` | PARKOUR call and wall-clock bounds |
+| `PARKOUR_MAX_CONTEXT_CHARS` / `PARKOUR_MAX_OUTPUT_CHARS` | `24000` / `24000` | PARKOUR per-node context/output bounds |
+| `PARKOUR_MAX_TOKENS` / `PARKOUR_MAX_COST_USD` | `64000` / `1.0` | PARKOUR aggregate token and estimated-cost bounds |
 | `DEFAULT_EMBEDDING_MODEL` | `nvidia/nv-embedqa-e5-v5` | Embeddings model |
 | `LOG_LEVEL` / `LOG_JSON` | `INFO` / `False` | Logging level / JSON output |
 
@@ -227,6 +253,17 @@ backpressure) alongside the richer JSON `GET /metrics` used by the dashboards.
 pip install -e ".[dev]"
 pytest -q
 ```
+
+### PARKOUR preview
+
+PARKOUR is disabled by default. Set `ENABLE_PARKOUR=True`, restart the gateway,
+and explicitly request `model="parkour"`. A PARKOUR run may make a conductor
+call, several bounded worker calls, and a synthesis call, so it costs more and
+usually takes longer than a normal completion. Tune `PARKOUR_MAX_NODES`,
+`PARKOUR_MAX_CONCURRENCY`, `PARKOUR_MAX_CALLS`, `PARKOUR_TIMEOUT_SECONDS`,
+`PARKOUR_MAX_TOKENS`, and `PARKOUR_MAX_COST_USD` together. Version 1 rejects
+streaming and tool execution. Keep the feature disabled for clients that do not
+explicitly opt into that tradeoff.
 
 ## Governance
 

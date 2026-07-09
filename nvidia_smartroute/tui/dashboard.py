@@ -68,6 +68,7 @@ class DashboardApp(App):
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
         yield Static("Connecting to gateway...", id="summary")
+        yield Static("PARKOUR: no runs yet", id="parkour_summary")
         with Vertical(id="chart"):
             yield Static("Requests/sec", classes="title", id="chart_title")
             yield Sparkline(list(self._req_history), summary_function=max, id="req_spark")
@@ -108,6 +109,15 @@ class DashboardApp(App):
         self._update_summary(data)
         self._update_models(data)
         self._update_log(data)
+        parkour = data.get("parkour", {}) or {}
+        recent = parkour.get("recent_runs", [])
+        latest = recent[-1] if recent else {}
+        self.query_one("#parkour_summary", Static).update(
+            f"[b]PARKOUR:[/b] {parkour.get('runs', 0)} runs · "
+            f"{parkour.get('active_runs', 0)} active · "
+            f"peak {parkour.get('peak_concurrency', 0)} workers · "
+            f"latest {latest.get('outcome', 'none')}"
+        )
 
     def _update_rate(self, data: Dict[str, Any]) -> None:
         """Compute requests/sec from total-request deltas and feed the chart."""
