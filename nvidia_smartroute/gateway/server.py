@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from collections import deque, defaultdict
 from contextlib import asynccontextmanager
-from typing import Optional, Dict, Deque
+from typing import Any, AsyncGenerator, Optional, Dict, Deque
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
@@ -65,6 +65,121 @@ background_tasks = set()
 
 
 # @spec[PARKOUR.md#Requirements]
+def _parkour_chunk(
+    run_id: str,
+    event: Optional[Dict[str, Any]] = None,
+    content: str = "",
+    finish_reason: Optional[str] = None,
+) -> dict:
+    """Build one bounded OpenAI-compatible PARKOUR stream chunk."""
+    chunk = {
+        "id": f"chatcmpl-parkour-{run_id}",
+        "object": "chat.completion.chunk",
+        "created": int(time.time()),
+        "model": "parkour",
+        "choices": [{"index": 0, "delta": {}, "finish_reason": finish_reason}],
+    }
+    if content:
+        chunk["choices"][0]["delta"]["content"] = content
+    if event:
+        chunk["parkour_event"] = {
+            key: value for key, value in event.items()
+            if key in {
+                "type", "node_id", "task_type", "model", "tokens", "status",
+                "reason", "error", "node_count", "partial",
+                "context_truncated", "output_truncated",
+            }
+        }
+    return chunk
+
+
+def _sse(data: dict) -> str:
+    return f"data: {json.dumps(data)}\n\n"
+
+
+# @spec[PARKOUR.md#Requirements]
+async def _execute_parkour_to_queue(
+    body: dict,
+    request_id: str,
+    run_id: str,
+    started: float,
+    queue: asyncio.Queue,
+) -> None:
+    """Execute PARKOUR and enqueue bounded progress/final events for SSE."""
+    async def emit(event: Dict[str, Any]) -> None:
+        await queue.put(event)
+
+    parkour_telemetry.start()
+    try:
+        result = await run_parkour(body.get("messages", []), progress=emit)
+        parkour_telemetry.finish(run_id, result, (time.time() - started) * 1000)
+        logger.info("parkour run completed", request_id=request_id, run_id=run_id,
+                    partial=result.partial, nodes=len(result.scheduler.nodes),
+                    calls=result.scheduler.total_calls, tokens=result.total_tokens,
+                    cost_usd=result.total_cost_usd)
+        for node in result.scheduler.nodes.values():
+            logger.info("parkour node completed", request_id=request_id,
+                        run_id=run_id, node_id=node.node_id,
+                        status=node.status, model=node.model_id or None,
+                        context_truncated=node.context_truncated)
+        await queue.put({
+            "type": "run_completed",
+            "partial": result.partial,
+            "node_count": len(result.scheduler.nodes),
+            "tokens": result.total_tokens,
+        })
+        await queue.put({"type": "final_answer", "content": result.output})
+    except ParkourExecutionError as exc:
+        parkour_telemetry.fail()
+        await queue.put({
+            "type": "error",
+            "error": exc.code,
+            "message": str(exc),
+        })
+    except ParkourLimitError as exc:
+        parkour_telemetry.fail(limit=True)
+        await queue.put({
+            "type": "error",
+            "error": "parkour_limit_exceeded",
+            "message": str(exc),
+        })
+    finally:
+        await queue.put(None)
+
+
+# @spec[PARKOUR.md#Requirements]
+async def _stream_parkour(body: dict, request_id: str) -> AsyncGenerator[str, None]:
+    """Stream bounded PARKOUR progress metadata and a clean final answer."""
+    queue: asyncio.Queue[Optional[Dict[str, Any]]] = asyncio.Queue()
+    run_id = str(uuid.uuid4())
+    started = time.time()
+
+    task = asyncio.create_task(
+        _execute_parkour_to_queue(body, request_id, run_id, started, queue)
+    )
+    try:
+        yield _sse(_parkour_chunk(run_id, {
+            "type": "run_started",
+            "status": "running",
+        }))
+        while True:
+            event = await queue.get()
+            if event is None:
+                break
+            if event.get("type") == "final_answer":
+                content = str(event.get("content") or "")
+                if content:
+                    yield _sse(_parkour_chunk(run_id, content=content))
+                yield _sse(_parkour_chunk(run_id, finish_reason="stop"))
+                continue
+            yield _sse(_parkour_chunk(run_id, event))
+    finally:
+        if not task.done():
+            task.cancel()
+        yield "data: [DONE]\n\n"
+
+
+# @spec[PARKOUR.md#Requirements]
 async def _handle_parkour(body: dict, request_id: str):
     """Validate and execute an explicitly selected PARKOUR request."""
     if not settings.enable_parkour:
@@ -74,19 +189,25 @@ async def _handle_parkour(body: dict, request_id: str):
                                "type": "invalid_request_error",
                                "code": "parkour_disabled"}},
         )
-    if body.get("stream"):
-        return JSONResponse(
-            status_code=400,
-            content={"error": {"message": "PARKOUR v1 does not support streaming",
-                               "type": "invalid_request_error",
-                               "code": "parkour_streaming_unsupported"}},
-        )
     if body.get("tools") or body.get("tool_choice"):
         return JSONResponse(
             status_code=400,
             content={"error": {"message": "PARKOUR v1 does not execute tools",
                                "type": "invalid_request_error",
                                "code": "parkour_tools_unsupported"}},
+        )
+    if body.get("stream"):
+        return StreamingResponse(
+            _stream_parkour(body, request_id),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Request-ID": request_id,
+                "X-Selected-Model": "parkour",
+                "X-Autoscaled": "true",
+                "X-Autoscale-Type": "parkour",
+            },
         )
     parkour_telemetry.start()
     started = time.time()

@@ -3,7 +3,7 @@
 
 import asyncio
 from dataclasses import dataclass
-from typing import Awaitable, Callable, Dict, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from .planning import ExecutionPlan, SubtaskSpec
 
@@ -78,16 +78,22 @@ class SchedulerResult:
 WorkerCallable = Callable[
     [SubtaskSpec, List[DependencyContext]], Awaitable[WorkerResult]
 ]
+ProgressCallback = Callable[[Dict[str, Any]], Awaitable[None]]
 
 
 # @spec[PARKOUR.md#Requirements]
 class DagScheduler:
     """Execute validated DAG nodes when their dependencies are complete."""
 
-    def __init__(self, limits: SchedulerLimits):
+    def __init__(
+        self,
+        limits: SchedulerLimits,
+        progress: Optional[ProgressCallback] = None,
+    ):
         self.limits = limits
         self._active = 0
         self._peak = 0
+        self._progress = progress
 
     async def execute(
         self, plan: ExecutionPlan, worker: WorkerCallable
@@ -133,6 +139,11 @@ class DagScheduler:
                         task.id, "", "", 0, 0.0, False, "skipped",
                         "required dependency failed",
                     )
+                    await self._emit({
+                        "type": "node_skipped",
+                        "node_id": task.id,
+                        "reason": "required_dependency_failed",
+                    })
                     pending.pop(task.id)
                 else:
                     runnable.append(task)
@@ -165,21 +176,32 @@ class DagScheduler:
                 self._active += 1
                 self._peak = max(self._peak, self._active)
                 try:
+                    await self._emit({
+                        "type": "node_started",
+                        "node_id": task.id,
+                        "task_type": task.task_type.value,
+                    })
                     result = await worker(task, contexts)
                 finally:
                     self._active -= 1
         except ParkourLimitError:
             raise
         except Exception as exc:
-            return NodeResult(
+            failed = NodeResult(
                 task.id, "", "", 0, 0.0,
                 any(context.truncated for context in contexts),
                 "failed", str(exc) or repr(exc),
             )
+            await self._emit({
+                "type": "node_failed",
+                "node_id": task.id,
+                "error": failed.error,
+            })
+            return failed
         if result.model_id == "parkour":
             raise ParkourLimitError("recursive PARKOUR worker selection is prohibited")
         output = result.output[: self.limits.max_output_chars]
-        return NodeResult(
+        node = NodeResult(
             task.id,
             output,
             result.model_id,
@@ -187,6 +209,19 @@ class DagScheduler:
             result.cost_usd,
             any(context.truncated for context in contexts),
         )
+        await self._emit({
+            "type": "node_completed",
+            "node_id": task.id,
+            "model": result.model_id,
+            "tokens": result.tokens,
+            "context_truncated": node.context_truncated,
+            "output_truncated": len(output) < len(result.output),
+        })
+        return node
+
+    async def _emit(self, event: Dict[str, Any]) -> None:
+        if self._progress is not None:
+            await self._progress(event)
 
     def _contexts(
         self, task: SubtaskSpec, results: Dict[str, NodeResult]
@@ -209,6 +244,7 @@ class DagScheduler:
 async def routed_gateway_worker(
     task: SubtaskSpec,
     contexts: List[DependencyContext],
+    progress: Optional[ProgressCallback] = None,
 ) -> WorkerResult:
     """Run one node through the gateway's existing route/fallback/control path."""
     from ..cost import compute_cost
@@ -225,6 +261,13 @@ async def routed_gateway_worker(
     decision = await router.route_request(messages)
     if not decision.selected_model or decision.selected_model.model_id == "parkour":
         raise ParkourLimitError("no non-PARKOUR worker model available")
+    if progress is not None:
+        await progress({
+            "type": "worker_model_call",
+            "node_id": task.id,
+            "model": decision.selected_model.model_id,
+            "task_type": decision.task_type.value,
+        })
     data, used_model, _ = await complete_with_fallback(
         decision.task_type, decision.selected_model, messages, None, None, {}
     )

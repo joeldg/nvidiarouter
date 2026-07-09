@@ -27,6 +27,6 @@ def list_virtual_models(settings: Settings, created: int) -> List[Dict[str, Any]
             "model_type": "virtual",
             "execution_strategy": "multi_agent_dag",
             "display_name": "PARKOUR",
-            "supports_streaming": False,
+            "supports_streaming": True,
         }
     ]

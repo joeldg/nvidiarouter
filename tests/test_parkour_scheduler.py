@@ -43,16 +43,22 @@ def _limits(**changes):
 
 def test_dependencies_execute_in_order_and_context_is_typed():
     seen = []
+    progress = []
 
     async def worker(task, contexts):
         seen.append((task.id, [item.node_id for item in contexts]))
         return WorkerResult(task.id * 5, "model", 2, 0.01)
 
+    async def emit(event):
+        progress.append(event)
+
     plan = ExecutionPlan(tasks=[_node("first"), _node("second", ["first"])])
-    result = asyncio.run(DagScheduler(_limits()).execute(plan, worker))
+    result = asyncio.run(DagScheduler(_limits(), emit).execute(plan, worker))
     assert seen == [("first", []), ("second", ["first"])]
     assert result.total_calls == 2 and result.total_tokens == 4
     assert result.nodes["second"].context_truncated is True
+    assert {"type": "node_started", "node_id": "first",
+            "task_type": "reasoning"} in progress
 
 
 def test_ready_nodes_run_concurrently_under_semaphore():

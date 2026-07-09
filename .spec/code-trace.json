@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-09T14:24:59.052Z",
+  "generated_at": "2026-07-09T20:13:17.568Z",
   "root": "nvidiarouter",
   "specs_dir": "specs",
   "spec_count": 19,
-  "entity_count": 800,
+  "entity_count": 810,
   "links": [
     {
       "entity_id": "code:class:00ecb5aa5fe7b787",
@@ -2375,9 +2375,19 @@
       "entity_name": "_run",
       "entity_kind": "function",
       "spec_filename": "PARKOUR.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: async, def, progress"
+      ]
+    },
+    {
+      "entity_id": "code:function:212d56b8c03d0e71",
+      "entity_name": "_run",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
       "confidence": 0.59,
       "reasons": [
-        "matched tokens: async, def"
+        "matched tokens: def, progress"
       ]
     },
     {
@@ -3005,6 +3015,49 @@
       ]
     },
     {
+      "entity_id": "code:function:334e5fee689faa67",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: emit, def, emit, event"
+      ]
+    },
+    {
+      "entity_id": "code:function:334e5fee689faa67",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: emit, def, emit, event"
+      ]
+    },
+    {
+      "entity_id": "code:function:334e5fee689faa67",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: emit, async, def, emit, event"
+      ]
+    },
+    {
+      "entity_id": "code:function:334e5fee689faa67",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, event"
+      ]
+    },
+    {
       "entity_id": "code:function:33b8cb307c316bf3",
       "entity_name": "build_default_bandit",
       "entity_kind": "function",
@@ -3123,6 +3176,94 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, models"
+      ]
+    },
+    {
+      "entity_id": "code:function:36787dd413c1f095",
+      "entity_name": "run",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: run, def, run, messages, progress"
+      ]
+    },
+    {
+      "entity_id": "code:function:36787dd413c1f095",
+      "entity_name": "run",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: run, def, run, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:36787dd413c1f095",
+      "entity_name": "run",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: run, async, def, run, progress"
+      ]
+    },
+    {
+      "entity_id": "code:function:36787dd413c1f095",
+      "entity_name": "run",
+      "entity_kind": "function",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: run, def, run"
+      ]
+    },
+    {
+      "entity_id": "code:function:36787dd413c1f095",
+      "entity_name": "run",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: run, def, run"
+      ]
+    },
+    {
+      "entity_id": "code:function:36787dd413c1f095",
+      "entity_name": "run",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: run, def, run"
+      ]
+    },
+    {
+      "entity_id": "code:function:36787dd413c1f095",
+      "entity_name": "run",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: run, run"
+      ]
+    },
+    {
+      "entity_id": "code:function:36787dd413c1f095",
+      "entity_name": "run",
+      "entity_kind": "function",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: run, run"
       ]
     },
     {
@@ -3920,6 +4061,98 @@
       ]
     },
     {
+      "entity_id": "code:function:55736fc09e20e801",
+      "entity_name": "worker",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: worker, def, worker, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:55736fc09e20e801",
+      "entity_name": "worker",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: worker, async, def, worker, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:55736fc09e20e801",
+      "entity_name": "worker",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:55736fc09e20e801",
+      "entity_name": "worker",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:55736fc09e20e801",
+      "entity_name": "worker",
+      "entity_kind": "function",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:55736fc09e20e801",
+      "entity_name": "worker",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:55736fc09e20e801",
+      "entity_name": "worker",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:55736fc09e20e801",
+      "entity_name": "worker",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:55736fc09e20e801",
+      "entity_name": "worker",
+      "entity_kind": "function",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
       "entity_id": "code:function:55892822b1315cd7",
       "entity_name": "save_models",
       "entity_kind": "function",
@@ -4299,6 +4532,86 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:594e9f458aeee5fd",
+      "entity_name": "_sse",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, data:, dict"
+      ]
+    },
+    {
+      "entity_id": "code:function:594e9f458aeee5fd",
+      "entity_name": "_sse",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, data:, dict"
+      ]
+    },
+    {
+      "entity_id": "code:function:594e9f458aeee5fd",
+      "entity_name": "_sse",
+      "entity_kind": "function",
+      "spec_filename": "GLOBAL_SECURITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, dict"
+      ]
+    },
+    {
+      "entity_id": "code:function:594e9f458aeee5fd",
+      "entity_name": "_sse",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, dict"
+      ]
+    },
+    {
+      "entity_id": "code:function:594e9f458aeee5fd",
+      "entity_name": "_sse",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, dict"
+      ]
+    },
+    {
+      "entity_id": "code:function:594e9f458aeee5fd",
+      "entity_name": "_sse",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, dict"
+      ]
+    },
+    {
+      "entity_id": "code:function:594e9f458aeee5fd",
+      "entity_name": "_sse",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, dict"
+      ]
+    },
+    {
+      "entity_id": "code:function:594e9f458aeee5fd",
+      "entity_name": "_sse",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, dict"
       ]
     },
     {
@@ -5830,6 +6143,16 @@
       ]
     },
     {
+      "entity_id": "code:function:6d2aef4505ed56ef",
+      "entity_name": "direct_synthesizer",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.83,
+      "reasons": [
+        "matched tokens: async, def, nodes, instructions"
+      ]
+    },
+    {
       "entity_id": "code:function:7047e5c816114d6c",
       "entity_name": "record_stream_usage",
       "entity_kind": "function",
@@ -6071,136 +6394,6 @@
       ]
     },
     {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "GATEWAY_API.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: def, str, list"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: def, str, list"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: async, def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "SPEC_GOVERNANCE.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: def, str, list"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "COST.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "MODEL_DISCOVERY.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "OBSERVABILITY.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "PROJECT_PROFILE.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "ROUTING.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "SDD_OPERATING_MODEL.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "SECURITY_AND_KEYS.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "SECURITY_AND_SECRETS.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:718e7504266813f7",
-      "entity_name": "_routed_explicit_completion",
-      "entity_kind": "function",
-      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
       "entity_id": "code:function:74fca218142dba3b",
       "entity_name": "_limits",
       "entity_kind": "function",
@@ -6421,136 +6614,6 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, request"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "GATEWAY_API.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: def, list, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: def, list, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: async, def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "SPEC_GOVERNANCE.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: def, list, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "COST.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "MODEL_DISCOVERY.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "OBSERVABILITY.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "PROJECT_PROFILE.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "ROUTING.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "SDD_OPERATING_MODEL.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "SECURITY_AND_KEYS.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "SECURITY_AND_SECRETS.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
-      ]
-    },
-    {
-      "entity_id": "code:function:7889b931dcfc3404",
-      "entity_name": "_synthesize",
-      "entity_kind": "function",
-      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, str"
       ]
     },
     {
@@ -6883,6 +6946,136 @@
       "reasons": [
         "explicit @spec annotation",
         "section: Requirements"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "COST.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_KEYS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:7ee743e83b219557",
+      "entity_name": "_sse_events",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
       ]
     },
     {
@@ -9192,6 +9385,118 @@
       ]
     },
     {
+      "entity_id": "code:function:a15a16032c350c29",
+      "entity_name": "direct_worker",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: async, def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:a15a16032c350c29",
+      "entity_name": "direct_worker",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:a15a16032c350c29",
+      "entity_name": "direct_worker",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:a15a16032c350c29",
+      "entity_name": "direct_worker",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:a15a16032c350c29",
+      "entity_name": "direct_worker",
+      "entity_kind": "function",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:a15a16032c350c29",
+      "entity_name": "direct_worker",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:a15a16032c350c29",
+      "entity_name": "direct_worker",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:a15a16032c350c29",
+      "entity_name": "direct_worker",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:a15a16032c350c29",
+      "entity_name": "direct_worker",
+      "entity_kind": "function",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task"
+      ]
+    },
+    {
+      "entity_id": "code:function:a2c325f844365813",
+      "entity_name": "synthesizer",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: synthesizer, async, def, synthesizer, nodes, instructions"
+      ]
+    },
+    {
+      "entity_id": "code:function:a2c325f844365813",
+      "entity_name": "synthesizer",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: synthesizer, def, synthesizer"
+      ]
+    },
+    {
       "entity_id": "code:function:a4f00f8d97e56bb8",
       "entity_name": "_node",
       "entity_kind": "function",
@@ -10395,6 +10700,169 @@
       ]
     },
     {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: emit, def, emit, dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: emit, def, emit, dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: emit, async, def, emit, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "GLOBAL_SECURITY.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "COST.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:c63209e1b4f494ee",
+      "entity_name": "emit",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_KEYS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
       "entity_id": "code:function:c98141c1e6467bec",
       "entity_name": "health_check",
       "entity_kind": "function",
@@ -11189,6 +11657,17 @@
       "entity_name": "recommend_for",
       "entity_kind": "function",
       "spec_filename": "RECOMMENDATION.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
+      ]
+    },
+    {
+      "entity_id": "code:function:da3de0d69df7d5d0",
+      "entity_name": "_stream_parkour",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
       "confidence": 1,
       "reasons": [
         "explicit @spec annotation",
@@ -13185,17 +13664,6 @@
       ]
     },
     {
-      "entity_id": "code:function:fbfdd770c8641558",
-      "entity_name": "run_parkour",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR.md",
-      "confidence": 1,
-      "reasons": [
-        "explicit @spec annotation",
-        "section: Requirements"
-      ]
-    },
-    {
       "entity_id": "code:function:fd690724f988393a",
       "entity_name": "compute_cost",
       "entity_kind": "function",
@@ -13511,7 +13979,7 @@
       "spec_filename": "PARKOUR.md",
       "confidence": 0.95,
       "reasons": [
-        "matched tokens: def, self, dict, str, any"
+        "matched tokens: def, self, data:, dict, str, any"
       ]
     },
     {
@@ -15061,7 +15529,7 @@
       "spec_filename": "PARKOUR.md",
       "confidence": 0.95,
       "reasons": [
-        "matched tokens: def, self, dict, str, any"
+        "matched tokens: def, self, data:, dict, str, any"
       ]
     },
     {
@@ -15844,7 +16312,7 @@
       "spec_filename": "PARKOUR.md",
       "confidence": 0.95,
       "reasons": [
-        "matched tokens: def, self, dict, str, any"
+        "matched tokens: def, self, data:, dict, str, any"
       ]
     },
     {
@@ -16583,36 +17051,6 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, pass"
-      ]
-    },
-    {
-      "entity_id": "code:method:68d51815e580a2fe",
-      "entity_name": "__init__",
-      "entity_kind": "method",
-      "spec_filename": "COST.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, self"
-      ]
-    },
-    {
-      "entity_id": "code:method:68d51815e580a2fe",
-      "entity_name": "__init__",
-      "entity_kind": "method",
-      "spec_filename": "MODEL_DISCOVERY.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, self"
-      ]
-    },
-    {
-      "entity_id": "code:method:68d51815e580a2fe",
-      "entity_name": "__init__",
-      "entity_kind": "method",
-      "spec_filename": "PARKOUR.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, self"
       ]
     },
     {
@@ -18154,7 +18592,7 @@
       "spec_filename": "PARKOUR.md",
       "confidence": 0.95,
       "reasons": [
-        "matched tokens: def, self, dict, str, any"
+        "matched tokens: def, self, data:, dict, str, any"
       ]
     },
     {
@@ -19042,6 +19480,166 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.95,
+      "reasons": [
+        "matched tokens: async, def, self, dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.83,
+      "reasons": [
+        "matched tokens: def, dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.83,
+      "reasons": [
+        "matched tokens: def, dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "COST.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, self, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "GLOBAL_SECURITY.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, self, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: dict, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, dict, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:a83dca03c01a8630",
+      "entity_name": "_emit",
+      "entity_kind": "method",
+      "spec_filename": "SECURITY_AND_KEYS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
       ]
     },
     {
@@ -22030,15 +22628,15 @@
       "path": "tests/test_parkour_gateway.py",
       "name": "_result",
       "signature": "def _result():",
-      "start_line": 13
+      "start_line": 15
     },
     {
-      "id": "code:function:cb4d15575273d52c",
+      "id": "code:function:57a04b93d491be02",
       "kind": "function",
       "path": "tests/test_parkour_gateway.py",
-      "name": "test_parkour_disabled_stream_and_tools_errors",
-      "signature": "def test_parkour_disabled_stream_and_tools_errors(monkeypatch):",
-      "start_line": 20
+      "name": "test_parkour_disabled_and_tools_errors",
+      "signature": "def test_parkour_disabled_and_tools_errors(monkeypatch):",
+      "start_line": 31
     },
     {
       "id": "code:function:1bd62b1be0e94758",
@@ -22046,7 +22644,15 @@
       "path": "tests/test_parkour_gateway.py",
       "name": "test_parkour_response_headers_and_opt_in_trace",
       "signature": "def test_parkour_response_headers_and_opt_in_trace(monkeypatch):",
-      "start_line": 44
+      "start_line": 50
+    },
+    {
+      "id": "code:function:3c66c84a631ad411",
+      "kind": "function",
+      "path": "tests/test_parkour_gateway.py",
+      "name": "test_parkour_streams_progress_events_and_final_answer",
+      "signature": "def test_parkour_streams_progress_events_and_final_answer(monkeypatch):",
+      "start_line": 76
     },
     {
       "id": "code:function:202adb4ef2231666",
@@ -22054,7 +22660,7 @@
       "path": "tests/test_parkour_gateway.py",
       "name": "test_parkour_trace_is_absent_by_default",
       "signature": "def test_parkour_trace_is_absent_by_default(monkeypatch):",
-      "start_line": 70
+      "start_line": 118
     },
     {
       "id": "code:function:84c2945a446c9826",
@@ -22062,7 +22668,7 @@
       "path": "tests/test_parkour_gateway.py",
       "name": "test_openai_client_base_url_must_include_v1",
       "signature": "def test_openai_client_base_url_must_include_v1():",
-      "start_line": 85
+      "start_line": 133
     },
     {
       "id": "code:function:5187d88897ef7f03",
@@ -22078,7 +22684,7 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_ready_nodes_run_concurrently_under_semaphore",
       "signature": "def test_ready_nodes_run_concurrently_under_semaphore():",
-      "start_line": 58
+      "start_line": 64
     },
     {
       "id": "code:function:9c5dbe3bc14efe40",
@@ -22086,7 +22692,7 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_deadline_cancels_worker",
       "signature": "def test_deadline_cancels_worker():",
-      "start_line": 102
+      "start_line": 108
     },
     {
       "id": "code:function:5cac978eb602d4eb",
@@ -22094,7 +22700,7 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_recursive_worker_model_is_rejected",
       "signature": "def test_recursive_worker_model_is_rejected():",
-      "start_line": 122
+      "start_line": 128
     },
     {
       "id": "code:function:2095d3727ec3b093",
@@ -22102,7 +22708,7 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_gateway_worker_uses_router_and_existing_fallback_path",
       "signature": "def test_gateway_worker_uses_router_and_existing_fallback_path(monkeypatch):",
-      "start_line": 134
+      "start_line": 140
     },
     {
       "id": "code:function:bc28a9c96e89b28f",
@@ -22219,26 +22825,26 @@
   ],
   "aliases": [],
   "coverage": {
-    "governed_entity_count": 450,
-    "linked_entity_count": 399,
-    "unlinked_entity_count": 51,
-    "coverage_ratio": 0.8867,
+    "governed_entity_count": 458,
+    "linked_entity_count": 406,
+    "unlinked_entity_count": 52,
+    "coverage_ratio": 0.8865,
     "linked_by_kind": {
       "class": 42,
       "method": 123,
-      "function": 223,
+      "function": 230,
       "route": 11
     },
     "unlinked_by_kind": {
       "class": 11,
-      "function": 40
+      "function": 41
     }
   },
   "drift": {
-    "score": 0.1133,
+    "score": 0.1135,
     "severity": "low",
     "signals": [
-      "51 of 450 governable code entities have no local spec link",
+      "52 of 458 governable code entities have no local spec link",
       "19 local spec documents scanned"
     ]
   },

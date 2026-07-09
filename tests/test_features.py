@@ -609,7 +609,7 @@ def test_models_endpoint_includes_enabled_parkour(monkeypatch):
     assert parkour["owned_by"] == "nvidia-smartroute"
     assert parkour["model_type"] == "virtual"
     assert parkour["execution_strategy"] == "multi_agent_dag"
-    assert parkour["supports_streaming"] is False
+    assert parkour["supports_streaming"] is True
     # A virtual execution strategy must never become a routing candidate.
     assert "parkour" not in srv.router.model_registry.models
 

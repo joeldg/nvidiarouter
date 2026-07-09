@@ -177,7 +177,7 @@ Verification:
 Verification:
 
 - OpenAI response-shape and header-size tests.
-- Unknown/disabled PARKOUR, streaming rejection, explicit-model precedence,
+- Unknown/disabled PARKOUR, progress-event streaming, explicit-model precedence,
   tools policy, and namespaced metadata tests.
 - Compatibility smoke test using an OpenAI client.
 
