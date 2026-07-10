@@ -223,41 +223,48 @@ Release gates:
 
 ## Phase 8 — Governed Research Lane and Built-In Web Search
 
+Status: SHIPPED. Governed by `PARKOUR_RESEARCH.md` v1.0.0; implemented in
+`nvidia_smartroute/parkour/research.py` (commit `9ea22b7`). Two follow-on
+capabilities were subsequently specced and built toward Sakana Fugu parity:
+the verify-and-refine loop (`PARKOUR_REFINEMENT.md`, `TODO-parkour-refinement.md`,
+commit `8e71349`) and the multi-model ensemble panel (`PARKOUR_ENSEMBLE.md`,
+`TODO-parkour-ensemble.md`).
+
 Goal: restore PARKOUR's research usefulness without allowing arbitrary
 client-supplied tool execution. PARKOUR should gain a server-owned, bounded web
 research capability that workers can use under gateway policy, while continuing
 to reject untrusted OpenAI `tools` payloads until a separate sandbox/security
 contract exists.
 
-- [ ] Draft and submit a minor `PARKOUR.md` spec update, or a focused
+- [x] Draft and submit a minor `PARKOUR.md` spec update, or a focused
       `PARKOUR_RESEARCH.md`, before implementation. The spec must distinguish
       built-in server-owned research tools from arbitrary client-provided tools.
-- [ ] Keep `tools` / `tool_choice` rejection for PARKOUR requests unless and
+- [x] Keep `tools` / `tool_choice` rejection for PARKOUR requests unless and
       until a reviewed arbitrary-tool sandbox contract is approved.
-- [ ] Add an opt-in setting such as `ENABLE_PARKOUR_RESEARCH=false` so web
+- [x] Add an opt-in setting such as `ENABLE_PARKOUR_RESEARCH=false` so web
       research remains disabled by default and can be rolled out separately
       from core PARKOUR.
-- [ ] Define a built-in `parkour_web_search` capability with a narrow interface:
+- [x] Define a built-in `parkour_web_search` capability with a narrow interface:
       query string, optional domain filters, max result count, timeout, and
       citation/result snippets only.
-- [ ] Enforce hard limits for total searches per run, searches per node, query
+- [x] Enforce hard limits for total searches per run, searches per node, query
       length, result count, fetched bytes, wall-clock time, and aggregate cost.
-- [ ] Route all research through a dedicated adapter that blocks local/private
+- [x] Route all research through a dedicated adapter that blocks local/private
       network targets, masks secrets, applies domain allow/block lists, and
       never exposes raw API keys or authorization headers to workers.
-- [ ] Require workers that use search to return source provenance/citations in
+- [x] Require workers that use search to return source provenance/citations in
       a bounded structured field; synthesis must preserve cited claims where
       possible and mark uncited claims as model-derived.
-- [ ] Add streaming progress events for research activity, e.g.
+- [x] Add streaming progress events for research activity, e.g.
       `research_query_started`, `research_query_completed`, and
       `research_query_failed`, without including full prompts or unbounded page
       text in the event payload.
-- [ ] Record telemetry for search count, failures, latency, bytes/results
+- [x] Record telemetry for search count, failures, latency, bytes/results
       retained, domains contacted, truncations, and limit stops; expose JSON and
       Prometheus parity.
-- [ ] Add cache/deduplication for identical research queries within one run so
+- [x] Add cache/deduplication for identical research queries within one run so
       parallel workers do not stampede the same provider.
-- [ ] Document privacy and freshness tradeoffs: research may send generated
+- [x] Document privacy and freshness tradeoffs: research may send generated
       search queries to the configured provider, and output quality depends on
       provider coverage and recency.
 

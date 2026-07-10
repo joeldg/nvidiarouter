@@ -1,0 +1,8 @@
+[mcp_servers.specregistry]
+command = "specreg"
+args = ["mcp"]
+
+[mcp_servers.specregistry.env]
+SPECREG_SERVER = "http://10.0.0.142:4000"
+SPECREG_PROJECT_TYPE = "CLI Tool / Developer Tooling"
+SPECREG_REPO = "github.com/joeldg/nvidiarouter"
