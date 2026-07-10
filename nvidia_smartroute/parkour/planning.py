@@ -49,6 +49,10 @@ class SubtaskSpec(BaseModel):
     # unless ENABLE_PARKOUR_RESEARCH is set; never client-parameterizable.
     # @spec[PARKOUR_RESEARCH.md#Requirements]
     research: bool = False
+    # Server/conductor-controlled opt-in to the multi-model ensemble panel.
+    # Ignored unless ENABLE_PARKOUR_ENSEMBLE is set; never client-parameterizable.
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    panel: bool = False
 
 
 # @spec[PARKOUR.md#Requirements]

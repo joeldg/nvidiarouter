@@ -95,6 +95,18 @@ def render_prometheus(snapshot: Dict[str, Any]) -> str:
     ]:
         _metric(lines, name, mtype, help_text, refine.get(key, 0))
 
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    ensemble = parkour.get("ensemble") or {}
+    for name, mtype, help_text, key in [
+        ("nsr_parkour_ensemble_panels", "counter", "PARKOUR ensemble panels", "panels"),
+        ("nsr_parkour_ensemble_member_successes", "counter", "PARKOUR ensemble member successes", "member_successes"),
+        ("nsr_parkour_ensemble_member_failures", "counter", "PARKOUR ensemble member failures", "member_failures"),
+        ("nsr_parkour_ensemble_all_failed", "counter", "PARKOUR ensemble all-members-failed", "all_failed"),
+        ("nsr_parkour_ensemble_distinct_models", "gauge", "PARKOUR ensemble distinct models", "distinct_models"),
+        ("nsr_parkour_ensemble_added_cost_usd", "gauge", "PARKOUR ensemble added cost", "added_cost_usd"),
+    ]:
+        _metric(lines, name, mtype, help_text, ensemble.get(key, 0))
+
     # Per-model gauges/counters (labelled by model).
     models = snapshot.get("models") or []
     for family, mtype, help_text, key in [

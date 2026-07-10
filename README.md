@@ -229,6 +229,8 @@ All settings are environment variables (see [.env.example](./.env.example)):
 | `PARKOUR_REFINE_MAX_ITERATIONS` / `..._MAX_VERIFIER_CALLS` / `..._MAX_REVISION_CALLS` | `2` / `3` / `2` | Refinement loop call bounds |
 | `PARKOUR_REFINE_TIMEOUT_SECONDS` / `..._MAX_ADDED_TOKENS` / `..._MAX_ADDED_COST_USD` | `120` / `32000` / `0.5` | Added wall-clock, token, and cost bounds (rolled into PARKOUR budget) |
 | `PARKOUR_REFINE_ACCEPT_THRESHOLD` / `..._MIN_IMPROVEMENT` / `..._FEEDBACK_CHARS` | `0.8` / `0.02` / `2000` | Accept score, no-improvement margin, injected-feedback bound |
+| `ENABLE_PARKOUR_ENSEMBLE` | `False` | Fan a node's prompt across a distinct-model panel and combine |
+| `PARKOUR_ENSEMBLE_MODELS` / `PARKOUR_ENSEMBLE_MAX_SIZE` | – / `3` | Panel member model IDs (≥2 distinct) and max members per node |
 | `DEFAULT_EMBEDDING_MODEL` | `nvidia/nv-embedqa-e5-v5` | Embeddings model |
 | `LOG_LEVEL` / `LOG_JSON` | `INFO` / `False` | Logging level / JSON output |
 
@@ -330,6 +332,25 @@ revision tokens/cost roll into the PARKOUR aggregate and daily budget; the loop
 adds latency and cost proportional to the iteration and call limits. Refinement
 telemetry is exposed in JSON `/metrics` and `/metrics/prometheus`
 (`nsr_parkour_refine_*`).
+
+### PARKOUR multi-model ensemble panel
+
+An opt-in panel (disabled by default, independent of `ENABLE_PARKOUR`) gives a
+node genuine model diversity: it fans one prompt across an explicit, server-
+configured set of **≥2 distinct models in parallel** — bypassing the usual
+single-model-per-task routing — and combines their answers. Set
+`ENABLE_PARKOUR_ENSEMBLE=True` and list members in `PARKOUR_ENSEMBLE_MODELS`
+(deduplicated, `parkour` excluded, capped at `PARKOUR_ENSEMBLE_MAX_SIZE`).
+
+Membership is server-configured only — clients cannot specify it. Each member
+routes through the existing key pool, retries, fallback, and circuit breaker,
+and cannot select `parkour`. The panel tolerates partial failure (it proceeds on
+surviving members and fails only if all fail), combines survivors with the
+synthesizer, and rolls all member and combination tokens/cost into the PARKOUR
+aggregate. Cost and latency scale roughly with panel size. Ensemble telemetry is
+exposed in JSON `/metrics` and `/metrics/prometheus` (`nsr_parkour_ensemble_*`).
+If fewer than two distinct members are configured, the node falls back to
+ordinary single-model routing.
 
 ## Governance
 

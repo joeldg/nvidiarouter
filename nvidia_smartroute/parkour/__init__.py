@@ -52,6 +52,14 @@ from .refinement import (
     refinement_telemetry,
     run_refinement,
 )
+from .ensemble import (
+    EnsembleError,
+    EnsembleTelemetry,
+    MemberResult,
+    PanelResult,
+    ensemble_telemetry,
+    run_panel,
+)
 
 __all__ = [
     "ExecutionPlan",
@@ -99,4 +107,10 @@ __all__ = [
     "parse_verdict",
     "refinement_telemetry",
     "run_refinement",
+    "EnsembleError",
+    "EnsembleTelemetry",
+    "MemberResult",
+    "PanelResult",
+    "ensemble_telemetry",
+    "run_panel",
 ]

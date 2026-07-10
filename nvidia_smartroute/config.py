@@ -327,6 +327,23 @@ class Settings(BaseSettings):
         description="Maximum verifier-feedback characters injected into a revision",
     )
 
+    # PARKOUR multi-model ensemble panel (opt-in; disabled by default and
+    # independent of the other PARKOUR flags). See PARKOUR_ENSEMBLE.md.
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    enable_parkour_ensemble: bool = Field(
+        default=False,
+        description="Let a PARKOUR node fan one prompt across a distinct-model panel",
+    )
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    parkour_ensemble_models: Optional[str] = Field(
+        default=None,
+        description="Comma-separated distinct model IDs forming the ensemble panel",
+    )
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    parkour_ensemble_max_size: int = Field(
+        default=3, ge=2, le=8, description="Maximum panel members run for one node"
+    )
+
     # Response cache
     # @spec[GATEWAY_API.md#Requirements]
     enable_cache: bool = Field(
@@ -539,6 +556,21 @@ class Settings(BaseSettings):
         """Parsed, lowercased research block-domains (block wins over allow)."""
         raw = self.parkour_research_block_domains or ""
         return [d.strip().lower() for d in raw.split(",") if d.strip()]
+
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    @property
+    def parkour_ensemble_panel(self) -> List[str]:
+        """The effective ensemble panel: distinct model IDs, `parkour` excluded,
+        order-preserving, truncated to the configured maximum panel size."""
+        raw = self.parkour_ensemble_models or ""
+        panel: List[str] = []
+        seen = set()
+        for model_id in (m.strip() for m in raw.split(",")):
+            if not model_id or model_id == "parkour" or model_id in seen:
+                continue
+            seen.add(model_id)
+            panel.append(model_id)
+        return panel[: self.parkour_ensemble_max_size]
 
 
 # @spec[GATEWAY_API.md#Requirements]

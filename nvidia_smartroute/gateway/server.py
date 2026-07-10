@@ -37,6 +37,7 @@ from ..parkour.service import run_parkour
 from ..parkour.telemetry import parkour_telemetry
 from ..parkour.research import research_telemetry
 from ..parkour.refinement import refinement_telemetry
+from ..parkour.ensemble import ensemble_telemetry
 from ..web import DASHBOARD_HTML
 from .. import logging_config  # noqa: F401  (configures structlog on import)
 from . import runtime
@@ -94,6 +95,8 @@ def _parkour_chunk(
                 "query_chars", "results", "truncated",
                 # @spec[PARKOUR_REFINEMENT.md#Requirements] bounded refine fields
                 "iteration", "score", "accepted",
+                # @spec[PARKOUR_ENSEMBLE.md#Requirements] bounded panel fields
+                "size", "successes", "failures", "combined", "ok",
             }
         }
     return chunk
@@ -664,6 +667,8 @@ def _full_snapshot() -> dict:
     snapshot["parkour"]["research"] = research_telemetry.snapshot()
     # @spec[PARKOUR_REFINEMENT.md#Requirements]
     snapshot["parkour"]["refinement"] = refinement_telemetry.snapshot()
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    snapshot["parkour"]["ensemble"] = ensemble_telemetry.snapshot()
     return snapshot
 
 

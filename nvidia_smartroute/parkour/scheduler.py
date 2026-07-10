@@ -268,6 +268,14 @@ async def routed_gateway_worker(
     # Server-owned research: only when the node opts in and the lane is enabled.
     citations = await _inject_research(task, messages, research, progress)
     messages.append({"role": "user", "content": task.user_prompt})
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    # Multi-model panel: only when the node opts in, the panel is enabled, and at
+    # least two distinct members are configured; otherwise single-model routing.
+    from ..config import settings as _settings
+    if task.panel and _settings.enable_parkour_ensemble:
+        panel = _settings.parkour_ensemble_panel
+        if len(panel) >= 2:
+            return await _run_ensemble_node(task, messages, panel, citations, progress)
     decision = await router.route_request(messages)
     if not decision.selected_model or decision.selected_model.model_id == "parkour":
         raise ParkourLimitError("no non-PARKOUR worker model available")
@@ -327,4 +335,74 @@ async def _inject_research(
     return tuple(
         {"url": c.url, "title": c.title, "snippet": c.snippet}
         for c in result.citations
+    )
+
+
+_ENSEMBLE_COMBINE_PROMPT = """You are given several candidate answers to the same
+request from different models. Combine them into a single best answer, resolving
+disagreements and keeping the strongest, most accurate content. Return only the
+final answer."""
+
+
+# @spec[PARKOUR_ENSEMBLE.md#Requirements]
+async def _routed_call(messages: List[Dict[str, Any]], model_id: str):
+    """Route one explicit-model call through existing controls; refuse parkour.
+
+    Returns (content, used_model_id, tokens, cost_usd).
+    """
+    from ..cost import compute_cost
+    from ..gateway.completion import complete_with_fallback
+    from ..routing.router import router
+
+    decision = await router.route_request(messages, model=model_id)
+    if not decision.selected_model or decision.selected_model.model_id == "parkour":
+        raise ParkourLimitError("ensemble call cannot select parkour")
+    data, used_model, _ = await complete_with_fallback(
+        decision.task_type, decision.selected_model, messages, None, None, {}
+    )
+    usage = data.get("usage", {}) if isinstance(data, dict) else {}
+    tokens = int(usage.get("total_tokens") or 0)
+    cost = compute_cost(
+        used_model,
+        int(usage.get("prompt_tokens") or 0),
+        int(usage.get("completion_tokens") or 0),
+    )
+    content = data["choices"][0]["message"].get("content", "")
+    return content, used_model.model_id, tokens, cost
+
+
+# @spec[PARKOUR_ENSEMBLE.md#Requirements]
+async def _run_ensemble_node(
+    task: SubtaskSpec,
+    messages: List[Dict[str, Any]],
+    panel: List[str],
+    citations: Tuple[Dict[str, str], ...],
+    progress: Optional[ProgressCallback],
+) -> WorkerResult:
+    """Fan the node prompt across the distinct-model panel and combine survivors."""
+    from ..config import settings
+    from .ensemble import MemberResult, ensemble_telemetry, run_panel
+
+    async def run_member(model_id: str) -> MemberResult:
+        content, used_id, tokens, cost = await _routed_call(messages, model_id)
+        return MemberResult(used_id, content, tokens, cost, ok=True)
+
+    async def combine(successful: List[MemberResult]) -> MemberResult:
+        evidence = "\n\n".join(
+            f"[candidate {i + 1} / {m.model_id}]\n{m.content}"
+            for i, m in enumerate(successful)
+        )
+        content, used_id, tokens, cost = await _routed_call(
+            [
+                {"role": "system", "content": _ENSEMBLE_COMBINE_PROMPT},
+                {"role": "user", "content": evidence},
+            ],
+            settings.parkour_synthesizer_model,
+        )
+        return MemberResult(used_id, content, tokens, cost, ok=True)
+
+    result = await run_panel(panel, run_member, combine, ensemble_telemetry, progress)
+    return WorkerResult(
+        result.content, result.model_id, result.tokens, result.cost_usd,
+        citations=citations,
     )
