@@ -52,6 +52,9 @@ class EngineResult:
     # Bounded research-lane summary; None when the research lane is inactive.
     # @spec[PARKOUR_RESEARCH.md#Requirements]
     research: Optional[Dict[str, Any]] = None
+    # Bounded refinement-loop summary; None when the loop is inactive.
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    refinement: Optional[Dict[str, Any]] = None
 
 
 # @spec[PARKOUR.md#Requirements]

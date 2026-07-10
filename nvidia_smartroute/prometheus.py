@@ -79,6 +79,22 @@ def render_prometheus(snapshot: Dict[str, Any]) -> str:
     ]:
         _metric(lines, name, mtype, help_text, research.get(key, 0))
 
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    refine = parkour.get("refinement") or {}
+    for name, mtype, help_text, key in [
+        ("nsr_parkour_refine_loops", "counter", "PARKOUR refinement loops", "loops"),
+        ("nsr_parkour_refine_iterations", "counter", "PARKOUR refinement iterations", "iterations"),
+        ("nsr_parkour_refine_accepts", "counter", "PARKOUR refinement accepts", "accepts"),
+        ("nsr_parkour_refine_rejects", "counter", "PARKOUR refinement rejects", "rejects"),
+        ("nsr_parkour_refine_no_improvement", "counter", "PARKOUR refinement no-improvement stops", "no_improvement_stops"),
+        ("nsr_parkour_refine_limit_stops", "counter", "PARKOUR refinement limit stops", "limit_stops"),
+        ("nsr_parkour_refine_verifier_failures", "counter", "PARKOUR verifier failures", "verifier_failures"),
+        ("nsr_parkour_refine_avg_score", "gauge", "PARKOUR refinement avg returned score", "avg_returned_score"),
+        ("nsr_parkour_refine_added_tokens", "counter", "PARKOUR refinement added tokens", "added_tokens"),
+        ("nsr_parkour_refine_added_cost_usd", "gauge", "PARKOUR refinement added cost", "added_cost_usd"),
+    ]:
+        _metric(lines, name, mtype, help_text, refine.get(key, 0))
+
     # Per-model gauges/counters (labelled by model).
     models = snapshot.get("models") or []
     for family, mtype, help_text, key in [

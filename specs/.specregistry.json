@@ -2,7 +2,7 @@
   "project_type": "CLI Tool / Developer Tooling",
   "project": "github.com/joeldg/nvidiarouter",
   "channel": "stable",
-  "fetched_at": "2026-07-09T21:25:31.600Z",
+  "fetched_at": "2026-07-10T00:19:46.146Z",
   "specs": [
     {
       "filename": "AGENT_OPERATING_RULES.md",
@@ -124,6 +124,13 @@
       "sha256": "bb0c78a765eccf376bb90d171faf19a69cd4c703e9a31019bc42edd1ba27f925"
     },
     {
+      "filename": "PARKOUR_REFINEMENT.md",
+      "version": "1.0.0",
+      "project_type": "github.com/joeldg/nvidiarouter",
+      "scope": "project",
+      "sha256": "b6baf67d83636af41ca248eea641f4e2579eddc7bca97a7cc447b90338527bce"
+    },
+    {
       "filename": "PARKOUR_RESEARCH.md",
       "version": "1.0.0",
       "project_type": "github.com/joeldg/nvidiarouter",
@@ -145,6 +152,6 @@
       "sha256": "a424208a10cbe963ff067dfd604197643f5ce90faccac14b4135c8264ae5f879"
     }
   ],
-  "signature": "zwnRLSO+bE+5fZMR3N3jGZF5tiqsldQLs/zmrLiX6J3L2Cfn7JiQjCXWrbUXLzzP2KD2CKtAqtw3Eq7XwycrAA==",
+  "signature": "07KCwUNiXY3nKjgE+UJn53vmT1wBrfQc5rHPbJ/0ITfQbAHMP96t31ttwLNEbLyaDA2NxhFInms9ldSKf97jBw==",
   "signature_alg": "ed25519"
 }

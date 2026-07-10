@@ -36,6 +36,7 @@ from ..parkour.scheduler import ParkourLimitError
 from ..parkour.service import run_parkour
 from ..parkour.telemetry import parkour_telemetry
 from ..parkour.research import research_telemetry
+from ..parkour.refinement import refinement_telemetry
 from ..web import DASHBOARD_HTML
 from .. import logging_config  # noqa: F401  (configures structlog on import)
 from . import runtime
@@ -91,6 +92,8 @@ def _parkour_chunk(
                 "context_truncated", "output_truncated",
                 # @spec[PARKOUR_RESEARCH.md#Requirements] bounded research fields
                 "query_chars", "results", "truncated",
+                # @spec[PARKOUR_REFINEMENT.md#Requirements] bounded refine fields
+                "iteration", "score", "accepted",
             }
         }
     return chunk
@@ -265,6 +268,9 @@ async def _handle_parkour(body: dict, request_id: str):
         # @spec[PARKOUR_RESEARCH.md#Requirements]
         if result.research:
             response["parkour"]["research"] = result.research
+        # @spec[PARKOUR_REFINEMENT.md#Requirements]
+        if result.refinement:
+            response["parkour"]["refinement"] = result.refinement
     return JSONResponse(
         content=response,
         headers={"X-Request-ID": request_id, "X-Selected-Model": "parkour",
@@ -656,6 +662,8 @@ def _full_snapshot() -> dict:
     snapshot["parkour"] = parkour_telemetry.snapshot()
     # @spec[PARKOUR_RESEARCH.md#Requirements]
     snapshot["parkour"]["research"] = research_telemetry.snapshot()
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    snapshot["parkour"]["refinement"] = refinement_telemetry.snapshot()
     return snapshot
 
 

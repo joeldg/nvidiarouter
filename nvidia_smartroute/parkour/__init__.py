@@ -40,6 +40,18 @@ from .research import (
     mask_secret,
     research_telemetry,
 )
+from .refinement import (
+    RefinementError,
+    RefinementLimits,
+    RefinementResult,
+    RefinementTelemetry,
+    ReviseOutcome,
+    Verdict,
+    VerifyOutcome,
+    parse_verdict,
+    refinement_telemetry,
+    run_refinement,
+)
 
 __all__ = [
     "ExecutionPlan",
@@ -77,4 +89,14 @@ __all__ = [
     "guard_url",
     "mask_secret",
     "research_telemetry",
+    "RefinementError",
+    "RefinementLimits",
+    "RefinementResult",
+    "RefinementTelemetry",
+    "ReviseOutcome",
+    "Verdict",
+    "VerifyOutcome",
+    "parse_verdict",
+    "refinement_telemetry",
+    "run_refinement",
 ]

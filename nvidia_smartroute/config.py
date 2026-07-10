@@ -272,6 +272,61 @@ class Settings(BaseSettings):
         default=None, description="Comma-separated blocked research domains"
     )
 
+    # PARKOUR verifier + iterative refinement loop (opt-in; disabled by default
+    # and independent of ENABLE_PARKOUR / ENABLE_PARKOUR_RESEARCH). See
+    # PARKOUR_REFINEMENT.md.
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    enable_parkour_refinement: bool = Field(
+        default=False,
+        description="Verify the PARKOUR answer and iteratively refine it under bounds",
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_verifier_model: str = Field(
+        default="meta/llama-3.1-70b-instruct",
+        min_length=1,
+        description="Upstream model used to verify/score PARKOUR candidate answers",
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_max_iterations: int = Field(
+        default=2, ge=1, le=10, description="Maximum refinement iterations per run"
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_max_verifier_calls: int = Field(
+        default=3, ge=1, le=20, description="Maximum verifier calls per run"
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_max_revision_calls: int = Field(
+        default=2, ge=1, le=20, description="Maximum revision (worker) calls per run"
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_timeout_seconds: float = Field(
+        default=120.0, gt=0, le=1800,
+        description="Added wall-clock budget (seconds) for the refinement loop",
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_max_added_tokens: int = Field(
+        default=32_000, ge=1, description="Maximum added tokens for the refinement loop"
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_max_added_cost_usd: float = Field(
+        default=0.5, gt=0, description="Maximum added estimated cost for the loop"
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_accept_threshold: float = Field(
+        default=0.8, ge=0.0, le=1.0,
+        description="Verifier score (0..1) at/above which an answer is accepted",
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_min_improvement: float = Field(
+        default=0.02, ge=0.0, le=1.0,
+        description="Minimum score gain a revision must add or the loop stops",
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_feedback_chars: int = Field(
+        default=2_000, ge=1,
+        description="Maximum verifier-feedback characters injected into a revision",
+    )
+
     # Response cache
     # @spec[GATEWAY_API.md#Requirements]
     enable_cache: bool = Field(

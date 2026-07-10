@@ -6,10 +6,19 @@ from dataclasses import replace
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
 from ..config import settings
+from ..cost import compute_cost
 from ..gateway.completion import complete_with_fallback
 from ..routing.router import router
 from .engine import EngineResult, ParkourEngine
 from .planning import PlanLimits, build_direct_plan, should_decompose
+from .refinement import (
+    RefinementLimits,
+    ReviseOutcome,
+    VerifyOutcome,
+    parse_verdict,
+    refinement_telemetry,
+    run_refinement,
+)
 from .research import ResearchSession, build_research_session
 from .scheduler import (
     DagScheduler,
@@ -19,6 +28,16 @@ from .scheduler import (
     WorkerResult,
     routed_gateway_worker,
 )
+
+_VERIFIER_PROMPT = """You are a strict answer verifier. Given the user's request
+and a candidate answer, judge the candidate. Return JSON only with keys: `score`
+(a number from 0 to 1 for overall quality and correctness), `accept` (boolean),
+and `feedback` (short, concrete guidance to improve the answer). Return JSON
+only."""
+
+_REVISER_PROMPT = """Revise the candidate answer to address the verifier
+feedback while staying faithful to the original request. Return only the
+improved answer, with no preamble."""
 
 _CONDUCTOR_PROMPT = """Create a JSON execution plan with keys `tasks` and
 `synthesis_instructions`. Each task requires: id, task_type, role,
@@ -110,6 +129,83 @@ def _sources(node: NodeResult) -> str:
     return f"\nSources:\n{lines}"
 
 
+# @spec[PARKOUR_REFINEMENT.md#Requirements]
+async def _routed_completion_with_cost(model_id: str, messages: list):
+    """Route an explicit-model call through existing controls with real cost.
+
+    Returns (content, model_id, tokens, cost_usd). Refuses to select `parkour`.
+    """
+    decision = await router.route_request(messages, model=model_id)
+    if not decision.selected_model or decision.selected_model.model_id == "parkour":
+        raise RuntimeError("no non-PARKOUR model available for refinement")
+    data, used_model, _ = await complete_with_fallback(
+        decision.task_type, decision.selected_model, messages, None, None, {}
+    )
+    usage = data.get("usage", {}) if isinstance(data, dict) else {}
+    tokens = int(usage.get("total_tokens") or 0)
+    cost = compute_cost(
+        used_model,
+        int(usage.get("prompt_tokens") or 0),
+        int(usage.get("completion_tokens") or 0),
+    )
+    content = data["choices"][0]["message"].get("content", "")
+    return content, used_model.model_id, tokens, cost
+
+
+# @spec[PARKOUR_REFINEMENT.md#Requirements]
+async def _refine(result: EngineResult, request_text: str, progress) -> EngineResult:
+    """Run the bounded verify-and-refine loop over the synthesized answer."""
+    if not settings.enable_parkour_refinement:
+        return result
+
+    async def verify(candidate: str) -> VerifyOutcome:
+        content, _model, tokens, cost = await _routed_completion_with_cost(
+            settings.parkour_verifier_model,
+            [
+                {"role": "system", "content": _VERIFIER_PROMPT},
+                {"role": "user",
+                 "content": f"REQUEST:\n{request_text}\n\nCANDIDATE:\n{candidate}"},
+            ],
+        )
+        # parse_verdict raises on malformed output; the loop treats that as a
+        # verifier failure rather than an implicit accept.
+        return VerifyOutcome(parse_verdict(content), tokens, cost)
+
+    async def revise(candidate: str, feedback: str) -> ReviseOutcome:
+        content, model_id, tokens, cost = await _routed_completion_with_cost(
+            settings.parkour_synthesizer_model,
+            [
+                {"role": "system", "content": _REVISER_PROMPT},
+                {"role": "user",
+                 "content": (f"REQUEST:\n{request_text}\n\nCANDIDATE:\n{candidate}"
+                             f"\n\nFEEDBACK:\n{feedback}")},
+            ],
+        )
+        return ReviseOutcome(content, model_id, tokens, cost)
+
+    refined = await run_refinement(
+        result.output, verify, revise,
+        RefinementLimits.from_settings(settings), refinement_telemetry, progress,
+    )
+    return replace(
+        result,
+        output=refined.output,
+        total_tokens=result.total_tokens + refined.added_tokens,
+        total_cost_usd=result.total_cost_usd + refined.added_cost_usd,
+        refinement=refined.summary(),
+    )
+
+
+def _request_text(messages: list) -> str:
+    """Flatten inbound messages into a bounded plain-text request for the loop."""
+    parts = []
+    for message in messages:
+        content = message.get("content", "")
+        if isinstance(content, str):
+            parts.append(content)
+    return "\n".join(p for p in parts if p)[:8000]
+
+
 # @spec[PARKOUR.md#Requirements]
 async def run_parkour(
     messages: list,
@@ -135,7 +231,8 @@ async def run_parkour(
     if not should_decompose(messages):
         await _emit(progress, {"type": "direct_plan_selected"})
         result = await engine.execute(direct, worker, synthesizer)
-        return _with_research(result, research)
+        result = _with_research(result, research)
+        return await _refine(result, _request_text(messages), progress)
 
     conductor = await _routed_explicit_completion(
         settings.parkour_conductor_model,
@@ -155,7 +252,8 @@ async def run_parkour(
         synthesizer,
         conductor,
     )
-    return _with_research(result, research)
+    result = _with_research(result, research)
+    return await _refine(result, _request_text(messages), progress)
 
 
 # @spec[PARKOUR_RESEARCH.md#Requirements]

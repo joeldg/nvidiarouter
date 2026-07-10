@@ -224,6 +224,11 @@ All settings are environment variables (see [.env.example](./.env.example)):
 | `PARKOUR_RESEARCH_MAX_BYTES` / `..._TIMEOUT_SECONDS` | `200000` / `15` | Research bytes-retained and wall-clock bounds |
 | `PARKOUR_RESEARCH_COST_PER_SEARCH_USD` / `..._MAX_COST_USD` | `0.005` / `0.1` | Estimated per-search and per-run research spend (rolled into PARKOUR cost) |
 | `PARKOUR_RESEARCH_ALLOW_DOMAINS` / `..._BLOCK_DOMAINS` | – / – | Comma-separated research domain allow/block lists (block wins) |
+| `ENABLE_PARKOUR_REFINEMENT` | `False` | Verify the PARKOUR answer and iteratively refine it under bounds |
+| `PARKOUR_VERIFIER_MODEL` | `meta/llama-3.1-70b-instruct` | Model that scores/verifies candidate answers |
+| `PARKOUR_REFINE_MAX_ITERATIONS` / `..._MAX_VERIFIER_CALLS` / `..._MAX_REVISION_CALLS` | `2` / `3` / `2` | Refinement loop call bounds |
+| `PARKOUR_REFINE_TIMEOUT_SECONDS` / `..._MAX_ADDED_TOKENS` / `..._MAX_ADDED_COST_USD` | `120` / `32000` / `0.5` | Added wall-clock, token, and cost bounds (rolled into PARKOUR budget) |
+| `PARKOUR_REFINE_ACCEPT_THRESHOLD` / `..._MIN_IMPROVEMENT` / `..._FEEDBACK_CHARS` | `0.8` / `0.02` / `2000` | Accept score, no-improvement margin, injected-feedback bound |
 | `DEFAULT_EMBEDDING_MODEL` | `nvidia/nv-embedqa-e5-v5` | Embeddings model |
 | `LOG_LEVEL` / `LOG_JSON` | `INFO` / `False` | Logging level / JSON output |
 
@@ -304,6 +309,27 @@ run, and research telemetry is exposed in both JSON `/metrics` and
 the configured provider, and answer quality depends on that provider's coverage
 and recency. Workers using search return bounded citations; synthesis preserves
 cited claims where possible and marks uncited claims as model-derived.
+
+### PARKOUR verify-and-refine loop
+
+An opt-in loop (disabled by default, independent of `ENABLE_PARKOUR`) scores the
+synthesized answer with a server-owned verifier and, when it falls short and
+budget remains, revises it with the verifier's feedback and re-scores — a
+bounded Thinker/Worker/Verifier-style pass inspired by verify-and-refine
+coordinators. Set `ENABLE_PARKOUR_REFINEMENT=True` to enable it.
+
+The loop is **guaranteed to terminate**: it stops on the first of verifier
+acceptance (score ≥ `PARKOUR_REFINE_ACCEPT_THRESHOLD`), the iteration limit, any
+resource limit, or a no-improvement stop when a revision fails to raise the
+score by `PARKOUR_REFINE_MIN_IMPROVEMENT`. It returns the **best-scored**
+candidate observed (a worse revision never replaces a better earlier answer), a
+malformed verdict is treated as a verifier failure rather than an implicit
+accept, and any verifier/revision failure is non-fatal — PARKOUR returns the
+best answer so far marked *unverified* instead of erroring. Added verifier and
+revision tokens/cost roll into the PARKOUR aggregate and daily budget; the loop
+adds latency and cost proportional to the iteration and call limits. Refinement
+telemetry is exposed in JSON `/metrics` and `/metrics/prometheus`
+(`nsr_parkour_refine_*`).
 
 ## Governance
 
