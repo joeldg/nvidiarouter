@@ -72,6 +72,7 @@ async def run_panel(
     combine: Combiner,
     telemetry: Optional["EnsembleTelemetry"] = None,
     progress: Optional[ProgressCallback] = None,
+    configured_size: Optional[int] = None,
 ) -> PanelResult:
     """Run panel members concurrently and combine the survivors.
 
@@ -79,9 +80,18 @@ async def run_panel(
     single surviving member is returned directly without a combination call.
     """
     await _emit(progress, {"type": "panel_started", "size": len(members)})
-    outcomes: List[MemberResult] = await asyncio.gather(
-        *(_guarded_member(run_member, model_id, progress) for model_id in members)
-    )
+    tasks = [
+        asyncio.create_task(_guarded_member(run_member, model_id, progress))
+        for model_id in members
+    ]
+    try:
+        outcomes: List[MemberResult] = await asyncio.gather(*tasks)
+    except Exception:
+        for task in tasks:
+            if not task.done():
+                task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        raise
     summaries = tuple(
         {"model": m.model_id, "ok": m.ok, "tokens": m.tokens} for m in outcomes
     )
@@ -91,7 +101,14 @@ async def run_panel(
 
     if not successful:
         if telemetry:
-            telemetry.record_panel(len(members), 0, len(outcomes), 0.0)
+            telemetry.record_panel(
+                len(members),
+                0,
+                len(outcomes),
+                0,
+                0.0,
+                configured_size=configured_size,
+            )
         raise EnsembleError("all ensemble panel members failed")
 
     if len(successful) == 1:
@@ -116,8 +133,13 @@ async def run_panel(
     })
     if telemetry:
         telemetry.record_panel(
-            len(members), len(successful), len(outcomes), result.cost_usd,
+            len(members),
+            len(successful),
+            len(outcomes),
+            result.tokens,
+            result.cost_usd,
             distinct={m.model_id for m in successful},
+            configured_size=configured_size,
         )
     return result
 
@@ -129,6 +151,8 @@ async def _guarded_member(
     try:
         result = await run_member(model_id)
     except Exception as exc:  # a member failure must not fail the whole node
+        if getattr(exc, "is_parkour_limit", False):
+            raise
         await _emit(progress, {
             "type": "panel_member_completed", "model": model_id, "ok": False,
         })
@@ -150,6 +174,9 @@ class EnsembleTelemetry:
         self.member_successes = 0
         self.member_failures = 0
         self.all_failed = 0
+        self.configured_members = 0
+        self.effective_members = 0
+        self.added_tokens = 0
         self.added_cost_usd = 0.0
         self.distinct_models: set = set()
 
@@ -158,14 +185,19 @@ class EnsembleTelemetry:
         size: int,
         successes: int,
         total: int,
+        tokens: int,
         cost_usd: float,
         distinct: Optional[set] = None,
+        configured_size: Optional[int] = None,
     ) -> None:
         self.panels += 1
+        self.configured_members += configured_size or size
+        self.effective_members += size
         self.member_successes += successes
         self.member_failures += total - successes
         if successes == 0:
             self.all_failed += 1
+        self.added_tokens += tokens
         self.added_cost_usd += cost_usd
         if distinct:
             self.distinct_models.update(distinct)
@@ -176,7 +208,10 @@ class EnsembleTelemetry:
             "member_successes": self.member_successes,
             "member_failures": self.member_failures,
             "all_failed": self.all_failed,
+            "configured_members": self.configured_members,
+            "effective_members": self.effective_members,
             "distinct_models": len(self.distinct_models),
+            "added_tokens": self.added_tokens,
             "added_cost_usd": round(self.added_cost_usd, 8),
         }
 

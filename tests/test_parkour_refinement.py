@@ -84,6 +84,34 @@ async def test_improve_then_accept_returns_revised():
 
 
 @pytest.mark.asyncio
+async def test_accept_flag_below_threshold_cannot_reward_hack():
+    r = await run_refinement(
+        "ans",
+        _verifier([0.2, 0.9], accept_when=0.0),
+        _revise,
+        _limits(),
+    )
+
+    assert r.accepted is True
+    assert r.verifier_calls == 2
+    assert r.output == "ans+"
+
+
+@pytest.mark.asyncio
+async def test_oscillating_scores_return_best_observed_candidate():
+    r = await run_refinement(
+        "initial",
+        _verifier([0.4, 0.7, 0.5]),
+        _revise,
+        _limits(min_improvement=0.0),
+    )
+
+    assert r.stop_reason == "no_improvement"
+    assert r.best_score == 0.7
+    assert r.output == "initial+"
+
+
+@pytest.mark.asyncio
 async def test_no_improvement_stops():
     # 0.50 -> 0.505 is below the 0.02 margin.
     r = await run_refinement(
@@ -195,6 +223,21 @@ async def test_revision_failure_returns_best_so_far():
     assert r.best_score == 0.5
 
 
+@pytest.mark.asyncio
+async def test_shared_run_limit_stops_refinement_as_resource_limit():
+    class SharedLimitError(RuntimeError):
+        is_parkour_limit = True
+
+    async def limited_verify(candidate):
+        raise SharedLimitError("run call limit")
+
+    r = await run_refinement("usable", limited_verify, _revise, _limits())
+
+    assert r.stop_reason == "resource_limit"
+    assert r.output == "usable"
+    assert r.verified is False
+
+
 # --- telemetry & accounting --------------------------------------------------
 
 @pytest.mark.asyncio
@@ -237,8 +280,13 @@ async def test_progress_events_bounded():
         progress=progress,
     )
     types_seen = {e["type"] for e in events}
-    assert {"verification_completed", "revision_started", "revision_completed",
-            "refinement_stopped"} <= types_seen
+    assert {
+        "verification_started",
+        "verification_completed",
+        "revision_started",
+        "revision_completed",
+        "refinement_stopped",
+    } <= types_seen
     # No full candidate text leaks into events.
     for e in events:
         assert "candidate" not in e
@@ -272,3 +320,26 @@ def test_refinement_disabled_by_default_leaves_trace_absent(monkeypatch):
     })
     assert response.status_code == 200
     assert "refinement" not in response.json()["parkour"]
+
+
+@pytest.mark.asyncio
+async def test_refinement_disabled_returns_identical_result(monkeypatch):
+    import nvidia_smartroute.parkour.service as service
+    from nvidia_smartroute.parkour import (
+        EngineResult,
+        NodeResult,
+        SchedulerResult,
+        WorkerResult,
+    )
+
+    node = NodeResult("one", "answer", "worker", 5, 0.1, False)
+    scheduled = SchedulerResult({"one": node}, 1, 5, 0.1)
+    synthesis = WorkerResult("answer", "worker")
+    result = EngineResult(
+        "answer", scheduled, synthesis, 5, 0.1, False, False
+    )
+    monkeypatch.setattr(service.settings, "enable_parkour_refinement", False)
+
+    returned = await service._refine(result, "request", None)
+
+    assert returned is result

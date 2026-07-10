@@ -10,6 +10,7 @@ from nvidia_smartroute.parkour import (
     ParkourLimitError,
     SchedulerLimits,
     SubtaskSpec,
+    UpstreamBudget,
     WorkerResult,
 )
 from nvidia_smartroute.routing.router import TaskType
@@ -177,3 +178,103 @@ def test_gateway_worker_uses_router_and_existing_fallback_path(monkeypatch):
     assert result.output == "done"
     assert result.model_id == "worker-model"
     assert result.tokens == 5
+
+
+def test_gateway_worker_preserves_direct_message_roles(monkeypatch):
+    import nvidia_smartroute.gateway.completion as completion
+    import nvidia_smartroute.parkour.scheduler as scheduler
+    import nvidia_smartroute.routing.router as routing
+
+    model = ModelCapability(
+        model_id="worker-model",
+        name="Worker",
+        provider="test",
+        version="1",
+        supported_tasks=[TaskType.CHAT],
+    )
+    captured = {}
+
+    async def route_request(messages):
+        captured["routed"] = messages
+        return RoutingDecision("r", TaskType.CHAT, model, 1.0)
+
+    async def complete(task_type, primary, messages, max_tokens, temperature, extra):
+        captured["completed"] = messages
+        return (
+            {
+                "choices": [{"message": {"content": "corrected"}}],
+                "usage": {"total_tokens": 1},
+            },
+            model,
+            False,
+        )
+
+    original = [
+        {"role": "user", "content": "question"},
+        {"role": "assistant", "content": "incorrect claim"},
+        {"role": "user", "content": "that claim is wrong"},
+    ]
+    monkeypatch.setattr(routing.router, "route_request", route_request)
+    monkeypatch.setattr(completion, "complete_with_fallback", complete)
+
+    result = asyncio.run(
+        scheduler.routed_gateway_worker(
+            _node("one"), [], request_messages=original
+        )
+    )
+
+    expected = [
+        {"role": "system", "content": "work"},
+        *original,
+    ]
+    assert captured["routed"] == expected
+    assert captured["completed"] == expected
+    assert result.output == "corrected"
+
+
+@pytest.mark.asyncio
+async def test_upstream_budget_enforces_token_and_cost_limits():
+    token_budget = UpstreamBudget(_limits(max_tokens=1))
+    cost_budget = UpstreamBudget(_limits(max_cost_usd=0.01))
+
+    async def result():
+        return WorkerResult("x", "model", tokens=2, cost_usd=0.02)
+
+    with pytest.raises(ParkourLimitError, match="token"):
+        await token_budget.execute(
+            result, lambda value: (value.tokens, value.cost_usd)
+        )
+    with pytest.raises(ParkourLimitError, match="cost"):
+        await cost_budget.execute(
+            result, lambda value: (value.tokens, value.cost_usd)
+        )
+
+
+@pytest.mark.asyncio
+async def test_upstream_budget_releases_slot_on_cancellation():
+    budget = UpstreamBudget(_limits(max_concurrency=1))
+    entered = asyncio.Event()
+
+    async def blocked():
+        entered.set()
+        await asyncio.Event().wait()
+        return WorkerResult("never", "model")
+
+    running = asyncio.create_task(
+        budget.execute(blocked, lambda value: (value.tokens, value.cost_usd))
+    )
+    await asyncio.wait_for(entered.wait(), 0.5)
+    running.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await running
+
+    async def succeeding():
+        return WorkerResult("ok", "model")
+
+    result = await asyncio.wait_for(
+        budget.execute(
+            succeeding, lambda value: (value.tokens, value.cost_usd)
+        ),
+        0.5,
+    )
+    assert result.output == "ok"

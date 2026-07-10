@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-10T00:42:54.970Z",
+  "generated_at": "2026-07-10T20:14:27.125Z",
   "root": "nvidiarouter",
-  "entity_count": 1010,
+  "entity_count": 1066,
   "languages": [
     "Python"
   ],
@@ -1617,8 +1617,8 @@
       "signature": "nvidia_smartroute/parkour/__init__.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 117,
-      "hash": "2dcd5870448dd380c2d544f6"
+      "end_line": 119,
+      "hash": "b623d5e3fcd197bb32607ac4"
     },
     {
       "id": "code:file:b81b139c40c1f7e5",
@@ -1747,8 +1747,8 @@
       "signature": "nvidia_smartroute/parkour/ensemble.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 185,
-      "hash": "8e138a2ffb467906e59cb91d"
+      "end_line": 220,
+      "hash": "32f433f71c5d4310b754de0f"
     },
     {
       "id": "code:import:85b2b0836f085080",
@@ -1892,9 +1892,9 @@
       "path": "nvidia_smartroute/parkour/ensemble.py",
       "name": "EnsembleTelemetry",
       "signature": "class EnsembleTelemetry:",
-      "start_line": 145,
+      "start_line": 169,
       "start_column": 1,
-      "end_line": 145,
+      "end_line": 169,
       "hash": "d3d48c2b652f1790bfc52c40",
       "parent_id": "code:file:e110107b07aa65d2",
       "metadata": {
@@ -1908,9 +1908,9 @@
       "path": "nvidia_smartroute/parkour/ensemble.py",
       "name": "__init__",
       "signature": "def __init__(self) -> None:",
-      "start_line": 148,
+      "start_line": 172,
       "start_column": 5,
-      "end_line": 148,
+      "end_line": 172,
       "hash": "701769cc3c8d62b96fcc4334",
       "parent_id": "code:class:c978bf3b1969f438",
       "metadata": {
@@ -1924,9 +1924,9 @@
       "path": "nvidia_smartroute/parkour/ensemble.py",
       "name": "snapshot",
       "signature": "def snapshot(self) -> Dict[str, Any]:",
-      "start_line": 173,
+      "start_line": 205,
       "start_column": 5,
-      "end_line": 173,
+      "end_line": 205,
       "hash": "566ab83f3a22990624b2dab2",
       "parent_id": "code:class:c978bf3b1969f438",
       "metadata": {
@@ -1942,8 +1942,8 @@
       "signature": "nvidia_smartroute/parkour/planning.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 271,
-      "hash": "932442a2e4d63154d4804d98"
+      "end_line": 292,
+      "hash": "e43b6a186103e31a5cd5e460"
     },
     {
       "id": "code:import:3638acd8be58fe63",
@@ -2197,15 +2197,31 @@
       }
     },
     {
+      "id": "code:function:5933b149ef9d1b7f",
+      "kind": "function",
+      "language": "Python",
+      "path": "nvidia_smartroute/parkour/planning.py",
+      "name": "_message_transcript",
+      "signature": "def _message_transcript(messages: Iterable[Mapping[str, Any]]) -> str:",
+      "start_line": 240,
+      "start_column": 1,
+      "end_line": 240,
+      "hash": "ac340a47ac4be3a666ccd0cc",
+      "parent_id": "code:file:97ad992ab913753e",
+      "metadata": {
+        "async": false
+      }
+    },
+    {
       "id": "code:function:56c05401a6cba70f",
       "kind": "function",
       "language": "Python",
       "path": "nvidia_smartroute/parkour/planning.py",
       "name": "should_decompose",
       "signature": "def should_decompose(messages: Iterable[Mapping[str, Any]]) -> bool:",
-      "start_line": 241,
+      "start_line": 262,
       "start_column": 1,
-      "end_line": 241,
+      "end_line": 262,
       "hash": "036519fe4544b8399ec4deed",
       "parent_id": "code:file:97ad992ab913753e",
       "metadata": {
@@ -2222,8 +2238,8 @@
       "signature": "nvidia_smartroute/parkour/refinement.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 389,
-      "hash": "d49f0909dd5bf32242180fa7"
+      "end_line": 445,
+      "hash": "2099f3c7050aea0cab017c43"
     },
     {
       "id": "code:import:cdca73a70366753c",
@@ -2290,16 +2306,16 @@
       }
     },
     {
-      "id": "code:import:6061af2ac8d78f4c",
+      "id": "code:import:04079a8b0d862d85",
       "kind": "import",
       "language": "Python",
       "path": "nvidia_smartroute/parkour/refinement.py",
       "name": "typing",
-      "signature": "from typing import Any, Awaitable, Callable, Dict, Optional",
+      "signature": "from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, cast",
       "start_line": 20,
       "start_column": 1,
       "end_line": 20,
-      "hash": "e07e6f98275a4d912daa1963",
+      "hash": "8ce05054134b711d6c90ea6f",
       "parent_id": "code:file:1d6ef848b0edc211",
       "metadata": {
         "module": "typing"
@@ -2528,9 +2544,9 @@
       "path": "nvidia_smartroute/parkour/refinement.py",
       "name": "RefinementTelemetry",
       "signature": "class RefinementTelemetry:",
-      "start_line": 333,
+      "start_line": 389,
       "start_column": 1,
-      "end_line": 333,
+      "end_line": 389,
       "hash": "500604f14b73314fafe58c1d",
       "parent_id": "code:file:1d6ef848b0edc211",
       "metadata": {
@@ -2544,9 +2560,9 @@
       "path": "nvidia_smartroute/parkour/refinement.py",
       "name": "__init__",
       "signature": "def __init__(self) -> None:",
-      "start_line": 336,
+      "start_line": 392,
       "start_column": 5,
-      "end_line": 336,
+      "end_line": 392,
       "hash": "701769cc3c8d62b96fcc4334",
       "parent_id": "code:class:998ad8a6940c7a66",
       "metadata": {
@@ -2560,9 +2576,9 @@
       "path": "nvidia_smartroute/parkour/refinement.py",
       "name": "record_verifier_failure",
       "signature": "def record_verifier_failure(self) -> None:",
-      "start_line": 349,
+      "start_line": 405,
       "start_column": 5,
-      "end_line": 349,
+      "end_line": 405,
       "hash": "2787f6ec41e2cc8093d599af",
       "parent_id": "code:class:998ad8a6940c7a66",
       "metadata": {
@@ -2576,9 +2592,9 @@
       "path": "nvidia_smartroute/parkour/refinement.py",
       "name": "record_loop",
       "signature": "def record_loop(self, result: RefinementResult) -> None:",
-      "start_line": 352,
+      "start_line": 408,
       "start_column": 5,
-      "end_line": 352,
+      "end_line": 408,
       "hash": "d95dbf0e8922575275980870",
       "parent_id": "code:class:998ad8a6940c7a66",
       "metadata": {
@@ -2592,9 +2608,9 @@
       "path": "nvidia_smartroute/parkour/refinement.py",
       "name": "snapshot",
       "signature": "def snapshot(self) -> Dict[str, Any]:",
-      "start_line": 369,
+      "start_line": 425,
       "start_column": 5,
-      "end_line": 369,
+      "end_line": 425,
       "hash": "566ab83f3a22990624b2dab2",
       "parent_id": "code:class:998ad8a6940c7a66",
       "metadata": {
@@ -3201,8 +3217,8 @@
       "signature": "nvidia_smartroute/parkour/scheduler.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 409,
-      "hash": "65805a1ef5ddac2bb9ecf168"
+      "end_line": 542,
+      "hash": "59de90d8ddaf6ee47665f97c"
     },
     {
       "id": "code:import:25d7839c52c5cdd9",
@@ -3237,16 +3253,16 @@
       }
     },
     {
-      "id": "code:import:5e135ad937233f3b",
+      "id": "code:import:aa34415c3b070d85",
       "kind": "import",
       "language": "Python",
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "typing",
-      "signature": "from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple",
+      "signature": "from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple, TypeVar",
       "start_line": 6,
       "start_column": 1,
       "end_line": 6,
-      "hash": "3f32222a5a4785c3f751cc30",
+      "hash": "07178eaa8aa16d8bf37536e4",
       "parent_id": "code:file:751facb2c394c113",
       "metadata": {
         "module": "typing"
@@ -3272,9 +3288,9 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "DependencyContext",
       "signature": "class DependencyContext:",
-      "start_line": 16,
+      "start_line": 21,
       "start_column": 1,
-      "end_line": 16,
+      "end_line": 21,
       "hash": "471b8cb14de53be3e3cfac64",
       "parent_id": "code:file:751facb2c394c113"
     },
@@ -3285,9 +3301,9 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "WorkerResult",
       "signature": "class WorkerResult:",
-      "start_line": 23,
+      "start_line": 28,
       "start_column": 1,
-      "end_line": 23,
+      "end_line": 28,
       "hash": "eac730685975c15de54aa81c",
       "parent_id": "code:file:751facb2c394c113"
     },
@@ -3298,9 +3314,9 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "NodeResult",
       "signature": "class NodeResult:",
-      "start_line": 34,
+      "start_line": 39,
       "start_column": 1,
-      "end_line": 34,
+      "end_line": 39,
       "hash": "c99f6f1068e80a086743d22d",
       "parent_id": "code:file:751facb2c394c113"
     },
@@ -3311,9 +3327,9 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "SchedulerLimits",
       "signature": "class SchedulerLimits:",
-      "start_line": 48,
+      "start_line": 53,
       "start_column": 1,
-      "end_line": 48,
+      "end_line": 53,
       "hash": "3be5aa164c863efb33750d8e",
       "parent_id": "code:file:751facb2c394c113"
     },
@@ -3324,11 +3340,43 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "from_settings",
       "signature": "def from_settings(cls, settings):",
-      "start_line": 58,
+      "start_line": 63,
       "start_column": 5,
-      "end_line": 58,
+      "end_line": 63,
       "hash": "aabfb9bd576d210dc412e886",
       "parent_id": "code:class:0a07dffb42fd94a1",
+      "metadata": {
+        "async": false
+      }
+    },
+    {
+      "id": "code:class:18dc8f4905dd3574",
+      "kind": "class",
+      "language": "Python",
+      "path": "nvidia_smartroute/parkour/scheduler.py",
+      "name": "UpstreamBudget",
+      "signature": "class UpstreamBudget:",
+      "start_line": 77,
+      "start_column": 1,
+      "end_line": 77,
+      "hash": "c22b9cc84d34ed347073eabc",
+      "parent_id": "code:file:751facb2c394c113",
+      "metadata": {
+        "spec_ref": "PARKOUR_ENSEMBLE.md#Requirements"
+      }
+    },
+    {
+      "id": "code:method:69c31b0ce75cea7a",
+      "kind": "method",
+      "language": "Python",
+      "path": "nvidia_smartroute/parkour/scheduler.py",
+      "name": "__init__",
+      "signature": "def __init__(self, limits: SchedulerLimits):",
+      "start_line": 86,
+      "start_column": 5,
+      "end_line": 86,
+      "hash": "7c4f6c0f781786d5d2d6163f",
+      "parent_id": "code:class:18dc8f4905dd3574",
       "metadata": {
         "async": false
       }
@@ -3340,9 +3388,9 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "SchedulerResult",
       "signature": "class SchedulerResult:",
-      "start_line": 71,
+      "start_line": 131,
       "start_column": 1,
-      "end_line": 71,
+      "end_line": 131,
       "hash": "3b8a5e5597484e489bf84965",
       "parent_id": "code:file:751facb2c394c113"
     },
@@ -3353,9 +3401,9 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "partial",
       "signature": "def partial(self) -> bool:",
-      "start_line": 79,
+      "start_line": 139,
       "start_column": 5,
-      "end_line": 79,
+      "end_line": 139,
       "hash": "fa570e4674af22446766574b",
       "parent_id": "code:class:2c1019178b8d4ad1",
       "metadata": {
@@ -3369,9 +3417,9 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "DagScheduler",
       "signature": "class DagScheduler:",
-      "start_line": 90,
+      "start_line": 150,
       "start_column": 1,
-      "end_line": 90,
+      "end_line": 150,
       "hash": "a2bfa577618df34488ea8935",
       "parent_id": "code:file:751facb2c394c113",
       "metadata": {
@@ -3385,9 +3433,9 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "_emit",
       "signature": "async def _emit(self, event: Dict[str, Any]) -> None:",
-      "start_line": 228,
+      "start_line": 288,
       "start_column": 5,
-      "end_line": 228,
+      "end_line": 288,
       "hash": "8f8c1541cacc561f82ac26a5",
       "parent_id": "code:class:3539062a306af057",
       "metadata": {
@@ -3395,20 +3443,35 @@
       }
     },
     {
-      "id": "code:function:34e3d7e1cf964b02",
+      "id": "code:function:286fc55a1adbac8e",
       "kind": "function",
       "language": "Python",
       "path": "nvidia_smartroute/parkour/scheduler.py",
-      "name": "_routed_call",
-      "signature": "async def _routed_call(messages: List[Dict[str, Any]], model_id: str):",
-      "start_line": 348,
-      "start_column": 1,
-      "end_line": 348,
-      "hash": "6ff28da62a353cd192780226",
+      "name": "complete",
+      "signature": "async def complete() -> WorkerResult:",
+      "start_line": 384,
+      "start_column": 5,
+      "end_line": 384,
+      "hash": "4295339f3571cc786d407957",
       "parent_id": "code:file:751facb2c394c113",
       "metadata": {
-        "async": true,
-        "spec_ref": "PARKOUR_ENSEMBLE.md#Requirements"
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:5959eb3e8e3e0679",
+      "kind": "function",
+      "language": "Python",
+      "path": "nvidia_smartroute/parkour/scheduler.py",
+      "name": "complete",
+      "signature": "async def complete():",
+      "start_line": 475,
+      "start_column": 5,
+      "end_line": 475,
+      "hash": "b27541e4cda51d6b3ccf0247",
+      "parent_id": "code:file:751facb2c394c113",
+      "metadata": {
+        "async": true
       }
     },
     {
@@ -3418,9 +3481,9 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "run_member",
       "signature": "async def run_member(model_id: str) -> MemberResult:",
-      "start_line": 386,
+      "start_line": 509,
       "start_column": 5,
-      "end_line": 386,
+      "end_line": 509,
       "hash": "2fc1629b2923073e881ec184",
       "parent_id": "code:file:751facb2c394c113",
       "metadata": {
@@ -3434,9 +3497,9 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "combine",
       "signature": "async def combine(successful: List[MemberResult]) -> MemberResult:",
-      "start_line": 390,
+      "start_line": 515,
       "start_column": 5,
-      "end_line": 390,
+      "end_line": 515,
       "hash": "476c1bebf9a6d3e0726086c5",
       "parent_id": "code:file:751facb2c394c113",
       "metadata": {
@@ -3452,8 +3515,8 @@
       "signature": "nvidia_smartroute/parkour/service.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 276,
-      "hash": "f9faf1c3f45aae1cca211baa"
+      "end_line": 418,
+      "hash": "2c511bc7a37cbb5e6cc7250c"
     },
     {
       "id": "code:import:763abe1821c46779",
@@ -3504,15 +3567,47 @@
       }
     },
     {
+      "id": "code:function:17f6ee32886d4db4",
+      "kind": "function",
+      "language": "Python",
+      "path": "nvidia_smartroute/parkour/service.py",
+      "name": "_conductor_prompt",
+      "signature": "def _conductor_prompt(research_available: bool, panel_available: bool) -> str:",
+      "start_line": 62,
+      "start_column": 1,
+      "end_line": 62,
+      "hash": "22e3769e6eb0b16dc28564f6",
+      "parent_id": "code:file:c3f19af5384dcc18",
+      "metadata": {
+        "async": false
+      }
+    },
+    {
+      "id": "code:function:d1bd73c068fc4178",
+      "kind": "function",
+      "language": "Python",
+      "path": "nvidia_smartroute/parkour/service.py",
+      "name": "complete",
+      "signature": "async def complete() -> WorkerResult:",
+      "start_line": 106,
+      "start_column": 5,
+      "end_line": 106,
+      "hash": "4295339f3571cc786d407957",
+      "parent_id": "code:file:c3f19af5384dcc18",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
       "id": "code:function:b01fdc06042f7510",
       "kind": "function",
       "language": "Python",
       "path": "nvidia_smartroute/parkour/service.py",
       "name": "_sources",
       "signature": "def _sources(node: NodeResult) -> str:",
-      "start_line": 121,
+      "start_line": 179,
       "start_column": 1,
-      "end_line": 121,
+      "end_line": 179,
       "hash": "95746dbe9dbcafe266472f41",
       "parent_id": "code:file:c3f19af5384dcc18",
       "metadata": {
@@ -3521,37 +3616,19 @@
       }
     },
     {
-      "id": "code:function:5e00642a00549af4",
+      "id": "code:function:56b77ad3adef226a",
       "kind": "function",
       "language": "Python",
       "path": "nvidia_smartroute/parkour/service.py",
-      "name": "_routed_completion_with_cost",
-      "signature": "async def _routed_completion_with_cost(model_id: str, messages: list):",
-      "start_line": 133,
-      "start_column": 1,
-      "end_line": 133,
-      "hash": "52997d20a5629eb2737687ce",
+      "name": "complete",
+      "signature": "async def complete():",
+      "start_line": 203,
+      "start_column": 5,
+      "end_line": 203,
+      "hash": "b27541e4cda51d6b3ccf0247",
       "parent_id": "code:file:c3f19af5384dcc18",
       "metadata": {
-        "async": true,
-        "spec_ref": "PARKOUR_REFINEMENT.md#Requirements"
-      }
-    },
-    {
-      "id": "code:function:d6b2da528b7acec9",
-      "kind": "function",
-      "language": "Python",
-      "path": "nvidia_smartroute/parkour/service.py",
-      "name": "_refine",
-      "signature": "async def _refine(result: EngineResult, request_text: str, progress) -> EngineResult:",
-      "start_line": 156,
-      "start_column": 1,
-      "end_line": 156,
-      "hash": "456b57d39ec09ab6fe52ae69",
-      "parent_id": "code:file:c3f19af5384dcc18",
-      "metadata": {
-        "async": true,
-        "spec_ref": "PARKOUR_REFINEMENT.md#Requirements"
+        "async": true
       }
     },
     {
@@ -3561,9 +3638,9 @@
       "path": "nvidia_smartroute/parkour/service.py",
       "name": "verify",
       "signature": "async def verify(candidate: str) -> VerifyOutcome:",
-      "start_line": 161,
+      "start_line": 235,
       "start_column": 5,
-      "end_line": 161,
+      "end_line": 235,
       "hash": "bb33483d49293e7e0228c6e4",
       "parent_id": "code:file:c3f19af5384dcc18",
       "metadata": {
@@ -3577,9 +3654,9 @@
       "path": "nvidia_smartroute/parkour/service.py",
       "name": "revise",
       "signature": "async def revise(candidate: str, feedback: str) -> ReviseOutcome:",
-      "start_line": 174,
+      "start_line": 252,
       "start_column": 5,
-      "end_line": 174,
+      "end_line": 252,
       "hash": "698446942caa867a479dff6c",
       "parent_id": "code:file:c3f19af5384dcc18",
       "metadata": {
@@ -3587,16 +3664,16 @@
       }
     },
     {
-      "id": "code:function:f679fe6bdf0f5919",
+      "id": "code:function:0d3fc15da1219b98",
       "kind": "function",
       "language": "Python",
       "path": "nvidia_smartroute/parkour/service.py",
-      "name": "_request_text",
-      "signature": "def _request_text(messages: list) -> str:",
-      "start_line": 199,
+      "name": "_request_context",
+      "signature": "def _request_context(messages: list, max_chars: int = 8_000) -> str:",
+      "start_line": 281,
       "start_column": 1,
-      "end_line": 199,
-      "hash": "775895bb57bc9e51370755fa",
+      "end_line": 281,
+      "hash": "3d1cefca06f3afdaa1a95f2a",
       "parent_id": "code:file:c3f19af5384dcc18",
       "metadata": {
         "async": false
@@ -3609,9 +3686,9 @@
       "path": "nvidia_smartroute/parkour/service.py",
       "name": "worker",
       "signature": "async def worker(task, contexts):",
-      "start_line": 225,
+      "start_line": 327,
       "start_column": 5,
-      "end_line": 225,
+      "end_line": 327,
       "hash": "7c14b3fde18b7250e3bb3f59",
       "parent_id": "code:file:c3f19af5384dcc18",
       "metadata": {
@@ -3625,9 +3702,9 @@
       "path": "nvidia_smartroute/parkour/service.py",
       "name": "synthesizer",
       "signature": "async def synthesizer(nodes, instructions):",
-      "start_line": 228,
+      "start_line": 338,
       "start_column": 5,
-      "end_line": 228,
+      "end_line": 338,
       "hash": "3e22eb96397655915edd0f56",
       "parent_id": "code:file:c3f19af5384dcc18",
       "metadata": {
@@ -6609,8 +6686,8 @@
       "signature": "nvidia_smartroute/config.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 586,
-      "hash": "f753efaf449ff008c99a5c0b"
+      "end_line": 593,
+      "hash": "0a9a7332a166f9b5faf1e3fa"
     },
     {
       "id": "code:import:058af6c7455df217",
@@ -6788,15 +6865,32 @@
       }
     },
     {
+      "id": "code:method:a63aaf3e581b9103",
+      "kind": "method",
+      "language": "Python",
+      "path": "nvidia_smartroute/config.py",
+      "name": "parkour_ensemble_configured_panel",
+      "signature": "def parkour_ensemble_configured_panel(self) -> List[str]:",
+      "start_line": 562,
+      "start_column": 5,
+      "end_line": 562,
+      "hash": "f01ad264bde17ce585dd51bf",
+      "parent_id": "code:class:105cf3fd45f1a7e0",
+      "metadata": {
+        "async": false,
+        "spec_ref": "PARKOUR_ENSEMBLE.md#Requirements"
+      }
+    },
+    {
       "id": "code:method:1d2e526926550f78",
       "kind": "method",
       "language": "Python",
       "path": "nvidia_smartroute/config.py",
       "name": "parkour_ensemble_panel",
       "signature": "def parkour_ensemble_panel(self) -> List[str]:",
-      "start_line": 562,
+      "start_line": 576,
       "start_column": 5,
-      "end_line": 562,
+      "end_line": 576,
       "hash": "f238efba532cfe8b2b6b3b65",
       "parent_id": "code:class:105cf3fd45f1a7e0",
       "metadata": {
@@ -6811,9 +6905,9 @@
       "path": "nvidia_smartroute/config.py",
       "name": "get_settings",
       "signature": "def get_settings() -> Settings:",
-      "start_line": 578,
+      "start_line": 585,
       "start_column": 1,
-      "end_line": 578,
+      "end_line": 585,
       "hash": "64d01544c007a59e585b60a2",
       "parent_id": "code:file:7d9c2d244d4058be",
       "metadata": {
@@ -8135,8 +8229,8 @@
       "signature": "nvidia_smartroute/prometheus.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 127,
-      "hash": "da7b6716975f0d693871ec98"
+      "end_line": 130,
+      "hash": "d38f2c618146d9a8e9a1ef69"
     },
     {
       "id": "code:import:396306192c158485",
@@ -12543,8 +12637,8 @@
       "signature": "tests/test_parkour_ensemble.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 187,
-      "hash": "f982ae56982e84bfc7efa1a5"
+      "end_line": 348,
+      "hash": "740470a20a182358091acf01"
     },
     {
       "id": "code:import:1d3e4ab19239d1dd",
@@ -12611,32 +12705,48 @@
       }
     },
     {
-      "id": "code:import:ba3c445275d20500",
+      "id": "code:import:ebedfe8315449c99",
       "kind": "import",
       "language": "Python",
       "path": "tests/test_parkour_ensemble.py",
       "name": "nvidia_smartroute.parkour.scheduler",
-      "signature": "from nvidia_smartroute.parkour.scheduler import routed_gateway_worker",
+      "signature": "from nvidia_smartroute.parkour.scheduler import (",
       "start_line": 14,
       "start_column": 1,
       "end_line": 14,
-      "hash": "7a29bfd98ed83ac6148ff09a",
+      "hash": "36d868b02b5954212b75b44b",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
         "module": "nvidia_smartroute.parkour.scheduler"
       }
     },
     {
-      "id": "code:import:e04f4806a80a75dd",
+      "id": "code:import:f6f79b029e7e3f35",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "nvidia_smartroute.prometheus",
+      "signature": "from nvidia_smartroute.prometheus import render_prometheus",
+      "start_line": 20,
+      "start_column": 1,
+      "end_line": 20,
+      "hash": "8d08eb8c871fdcbd382ff04a",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "module": "nvidia_smartroute.prometheus"
+      }
+    },
+    {
+      "id": "code:import:035da3b28c92a2ee",
       "kind": "import",
       "language": "Python",
       "path": "tests/test_parkour_ensemble.py",
       "name": "nvidia_smartroute.routing.router",
-      "signature": "from nvidia_smartroute.routing.router import TaskType",
-      "start_line": 15,
+      "signature": "from nvidia_smartroute.routing.router import (",
+      "start_line": 21,
       "start_column": 1,
-      "end_line": 15,
-      "hash": "7b4197b789779e8a0dd34daa",
+      "end_line": 21,
+      "hash": "3a60d94614136d1336afe2f1",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
         "module": "nvidia_smartroute.routing.router"
@@ -12649,9 +12759,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_panel_dedup_excludes_parkour_and_caps",
       "signature": "def test_panel_dedup_excludes_parkour_and_caps():",
-      "start_line": 20,
+      "start_line": 30,
       "start_column": 1,
-      "end_line": 20,
+      "end_line": 30,
       "hash": "e12915dcc22ff3bf93d8048c",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12665,9 +12775,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_panel_empty_and_single",
       "signature": "def test_panel_empty_and_single():",
-      "start_line": 25,
+      "start_line": 36,
       "start_column": 1,
-      "end_line": 25,
+      "end_line": 36,
       "hash": "ae3555ff4fbfbb64fc9e1961",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12681,9 +12791,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_panel_only_parkour_yields_empty",
       "signature": "def test_panel_only_parkour_yields_empty():",
-      "start_line": 30,
+      "start_line": 41,
       "start_column": 1,
-      "end_line": 30,
+      "end_line": 41,
       "hash": "cb166f5335c61045a8f6a6f7",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12697,9 +12807,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_ensemble_disabled_by_default",
       "signature": "def test_ensemble_disabled_by_default():",
-      "start_line": 34,
+      "start_line": 45,
       "start_column": 1,
-      "end_line": 34,
+      "end_line": 45,
       "hash": "f5ba8d6ec618bc5b0cdb5de1",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12713,13 +12823,109 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_subtaskspec_panel_defaults_false",
       "signature": "def test_subtaskspec_panel_defaults_false():",
-      "start_line": 38,
+      "start_line": 49,
       "start_column": 1,
-      "end_line": 38,
+      "end_line": 49,
       "hash": "c13b40ff9f53bf2e8dc6c372",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
         "async": false
+      }
+    },
+    {
+      "id": "code:function:7b4576dbf6bd40dc",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "test_disabled_panel_is_identical_to_single_model_path",
+      "signature": "async def test_disabled_panel_is_identical_to_single_model_path(monkeypatch):",
+      "start_line": 56,
+      "start_column": 1,
+      "end_line": 56,
+      "hash": "5a53db8f943527de529191d5",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:import:f61c61aa0c29da3a",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "nvidia_smartroute.gateway.completion as completion",
+      "signature": "import nvidia_smartroute.gateway.completion as completion",
+      "start_line": 57,
+      "start_column": 5,
+      "end_line": 57,
+      "hash": "6bb70e013ed8c7334df995a0",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "module": "nvidia_smartroute.gateway.completion as completion"
+      }
+    },
+    {
+      "id": "code:import:52af2019b9d2a492",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "nvidia_smartroute.parkour.scheduler as sched",
+      "signature": "import nvidia_smartroute.parkour.scheduler as sched",
+      "start_line": 58,
+      "start_column": 5,
+      "end_line": 58,
+      "hash": "21ee7c9b335e27742f0dd58e",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour.scheduler as sched"
+      }
+    },
+    {
+      "id": "code:import:c79bfe992b7cd602",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "nvidia_smartroute.routing.router as routing",
+      "signature": "import nvidia_smartroute.routing.router as routing",
+      "start_line": 59,
+      "start_column": 5,
+      "end_line": 59,
+      "hash": "462ae7a02a47c6d9c8a6588f",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "module": "nvidia_smartroute.routing.router as routing"
+      }
+    },
+    {
+      "id": "code:import:819f5c917ffd5c24",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "nvidia_smartroute.config",
+      "signature": "from nvidia_smartroute.config import settings as cfg",
+      "start_line": 60,
+      "start_column": 5,
+      "end_line": 60,
+      "hash": "d313e60e866bcb38362b58e6",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "module": "nvidia_smartroute.config"
+      }
+    },
+    {
+      "id": "code:function:ee84f118a88c8c48",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "route_request",
+      "signature": "async def route_request(messages):",
+      "start_line": 66,
+      "start_column": 5,
+      "end_line": 66,
+      "hash": "dde30b0edf575b88b687be4f",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "async": true
       }
     },
     {
@@ -12729,9 +12935,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "_combine",
       "signature": "async def _combine(successful):",
-      "start_line": 46,
+      "start_line": 102,
       "start_column": 1,
-      "end_line": 46,
+      "end_line": 102,
       "hash": "a811e05b08a7984644f808de",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12745,9 +12951,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "_ok_runner",
       "signature": "def _ok_runner(content_prefix=\"ans\"):",
-      "start_line": 50,
+      "start_line": 106,
       "start_column": 1,
-      "end_line": 50,
+      "end_line": 106,
       "hash": "ed767346d5da155d4da940c3",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12761,9 +12967,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "run_member",
       "signature": "async def run_member(model_id):",
-      "start_line": 51,
+      "start_line": 107,
       "start_column": 5,
-      "end_line": 51,
+      "end_line": 107,
       "hash": "93a3dfbe0e9d73de60feb5eb",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12777,9 +12983,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_all_succeed_combines",
       "signature": "async def test_all_succeed_combines():",
-      "start_line": 57,
+      "start_line": 113,
       "start_column": 1,
-      "end_line": 57,
+      "end_line": 113,
       "hash": "8daf8aaabc66710ce89b2575",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12793,9 +12999,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_partial_failure_proceeds",
       "signature": "async def test_partial_failure_proceeds():",
-      "start_line": 68,
+      "start_line": 124,
       "start_column": 1,
-      "end_line": 68,
+      "end_line": 124,
       "hash": "0988ea626aa9f5340c94b1cf",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12809,9 +13015,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "run_member",
       "signature": "async def run_member(model_id):",
-      "start_line": 69,
+      "start_line": 125,
       "start_column": 5,
-      "end_line": 69,
+      "end_line": 125,
       "hash": "93a3dfbe0e9d73de60feb5eb",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12825,9 +13031,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_single_survivor_no_combine",
       "signature": "async def test_single_survivor_no_combine():",
-      "start_line": 80,
+      "start_line": 136,
       "start_column": 1,
-      "end_line": 80,
+      "end_line": 136,
       "hash": "2b5057b8acf4b5a9b191d043",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12841,9 +13047,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "run_member",
       "signature": "async def run_member(model_id):",
-      "start_line": 81,
+      "start_line": 137,
       "start_column": 5,
-      "end_line": 81,
+      "end_line": 137,
       "hash": "93a3dfbe0e9d73de60feb5eb",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12857,9 +13063,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_all_members_fail_raises",
       "signature": "async def test_all_members_fail_raises():",
-      "start_line": 93,
+      "start_line": 149,
       "start_column": 1,
-      "end_line": 93,
+      "end_line": 149,
       "hash": "9de9adcf505d449ca8b70373",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12873,9 +13079,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "run_member",
       "signature": "async def run_member(model_id):",
-      "start_line": 94,
+      "start_line": 150,
       "start_column": 5,
-      "end_line": 94,
+      "end_line": 150,
       "hash": "93a3dfbe0e9d73de60feb5eb",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12889,9 +13095,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_telemetry_snapshot_shape",
       "signature": "async def test_telemetry_snapshot_shape():",
-      "start_line": 104,
+      "start_line": 160,
       "start_column": 1,
-      "end_line": 104,
+      "end_line": 160,
       "hash": "fa379ec1da914e9854ad42f0",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12905,9 +13111,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_progress_events_bounded",
       "signature": "async def test_progress_events_bounded():",
-      "start_line": 118,
+      "start_line": 189,
       "start_column": 1,
-      "end_line": 118,
+      "end_line": 189,
       "hash": "2239c40338e656d94307e629",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12921,9 +13127,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "progress",
       "signature": "async def progress(e):",
-      "start_line": 121,
+      "start_line": 192,
       "start_column": 5,
-      "end_line": 121,
+      "end_line": 192,
       "hash": "4229651b38fa08c6f6dcdb91",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12937,9 +13143,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_panel_node_runs_ensemble",
       "signature": "async def test_panel_node_runs_ensemble(monkeypatch):",
-      "start_line": 135,
+      "start_line": 206,
       "start_column": 1,
-      "end_line": 135,
+      "end_line": 206,
       "hash": "34bdca71f4e5826ff78bb334",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12953,9 +13159,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "nvidia_smartroute.parkour.scheduler as sched",
       "signature": "import nvidia_smartroute.parkour.scheduler as sched",
-      "start_line": 136,
+      "start_line": 207,
       "start_column": 5,
-      "end_line": 136,
+      "end_line": 207,
       "hash": "21ee7c9b335e27742f0dd58e",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12969,9 +13175,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "nvidia_smartroute.config",
       "signature": "from nvidia_smartroute.config import settings as cfg",
-      "start_line": 137,
+      "start_line": 208,
       "start_column": 5,
-      "end_line": 137,
+      "end_line": 208,
       "hash": "d313e60e866bcb38362b58e6",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -12979,16 +13185,16 @@
       }
     },
     {
-      "id": "code:function:445173c6c92923b0",
+      "id": "code:function:59787ff4bb326198",
       "kind": "function",
       "language": "Python",
       "path": "tests/test_parkour_ensemble.py",
       "name": "fake_routed",
-      "signature": "async def fake_routed(messages, model_id):",
-      "start_line": 139,
+      "signature": "async def fake_routed(messages, model_id, upstream_budget=None):",
+      "start_line": 210,
       "start_column": 5,
-      "end_line": 139,
-      "hash": "4637070560890c30be6026f9",
+      "end_line": 210,
+      "hash": "7ce6bc22cfecea09a60a8326",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
         "async": true
@@ -13001,9 +13207,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_panel_ignored_when_fewer_than_two_members",
       "signature": "async def test_panel_ignored_when_fewer_than_two_members(monkeypatch):",
-      "start_line": 156,
+      "start_line": 227,
       "start_column": 1,
-      "end_line": 156,
+      "end_line": 227,
       "hash": "65f704c54d46441fc6776a47",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -13017,9 +13223,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "nvidia_smartroute.parkour.scheduler as sched",
       "signature": "import nvidia_smartroute.parkour.scheduler as sched",
-      "start_line": 157,
+      "start_line": 228,
       "start_column": 5,
-      "end_line": 157,
+      "end_line": 228,
       "hash": "21ee7c9b335e27742f0dd58e",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -13033,9 +13239,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "nvidia_smartroute.config",
       "signature": "from nvidia_smartroute.config import settings as cfg",
-      "start_line": 158,
+      "start_line": 229,
       "start_column": 5,
-      "end_line": 158,
+      "end_line": 229,
       "hash": "d313e60e866bcb38362b58e6",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
@@ -13049,29 +13255,13 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "nvidia_smartroute.routing.router",
       "signature": "from nvidia_smartroute.routing.router import router as real_router",
-      "start_line": 159,
+      "start_line": 230,
       "start_column": 5,
-      "end_line": 159,
+      "end_line": 230,
       "hash": "282170b06ed9109606eb37c4",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
         "module": "nvidia_smartroute.routing.router"
-      }
-    },
-    {
-      "id": "code:function:4ab7c369097e70ef",
-      "kind": "function",
-      "language": "Python",
-      "path": "tests/test_parkour_ensemble.py",
-      "name": "fake_routed",
-      "signature": "async def fake_routed(messages, model_id): # would only be hit by the panel",
-      "start_line": 163,
-      "start_column": 5,
-      "end_line": 163,
-      "hash": "af3754ce31e538d1ceb49766",
-      "parent_id": "code:file:4bb39156716f477b",
-      "metadata": {
-        "async": true
       }
     },
     {
@@ -13081,9 +13271,9 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "_Decision",
       "signature": "class _Decision:",
-      "start_line": 167,
+      "start_line": 240,
       "start_column": 5,
-      "end_line": 167,
+      "end_line": 240,
       "hash": "51950362849cd2483fb63f83",
       "parent_id": "code:file:4bb39156716f477b"
     },
@@ -13094,10 +13284,186 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "fake_route",
       "signature": "async def fake_route(messages, **kw):",
-      "start_line": 171,
+      "start_line": 244,
       "start_column": 5,
-      "end_line": 171,
+      "end_line": 244,
       "hash": "be057f5355c0256cf0985d3b",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:55753a8281773447",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "test_panel_calls_share_concurrency_and_call_limits",
+      "signature": "async def test_panel_calls_share_concurrency_and_call_limits(monkeypatch):",
+      "start_line": 263,
+      "start_column": 1,
+      "end_line": 263,
+      "hash": "f39fd69e8c314f787e3d6f3d",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:import:d4815fa359a41acb",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "asyncio",
+      "signature": "import asyncio",
+      "start_line": 264,
+      "start_column": 5,
+      "end_line": 264,
+      "hash": "8ccb747e5348f29a91068a6e",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "module": "asyncio"
+      }
+    },
+    {
+      "id": "code:import:52af2019b9d2a492",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "nvidia_smartroute.parkour.scheduler as sched",
+      "signature": "import nvidia_smartroute.parkour.scheduler as sched",
+      "start_line": 266,
+      "start_column": 5,
+      "end_line": 266,
+      "hash": "21ee7c9b335e27742f0dd58e",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour.scheduler as sched"
+      }
+    },
+    {
+      "id": "code:import:819f5c917ffd5c24",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "nvidia_smartroute.config",
+      "signature": "from nvidia_smartroute.config import settings as cfg",
+      "start_line": 267,
+      "start_column": 5,
+      "end_line": 267,
+      "hash": "d313e60e866bcb38362b58e6",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "module": "nvidia_smartroute.config"
+      }
+    },
+    {
+      "id": "code:function:59787ff4bb326198",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "fake_routed",
+      "signature": "async def fake_routed(messages, model_id, upstream_budget=None):",
+      "start_line": 277,
+      "start_column": 5,
+      "end_line": 277,
+      "hash": "7ce6bc22cfecea09a60a8326",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:8cf71a2b5f638d0c",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "operation",
+      "signature": "async def operation():",
+      "start_line": 278,
+      "start_column": 9,
+      "end_line": 278,
+      "hash": "4636c65e7344bc24108f8252",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:243bf81966fc86f6",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "test_panel_combiner_cannot_bypass_call_limit",
+      "signature": "async def test_panel_combiner_cannot_bypass_call_limit(monkeypatch):",
+      "start_line": 318,
+      "start_column": 1,
+      "end_line": 318,
+      "hash": "12d34f585e60d782bd7d2555",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:import:52af2019b9d2a492",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "nvidia_smartroute.parkour.scheduler as sched",
+      "signature": "import nvidia_smartroute.parkour.scheduler as sched",
+      "start_line": 319,
+      "start_column": 5,
+      "end_line": 319,
+      "hash": "21ee7c9b335e27742f0dd58e",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour.scheduler as sched"
+      }
+    },
+    {
+      "id": "code:import:819f5c917ffd5c24",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "nvidia_smartroute.config",
+      "signature": "from nvidia_smartroute.config import settings as cfg",
+      "start_line": 320,
+      "start_column": 5,
+      "end_line": 320,
+      "hash": "d313e60e866bcb38362b58e6",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "module": "nvidia_smartroute.config"
+      }
+    },
+    {
+      "id": "code:function:59787ff4bb326198",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "fake_routed",
+      "signature": "async def fake_routed(messages, model_id, upstream_budget=None):",
+      "start_line": 326,
+      "start_column": 5,
+      "end_line": 326,
+      "hash": "7ce6bc22cfecea09a60a8326",
+      "parent_id": "code:file:4bb39156716f477b",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:8cf71a2b5f638d0c",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_ensemble.py",
+      "name": "operation",
+      "signature": "async def operation():",
+      "start_line": 327,
+      "start_column": 9,
+      "end_line": 327,
+      "hash": "4636c65e7344bc24108f8252",
       "parent_id": "code:file:4bb39156716f477b",
       "metadata": {
         "async": true
@@ -13404,6 +13770,226 @@
       }
     },
     {
+      "id": "code:file:5b1ed61c242f126c",
+      "kind": "file",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "tests/test_parkour_grounding.py",
+      "signature": "tests/test_parkour_grounding.py",
+      "start_line": 1,
+      "start_column": 1,
+      "end_line": 121,
+      "hash": "12ff09961f56eba31e1be951"
+    },
+    {
+      "id": "code:import:a0c05dc61f50cd29",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "json",
+      "signature": "import json",
+      "start_line": 3,
+      "start_column": 1,
+      "end_line": 3,
+      "hash": "ff3e4d4dcf7250cae8d622d7",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "module": "json"
+      }
+    },
+    {
+      "id": "code:import:97b0d3b3494a3938",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "pytest",
+      "signature": "import pytest",
+      "start_line": 5,
+      "start_column": 1,
+      "end_line": 5,
+      "hash": "db7b0741c94798db59322961",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "module": "pytest"
+      }
+    },
+    {
+      "id": "code:import:426a089ab74176b4",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "nvidia_smartroute.parkour.scheduler",
+      "signature": "from nvidia_smartroute.parkour.scheduler import NodeResult, WorkerResult",
+      "start_line": 7,
+      "start_column": 1,
+      "end_line": 7,
+      "hash": "7fe2ee27731c6c828d021310",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour.scheduler"
+      }
+    },
+    {
+      "id": "code:function:b2534d6622468c0a",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "test_direct_plan_labels_prior_assistant_output",
+      "signature": "def test_direct_plan_labels_prior_assistant_output():",
+      "start_line": 10,
+      "start_column": 1,
+      "end_line": 10,
+      "hash": "495caaf0ffc48ea513611321",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "async": false
+      }
+    },
+    {
+      "id": "code:import:1d0fa213aa5fa244",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "nvidia_smartroute.parkour.planning",
+      "signature": "from nvidia_smartroute.parkour.planning import build_direct_plan",
+      "start_line": 11,
+      "start_column": 5,
+      "end_line": 11,
+      "hash": "8caec81cc880ef9c1aef3d19",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour.planning"
+      }
+    },
+    {
+      "id": "code:function:ceee8db88aea63a1",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "test_request_context_retains_roles_and_bounds",
+      "signature": "def test_request_context_retains_roles_and_bounds():",
+      "start_line": 24,
+      "start_column": 1,
+      "end_line": 24,
+      "hash": "6b925e9a1159959af10b472e",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "async": false
+      }
+    },
+    {
+      "id": "code:import:e6b655ea378b2f17",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "nvidia_smartroute.parkour.service",
+      "signature": "from nvidia_smartroute.parkour.service import _request_context",
+      "start_line": 25,
+      "start_column": 5,
+      "end_line": 25,
+      "hash": "b5216395620f4ba3788b8978",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour.service"
+      }
+    },
+    {
+      "id": "code:function:7da2d25a63a4c77f",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "test_direct_run_passes_original_role_sequence",
+      "signature": "async def test_direct_run_passes_original_role_sequence(monkeypatch):",
+      "start_line": 41,
+      "start_column": 1,
+      "end_line": 41,
+      "hash": "62adc1711b49968d2902229c",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:import:d8851ae4d6b5f0c3",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "nvidia_smartroute.parkour.service as service",
+      "signature": "import nvidia_smartroute.parkour.service as service",
+      "start_line": 42,
+      "start_column": 5,
+      "end_line": 42,
+      "hash": "9b3b711902c680986d012bac",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour.service as service"
+      }
+    },
+    {
+      "id": "code:function:62f808473fff5106",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "test_synthesis_is_anchored_to_original_conversation",
+      "signature": "async def test_synthesis_is_anchored_to_original_conversation(monkeypatch):",
+      "start_line": 78,
+      "start_column": 1,
+      "end_line": 78,
+      "hash": "26e2c5b2cacf2f63b0972516",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:import:d8851ae4d6b5f0c3",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "nvidia_smartroute.parkour.service as service",
+      "signature": "import nvidia_smartroute.parkour.service as service",
+      "start_line": 79,
+      "start_column": 5,
+      "end_line": 79,
+      "hash": "9b3b711902c680986d012bac",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour.service as service"
+      }
+    },
+    {
+      "id": "code:function:c78aaa61b548490c",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "test_conductor_advertises_only_available_capabilities",
+      "signature": "def test_conductor_advertises_only_available_capabilities():",
+      "start_line": 110,
+      "start_column": 1,
+      "end_line": 110,
+      "hash": "a5d2aa2380f1aed92f887388",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "async": false
+      }
+    },
+    {
+      "id": "code:import:44d512cd61f39e60",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "nvidia_smartroute.parkour.service",
+      "signature": "from nvidia_smartroute.parkour.service import _conductor_prompt",
+      "start_line": 111,
+      "start_column": 5,
+      "end_line": 111,
+      "hash": "a94d24567a379135a6ca36b4",
+      "parent_id": "code:file:5b1ed61c242f126c",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour.service"
+      }
+    },
+    {
       "id": "code:file:855660df321f6102",
       "kind": "file",
       "language": "Python",
@@ -13412,8 +13998,8 @@
       "signature": "tests/test_parkour_refinement.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 275,
-      "hash": "c0a583b2c2dc9de7c179bcaf"
+      "end_line": 346,
+      "hash": "3ce4c54522bcce63d9423ccd"
     },
     {
       "id": "code:import:3e213d900f0b0e52",
@@ -13576,15 +14162,47 @@
       }
     },
     {
+      "id": "code:function:553f438dbdc40194",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_refinement.py",
+      "name": "test_accept_flag_below_threshold_cannot_reward_hack",
+      "signature": "async def test_accept_flag_below_threshold_cannot_reward_hack():",
+      "start_line": 87,
+      "start_column": 1,
+      "end_line": 87,
+      "hash": "9d102549c77c118924d0d6a3",
+      "parent_id": "code:file:855660df321f6102",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:9bf7508788c24994",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_refinement.py",
+      "name": "test_oscillating_scores_return_best_observed_candidate",
+      "signature": "async def test_oscillating_scores_return_best_observed_candidate():",
+      "start_line": 101,
+      "start_column": 1,
+      "end_line": 101,
+      "hash": "ce2abe77b78f229baec3d92a",
+      "parent_id": "code:file:855660df321f6102",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
       "id": "code:function:ed8dea13d4509f75",
       "kind": "function",
       "language": "Python",
       "path": "tests/test_parkour_refinement.py",
       "name": "test_no_improvement_stops",
       "signature": "async def test_no_improvement_stops():",
-      "start_line": 87,
+      "start_line": 115,
       "start_column": 1,
-      "end_line": 87,
+      "end_line": 115,
       "hash": "825ea6b79e36d1ece4a96727",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13598,9 +14216,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_max_iterations_stop",
       "signature": "async def test_max_iterations_stop():",
-      "start_line": 97,
+      "start_line": 125,
       "start_column": 1,
-      "end_line": 97,
+      "end_line": 125,
       "hash": "69f97920f456013949a07af1",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13614,9 +14232,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_verifier_call_limit_stop",
       "signature": "async def test_verifier_call_limit_stop():",
-      "start_line": 107,
+      "start_line": 135,
       "start_column": 1,
-      "end_line": 107,
+      "end_line": 135,
       "hash": "86522353b610febfc02306b1",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13630,9 +14248,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_added_token_limit_stop",
       "signature": "async def test_added_token_limit_stop():",
-      "start_line": 117,
+      "start_line": 145,
       "start_column": 1,
-      "end_line": 117,
+      "end_line": 145,
       "hash": "712b4ec834487a6db086b2f1",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13646,9 +14264,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_wall_clock_stop",
       "signature": "async def test_wall_clock_stop():",
-      "start_line": 126,
+      "start_line": 154,
       "start_column": 1,
-      "end_line": 126,
+      "end_line": 154,
       "hash": "b1140aedf55cfcfb39c63943",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13662,9 +14280,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_best_candidate_kept_when_revision_is_worse",
       "signature": "async def test_best_candidate_kept_when_revision_is_worse():",
-      "start_line": 143,
+      "start_line": 171,
       "start_column": 1,
-      "end_line": 143,
+      "end_line": 171,
       "hash": "1be8858d12d4e19282faaa81",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13678,9 +14296,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_ties_resolve_to_earlier_candidate",
       "signature": "async def test_ties_resolve_to_earlier_candidate():",
-      "start_line": 153,
+      "start_line": 181,
       "start_column": 1,
-      "end_line": 153,
+      "end_line": 181,
       "hash": "ef2c08394d1cfedd2209d980",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13694,9 +14312,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_verifier_failure_is_non_fatal",
       "signature": "async def test_verifier_failure_is_non_fatal():",
-      "start_line": 162,
+      "start_line": 190,
       "start_column": 1,
-      "end_line": 162,
+      "end_line": 190,
       "hash": "8e57eabcf573d58f2f04e148",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13710,9 +14328,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "boom",
       "signature": "async def boom(candidate):",
-      "start_line": 163,
+      "start_line": 191,
       "start_column": 5,
-      "end_line": 163,
+      "end_line": 191,
       "hash": "5a8f29807ba047b844de1e6e",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13726,9 +14344,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_malformed_verdict_is_verifier_failure_not_accept",
       "signature": "async def test_malformed_verdict_is_verifier_failure_not_accept():",
-      "start_line": 175,
+      "start_line": 203,
       "start_column": 1,
-      "end_line": 175,
+      "end_line": 203,
       "hash": "0e20009ce6fbf4f1110d9c51",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13742,9 +14360,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "bad_verify",
       "signature": "async def bad_verify(candidate):",
-      "start_line": 176,
+      "start_line": 204,
       "start_column": 5,
-      "end_line": 176,
+      "end_line": 204,
       "hash": "c5d8bff6d31c11405ebad438",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13758,9 +14376,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_revision_failure_returns_best_so_far",
       "signature": "async def test_revision_failure_returns_best_so_far():",
-      "start_line": 187,
+      "start_line": 215,
       "start_column": 1,
-      "end_line": 187,
+      "end_line": 215,
       "hash": "0b73f5cee978d26b08a1cc0d",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13774,10 +14392,55 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "revise_boom",
       "signature": "async def revise_boom(candidate, feedback):",
-      "start_line": 188,
+      "start_line": 216,
       "start_column": 5,
-      "end_line": 188,
+      "end_line": 216,
       "hash": "e07a1952a9d3155999b5a2f2",
+      "parent_id": "code:file:855660df321f6102",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:f7cafd2bd0936284",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_refinement.py",
+      "name": "test_shared_run_limit_stops_refinement_as_resource_limit",
+      "signature": "async def test_shared_run_limit_stops_refinement_as_resource_limit():",
+      "start_line": 227,
+      "start_column": 1,
+      "end_line": 227,
+      "hash": "867eb1bea8c21369199ca74b",
+      "parent_id": "code:file:855660df321f6102",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:class:a5b89af9ec954568",
+      "kind": "class",
+      "language": "Python",
+      "path": "tests/test_parkour_refinement.py",
+      "name": "SharedLimitError",
+      "signature": "class SharedLimitError(RuntimeError):",
+      "start_line": 228,
+      "start_column": 5,
+      "end_line": 228,
+      "hash": "742637e956e78021d428c358",
+      "parent_id": "code:file:855660df321f6102"
+    },
+    {
+      "id": "code:function:f0c0dc358713339b",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_refinement.py",
+      "name": "limited_verify",
+      "signature": "async def limited_verify(candidate):",
+      "start_line": 231,
+      "start_column": 5,
+      "end_line": 231,
+      "hash": "e0cd397e072f8a3f7bcd1843",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
         "async": true
@@ -13790,9 +14453,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_added_tokens_and_cost_accumulate",
       "signature": "async def test_added_tokens_and_cost_accumulate():",
-      "start_line": 201,
+      "start_line": 244,
       "start_column": 1,
-      "end_line": 201,
+      "end_line": 244,
       "hash": "7cdaac31658d991f76d92ec7",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13806,9 +14469,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_telemetry_snapshot_shape",
       "signature": "async def test_telemetry_snapshot_shape():",
-      "start_line": 211,
+      "start_line": 254,
       "start_column": 1,
-      "end_line": 211,
+      "end_line": 254,
       "hash": "fa379ec1da914e9854ad42f0",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13822,9 +14485,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_progress_events_bounded",
       "signature": "async def test_progress_events_bounded():",
-      "start_line": 229,
+      "start_line": 272,
       "start_column": 1,
-      "end_line": 229,
+      "end_line": 272,
       "hash": "2239c40338e656d94307e629",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13838,9 +14501,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "progress",
       "signature": "async def progress(e):",
-      "start_line": 232,
+      "start_line": 275,
       "start_column": 5,
-      "end_line": 232,
+      "end_line": 275,
       "hash": "4229651b38fa08c6f6dcdb91",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13854,9 +14517,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "test_refinement_disabled_by_default_leaves_trace_absent",
       "signature": "def test_refinement_disabled_by_default_leaves_trace_absent(monkeypatch):",
-      "start_line": 250,
+      "start_line": 298,
       "start_column": 1,
-      "end_line": 250,
+      "end_line": 298,
       "hash": "50308824b530ef05977009d9",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13870,9 +14533,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "fastapi.testclient",
       "signature": "from fastapi.testclient import TestClient",
-      "start_line": 251,
+      "start_line": 299,
       "start_column": 5,
-      "end_line": 251,
+      "end_line": 299,
       "hash": "f456ab1c3a65685bf42316c9",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13886,9 +14549,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "nvidia_smartroute.gateway.server as srv",
       "signature": "import nvidia_smartroute.gateway.server as srv",
-      "start_line": 252,
+      "start_line": 300,
       "start_column": 5,
-      "end_line": 252,
+      "end_line": 300,
       "hash": "885f31ca8d6fb305c19ba339",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13902,9 +14565,9 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "nvidia_smartroute.parkour",
       "signature": "from nvidia_smartroute.parkour import (",
-      "start_line": 253,
+      "start_line": 301,
       "start_column": 5,
-      "end_line": 253,
+      "end_line": 301,
       "hash": "890a69aa52f989764a991f37",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
@@ -13918,13 +14581,61 @@
       "path": "tests/test_parkour_refinement.py",
       "name": "run",
       "signature": "async def run(messages, progress=None):",
-      "start_line": 262,
+      "start_line": 310,
       "start_column": 5,
-      "end_line": 262,
+      "end_line": 310,
       "hash": "375468434c7d7af01bd36b71",
       "parent_id": "code:file:855660df321f6102",
       "metadata": {
         "async": true
+      }
+    },
+    {
+      "id": "code:function:4bfb064f5126e918",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_refinement.py",
+      "name": "test_refinement_disabled_returns_identical_result",
+      "signature": "async def test_refinement_disabled_returns_identical_result(monkeypatch):",
+      "start_line": 326,
+      "start_column": 1,
+      "end_line": 326,
+      "hash": "cc9b8f4052bfa17104ce75c7",
+      "parent_id": "code:file:855660df321f6102",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:import:8a2095bf6ae56147",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_refinement.py",
+      "name": "nvidia_smartroute.parkour.service as service",
+      "signature": "import nvidia_smartroute.parkour.service as service",
+      "start_line": 327,
+      "start_column": 5,
+      "end_line": 327,
+      "hash": "9b3b711902c680986d012bac",
+      "parent_id": "code:file:855660df321f6102",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour.service as service"
+      }
+    },
+    {
+      "id": "code:import:8d84129903c936f2",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_refinement.py",
+      "name": "nvidia_smartroute.parkour",
+      "signature": "from nvidia_smartroute.parkour import (",
+      "start_line": 328,
+      "start_column": 5,
+      "end_line": 328,
+      "hash": "890a69aa52f989764a991f37",
+      "parent_id": "code:file:855660df321f6102",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour"
       }
     },
     {
@@ -14633,8 +15344,8 @@
       "signature": "tests/test_parkour_scheduler.py",
       "start_line": 1,
       "start_column": 1,
-      "end_line": 180,
-      "hash": "180de2e32604a9c37e030673"
+      "end_line": 281,
+      "hash": "548fb040ecce42e9ac3fb43e"
     },
     {
       "id": "code:import:ef68327ffea8cb76",
@@ -14691,9 +15402,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "nvidia_smartroute.routing.router",
       "signature": "from nvidia_smartroute.routing.router import TaskType",
-      "start_line": 15,
+      "start_line": 16,
       "start_column": 1,
-      "end_line": 15,
+      "end_line": 16,
       "hash": "7b4197b789779e8a0dd34daa",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14707,9 +15418,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "nvidia_smartroute.routing.router",
       "signature": "from nvidia_smartroute.routing.router import ModelCapability, RoutingDecision",
-      "start_line": 16,
+      "start_line": 17,
       "start_column": 1,
-      "end_line": 16,
+      "end_line": 17,
       "hash": "2ebb246d14a563b1970093d7",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14723,9 +15434,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "_node",
       "signature": "def _node(node_id, dependencies=None):",
-      "start_line": 19,
+      "start_line": 20,
       "start_column": 1,
-      "end_line": 19,
+      "end_line": 20,
       "hash": "3f340bef284452b261ad1548",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14739,9 +15450,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "_limits",
       "signature": "def _limits(**changes):",
-      "start_line": 30,
+      "start_line": 31,
       "start_column": 1,
-      "end_line": 30,
+      "end_line": 31,
       "hash": "6283fcf5f6f21378924c8196",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14755,9 +15466,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_dependencies_execute_in_order_and_context_is_typed",
       "signature": "def test_dependencies_execute_in_order_and_context_is_typed():",
-      "start_line": 44,
+      "start_line": 45,
       "start_column": 1,
-      "end_line": 44,
+      "end_line": 45,
       "hash": "cfb5ce199d5eae6cde30f53b",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14771,9 +15482,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "worker",
       "signature": "async def worker(task, contexts):",
-      "start_line": 48,
+      "start_line": 49,
       "start_column": 5,
-      "end_line": 48,
+      "end_line": 49,
       "hash": "7c14b3fde18b7250e3bb3f59",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14787,9 +15498,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "emit",
       "signature": "async def emit(event):",
-      "start_line": 52,
+      "start_line": 53,
       "start_column": 5,
-      "end_line": 52,
+      "end_line": 53,
       "hash": "f1b03ab7643b55a048b6be5e",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14803,9 +15514,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_ready_nodes_run_concurrently_under_semaphore",
       "signature": "def test_ready_nodes_run_concurrently_under_semaphore():",
-      "start_line": 64,
+      "start_line": 65,
       "start_column": 1,
-      "end_line": 64,
+      "end_line": 65,
       "hash": "c10909d5c0eec4aeb36a54bc",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14819,9 +15530,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "run",
       "signature": "async def run():",
-      "start_line": 65,
+      "start_line": 66,
       "start_column": 5,
-      "end_line": 65,
+      "end_line": 66,
       "hash": "e4e11ea835b9d24f0544a834",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14835,9 +15546,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "worker",
       "signature": "async def worker(task, contexts):",
-      "start_line": 71,
+      "start_line": 72,
       "start_column": 9,
-      "end_line": 71,
+      "end_line": 72,
       "hash": "6fa2ccb41a3c245be4daa31b",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14851,9 +15562,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_runtime_limits",
       "signature": "def test_runtime_limits(limits, result, match):",
-      "start_line": 99,
+      "start_line": 100,
       "start_column": 1,
-      "end_line": 99,
+      "end_line": 100,
       "hash": "28f94340a6527e6c4da5245e",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14867,9 +15578,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "worker",
       "signature": "async def worker(task, contexts):",
-      "start_line": 100,
+      "start_line": 101,
       "start_column": 5,
-      "end_line": 100,
+      "end_line": 101,
       "hash": "7c14b3fde18b7250e3bb3f59",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14883,9 +15594,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_deadline_cancels_worker",
       "signature": "def test_deadline_cancels_worker():",
-      "start_line": 108,
+      "start_line": 109,
       "start_column": 1,
-      "end_line": 108,
+      "end_line": 109,
       "hash": "6ba8aa41ba3b87dbc56fa313",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14899,9 +15610,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "worker",
       "signature": "async def worker(task, contexts):",
-      "start_line": 111,
+      "start_line": 112,
       "start_column": 5,
-      "end_line": 111,
+      "end_line": 112,
       "hash": "7c14b3fde18b7250e3bb3f59",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14915,9 +15626,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_recursive_worker_model_is_rejected",
       "signature": "def test_recursive_worker_model_is_rejected():",
-      "start_line": 128,
+      "start_line": 129,
       "start_column": 1,
-      "end_line": 128,
+      "end_line": 129,
       "hash": "a2359dc81f041c122ac8a02a",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14931,9 +15642,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "worker",
       "signature": "async def worker(task, contexts):",
-      "start_line": 129,
+      "start_line": 130,
       "start_column": 5,
-      "end_line": 129,
+      "end_line": 130,
       "hash": "7c14b3fde18b7250e3bb3f59",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14947,9 +15658,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_gateway_worker_uses_router_and_existing_fallback_path",
       "signature": "def test_gateway_worker_uses_router_and_existing_fallback_path(monkeypatch):",
-      "start_line": 140,
+      "start_line": 141,
       "start_column": 1,
-      "end_line": 140,
+      "end_line": 141,
       "hash": "4f652b0d65ef1b396baade30",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14963,9 +15674,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "nvidia_smartroute.gateway.completion as completion",
       "signature": "import nvidia_smartroute.gateway.completion as completion",
-      "start_line": 141,
+      "start_line": 142,
       "start_column": 5,
-      "end_line": 141,
+      "end_line": 142,
       "hash": "6bb70e013ed8c7334df995a0",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14979,9 +15690,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "nvidia_smartroute.parkour.scheduler as scheduler",
       "signature": "import nvidia_smartroute.parkour.scheduler as scheduler",
-      "start_line": 142,
+      "start_line": 143,
       "start_column": 5,
-      "end_line": 142,
+      "end_line": 143,
       "hash": "311fc4b4433d69b9bc5e778a",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -14995,9 +15706,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "nvidia_smartroute.routing.router as routing",
       "signature": "import nvidia_smartroute.routing.router as routing",
-      "start_line": 143,
+      "start_line": 144,
       "start_column": 5,
-      "end_line": 143,
+      "end_line": 144,
       "hash": "462ae7a02a47c6d9c8a6588f",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -15011,9 +15722,9 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "route_request",
       "signature": "async def route_request(messages):",
-      "start_line": 154,
+      "start_line": 155,
       "start_column": 5,
-      "end_line": 154,
+      "end_line": 155,
       "hash": "dde30b0edf575b88b687be4f",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
@@ -15027,10 +15738,186 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "complete",
       "signature": "async def complete(task_type, primary, messages, max_tokens, temperature, extra):",
-      "start_line": 158,
+      "start_line": 159,
       "start_column": 5,
-      "end_line": 158,
+      "end_line": 159,
       "hash": "3b27acb73e0f3a4af841b4dc",
+      "parent_id": "code:file:af005baf11b71d6a",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:c62595e109c6ebed",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "test_gateway_worker_preserves_direct_message_roles",
+      "signature": "def test_gateway_worker_preserves_direct_message_roles(monkeypatch):",
+      "start_line": 183,
+      "start_column": 1,
+      "end_line": 183,
+      "hash": "ed24ac88c044dda405df747b",
+      "parent_id": "code:file:af005baf11b71d6a",
+      "metadata": {
+        "async": false
+      }
+    },
+    {
+      "id": "code:import:7ec37f7acb57e9fe",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "nvidia_smartroute.gateway.completion as completion",
+      "signature": "import nvidia_smartroute.gateway.completion as completion",
+      "start_line": 184,
+      "start_column": 5,
+      "end_line": 184,
+      "hash": "6bb70e013ed8c7334df995a0",
+      "parent_id": "code:file:af005baf11b71d6a",
+      "metadata": {
+        "module": "nvidia_smartroute.gateway.completion as completion"
+      }
+    },
+    {
+      "id": "code:import:50bae06c128375ed",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "nvidia_smartroute.parkour.scheduler as scheduler",
+      "signature": "import nvidia_smartroute.parkour.scheduler as scheduler",
+      "start_line": 185,
+      "start_column": 5,
+      "end_line": 185,
+      "hash": "311fc4b4433d69b9bc5e778a",
+      "parent_id": "code:file:af005baf11b71d6a",
+      "metadata": {
+        "module": "nvidia_smartroute.parkour.scheduler as scheduler"
+      }
+    },
+    {
+      "id": "code:import:b05d6b97ea6f42f4",
+      "kind": "import",
+      "language": "Python",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "nvidia_smartroute.routing.router as routing",
+      "signature": "import nvidia_smartroute.routing.router as routing",
+      "start_line": 186,
+      "start_column": 5,
+      "end_line": 186,
+      "hash": "462ae7a02a47c6d9c8a6588f",
+      "parent_id": "code:file:af005baf11b71d6a",
+      "metadata": {
+        "module": "nvidia_smartroute.routing.router as routing"
+      }
+    },
+    {
+      "id": "code:function:e0902a487f531e10",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "route_request",
+      "signature": "async def route_request(messages):",
+      "start_line": 197,
+      "start_column": 5,
+      "end_line": 197,
+      "hash": "dde30b0edf575b88b687be4f",
+      "parent_id": "code:file:af005baf11b71d6a",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:81308fc68216d6ac",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "complete",
+      "signature": "async def complete(task_type, primary, messages, max_tokens, temperature, extra):",
+      "start_line": 201,
+      "start_column": 5,
+      "end_line": 201,
+      "hash": "3b27acb73e0f3a4af841b4dc",
+      "parent_id": "code:file:af005baf11b71d6a",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:b4b565eec5dba806",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "test_upstream_budget_enforces_token_and_cost_limits",
+      "signature": "async def test_upstream_budget_enforces_token_and_cost_limits():",
+      "start_line": 236,
+      "start_column": 1,
+      "end_line": 236,
+      "hash": "9b3e1a5f33dd88fd8d792fe1",
+      "parent_id": "code:file:af005baf11b71d6a",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:cfea587b8350abbf",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "result",
+      "signature": "async def result():",
+      "start_line": 240,
+      "start_column": 5,
+      "end_line": 240,
+      "hash": "29d2071393b461a58e12647e",
+      "parent_id": "code:file:af005baf11b71d6a",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:c74ca36c05a6a289",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "test_upstream_budget_releases_slot_on_cancellation",
+      "signature": "async def test_upstream_budget_releases_slot_on_cancellation():",
+      "start_line": 254,
+      "start_column": 1,
+      "end_line": 254,
+      "hash": "ccc5b653c3b564144a80be2c",
+      "parent_id": "code:file:af005baf11b71d6a",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:1589bcadbce63bff",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "blocked",
+      "signature": "async def blocked():",
+      "start_line": 258,
+      "start_column": 5,
+      "end_line": 258,
+      "hash": "e623b429d9dd183a66c7f213",
+      "parent_id": "code:file:af005baf11b71d6a",
+      "metadata": {
+        "async": true
+      }
+    },
+    {
+      "id": "code:function:fd40b273f3f9b31f",
+      "kind": "function",
+      "language": "Python",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "succeeding",
+      "signature": "async def succeeding():",
+      "start_line": 271,
+      "start_column": 5,
+      "end_line": 271,
+      "hash": "6a263f47459d4818f3afdbe8",
       "parent_id": "code:file:af005baf11b71d6a",
       "metadata": {
         "async": true
@@ -15982,26 +16869,26 @@
     }
   ],
   "coverage": {
-    "governed_entity_count": 610,
-    "linked_entity_count": 527,
-    "unlinked_entity_count": 83,
-    "coverage_ratio": 0.8639,
+    "governed_entity_count": 642,
+    "linked_entity_count": 553,
+    "unlinked_entity_count": 89,
+    "coverage_ratio": 0.8614,
     "linked_by_kind": {
-      "class": 54,
-      "method": 152,
-      "function": 310,
+      "class": 55,
+      "method": 154,
+      "function": 333,
       "route": 11
     },
     "unlinked_by_kind": {
-      "class": 24,
-      "function": 59
+      "class": 25,
+      "function": 64
     }
   },
   "drift": {
-    "score": 0.1361,
+    "score": 0.1386,
     "severity": "low",
     "signals": [
-      "83 of 610 governable code entities have no local spec link",
+      "89 of 642 governable code entities have no local spec link",
       "22 local spec documents scanned"
     ]
   }

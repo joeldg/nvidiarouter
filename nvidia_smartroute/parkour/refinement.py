@@ -17,7 +17,7 @@ import json
 import re
 import time
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Dict, Optional
+from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, cast
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
@@ -63,7 +63,7 @@ def parse_verdict(value: Any) -> Verdict:
                     "fenced verifier verdict is not valid JSON"
                 ) from fenced_error
     try:
-        return Verdict.model_validate(decoded)
+        return cast(Verdict, Verdict.model_validate(decoded))
     except ValidationError as exc:
         raise RefinementError(f"verifier verdict schema is invalid: {exc}") from exc
 
@@ -218,10 +218,16 @@ async def _verify_step(
     progress: Optional[ProgressCallback],
 ) -> Optional[Verdict]:
     """Verify the current candidate; account, track best, and emit. None on failure."""
+    await _emit(progress, {
+        "type": "verification_started",
+        "iteration": state.iterations,
+    })
     try:
         outcome = await verify(state.current)
         verdict = outcome.verdict
-    except Exception:
+    except Exception as exc:
+        if getattr(exc, "is_parkour_limit", False):
+            raise
         if telemetry:
             telemetry.record_verifier_failure()
         await _emit(progress, {"type": "verification_failed"})
@@ -254,7 +260,9 @@ async def _revise_step(
     await _emit(progress, {"type": "revision_started", "iteration": state.iterations})
     try:
         revised = await revise(state.current, feedback)
-    except Exception:
+    except Exception as exc:
+        if getattr(exc, "is_parkour_limit", False):
+            raise
         if telemetry:
             telemetry.record_verifier_failure()
         await _emit(progress, {"type": "revision_failed", "iteration": state.iterations})
@@ -269,6 +277,43 @@ async def _revise_step(
     })
     state.current = revised.text
     return True
+
+
+async def _verify_or_limit(
+    state: "_LoopState",
+    verify: "VerifyCallable",
+    limits: RefinementLimits,
+    telemetry: Optional["RefinementTelemetry"],
+    progress: Optional[ProgressCallback],
+) -> Tuple[Optional[Verdict], bool]:
+    """Verify once, returning whether the shared run budget stopped the loop."""
+    try:
+        return await _verify_step(
+            state, verify, limits, telemetry, progress
+        ), False
+    except Exception as exc:
+        if not getattr(exc, "is_parkour_limit", False):
+            raise
+        return None, True
+
+
+async def _revise_or_limit(
+    state: "_LoopState",
+    verdict: Verdict,
+    revise: "ReviseCallable",
+    limits: RefinementLimits,
+    telemetry: Optional["RefinementTelemetry"],
+    progress: Optional[ProgressCallback],
+) -> Tuple[bool, bool]:
+    """Revise once, returning whether the shared run budget stopped the loop."""
+    try:
+        return await _revise_step(
+            state, verdict, revise, limits, telemetry, progress
+        ), False
+    except Exception as exc:
+        if not getattr(exc, "is_parkour_limit", False):
+            raise
+        return False, True
 
 
 # @spec[PARKOUR_REFINEMENT.md#Requirements]
@@ -294,7 +339,12 @@ async def run_refinement(
             stop_reason = guard
             break
 
-        verdict = await _verify_step(state, verify, limits, telemetry, progress)
+        verdict, limit_reached = await _verify_or_limit(
+            state, verify, limits, telemetry, progress
+        )
+        if limit_reached:
+            stop_reason = "resource_limit"
+            break
         if verdict is None:
             stop_reason = "verifier_failed"
             break
@@ -306,7 +356,13 @@ async def run_refinement(
             stop_reason = stop
             break
 
-        if not await _revise_step(state, verdict, revise, limits, telemetry, progress):
+        revised, limit_reached = await _revise_or_limit(
+            state, verdict, revise, limits, telemetry, progress
+        )
+        if limit_reached:
+            stop_reason = "resource_limit"
+            break
+        if not revised:
             stop_reason = "revision_failed"
             break
         state.prev_score = verdict.score

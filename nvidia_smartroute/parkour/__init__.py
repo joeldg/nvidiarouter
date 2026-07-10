@@ -19,6 +19,7 @@ from .scheduler import (
     ParkourLimitError,
     SchedulerLimits,
     SchedulerResult,
+    UpstreamBudget,
     WorkerResult,
     routed_gateway_worker,
 )
@@ -77,6 +78,7 @@ __all__ = [
     "ParkourLimitError",
     "SchedulerLimits",
     "SchedulerResult",
+    "UpstreamBudget",
     "WorkerResult",
     "routed_gateway_worker",
     "EngineResult",

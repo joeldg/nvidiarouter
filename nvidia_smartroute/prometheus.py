@@ -102,7 +102,10 @@ def render_prometheus(snapshot: Dict[str, Any]) -> str:
         ("nsr_parkour_ensemble_member_successes", "counter", "PARKOUR ensemble member successes", "member_successes"),
         ("nsr_parkour_ensemble_member_failures", "counter", "PARKOUR ensemble member failures", "member_failures"),
         ("nsr_parkour_ensemble_all_failed", "counter", "PARKOUR ensemble all-members-failed", "all_failed"),
+        ("nsr_parkour_ensemble_configured_members", "counter", "PARKOUR ensemble configured members", "configured_members"),
+        ("nsr_parkour_ensemble_effective_members", "counter", "PARKOUR ensemble effective members", "effective_members"),
         ("nsr_parkour_ensemble_distinct_models", "gauge", "PARKOUR ensemble distinct models", "distinct_models"),
+        ("nsr_parkour_ensemble_added_tokens", "counter", "PARKOUR ensemble added tokens", "added_tokens"),
         ("nsr_parkour_ensemble_added_cost_usd", "gauge", "PARKOUR ensemble added cost", "added_cost_usd"),
     ]:
         _metric(lines, name, mtype, help_text, ensemble.get(key, 0))

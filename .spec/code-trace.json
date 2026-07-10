@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-10T00:42:54.970Z",
+  "generated_at": "2026-07-10T20:14:27.125Z",
   "root": "nvidiarouter",
   "specs_dir": "specs",
   "spec_count": 22,
-  "entity_count": 1010,
+  "entity_count": 1066,
   "links": [
     {
       "entity_id": "code:class:00ecb5aa5fe7b787",
@@ -55,6 +55,17 @@
       "entity_name": "AutoscaleEngine",
       "entity_kind": "class",
       "spec_filename": "GATEWAY_API.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
+      ]
+    },
+    {
+      "entity_id": "code:class:18dc8f4905dd3574",
+      "entity_name": "UpstreamBudget",
+      "entity_kind": "class",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
       "confidence": 1,
       "reasons": [
         "explicit @spec annotation",
@@ -1695,6 +1706,186 @@
       ]
     },
     {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, list, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, list, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, list, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_RESEARCH.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, list, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, list, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "COST.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "GLOBAL_SECURITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_REFINEMENT.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_KEYS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:0d3fc15da1219b98",
+      "entity_name": "_request_context",
+      "entity_kind": "function",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, int"
+      ]
+    },
+    {
       "entity_id": "code:function:0d452c7609187d30",
       "entity_name": "test_identical_queries_deduplicated",
       "entity_kind": "function",
@@ -2155,6 +2346,26 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, model"
+      ]
+    },
+    {
+      "entity_id": "code:function:1589bcadbce63bff",
+      "entity_name": "blocked",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:1589bcadbce63bff",
+      "entity_name": "blocked",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
       ]
     },
     {
@@ -3304,6 +3515,26 @@
       ]
     },
     {
+      "entity_id": "code:function:243bf81966fc86f6",
+      "entity_name": "test_panel_combiner_cannot_bypass_call_limit",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:243bf81966fc86f6",
+      "entity_name": "test_panel_combiner_cannot_bypass_call_limit",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
       "entity_id": "code:function:24d41d49f7b4e3b7",
       "entity_name": "_mask",
       "entity_kind": "function",
@@ -3632,6 +3863,60 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, tests/test_routing.py"
+      ]
+    },
+    {
+      "entity_id": "code:function:286fc55a1adbac8e",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, async, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:286fc55a1adbac8e",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:286fc55a1adbac8e",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_REFINEMENT.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:286fc55a1adbac8e",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_RESEARCH.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:286fc55a1adbac8e",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
       ]
     },
     {
@@ -4252,17 +4537,6 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: async, def"
-      ]
-    },
-    {
-      "entity_id": "code:function:34e3d7e1cf964b02",
-      "entity_name": "_routed_call",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR_ENSEMBLE.md",
-      "confidence": 1,
-      "reasons": [
-        "explicit @spec annotation",
-        "section: Requirements"
       ]
     },
     {
@@ -5371,46 +5645,6 @@
       ]
     },
     {
-      "entity_id": "code:function:445173c6c92923b0",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "GATEWAY_API.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, messages"
-      ]
-    },
-    {
-      "entity_id": "code:function:445173c6c92923b0",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, messages"
-      ]
-    },
-    {
-      "entity_id": "code:function:445173c6c92923b0",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR_ENSEMBLE.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: async, def"
-      ]
-    },
-    {
-      "entity_id": "code:function:445173c6c92923b0",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: async, def"
-      ]
-    },
-    {
       "entity_id": "code:function:45a552667ff94f72",
       "entity_name": "list_virtual_models",
       "entity_kind": "function",
@@ -5653,193 +5887,23 @@
       ]
     },
     {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
+      "entity_id": "code:function:4bfb064f5126e918",
+      "entity_name": "test_refinement_disabled_returns_identical_result",
       "entity_kind": "function",
       "spec_filename": "PARKOUR_ENSEMBLE.md",
-      "confidence": 0.95,
+      "confidence": 0.59,
       "reasons": [
-        "matched tokens: async, def, only, the, panel"
+        "matched tokens: async, def"
       ]
     },
     {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
+      "entity_id": "code:function:4bfb064f5126e918",
+      "entity_name": "test_refinement_disabled_returns_identical_result",
       "entity_kind": "function",
       "spec_filename": "PARKOUR.md",
-      "confidence": 0.95,
-      "reasons": [
-        "matched tokens: async, def, only, hit, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "GATEWAY_API.md",
-      "confidence": 0.83,
-      "reasons": [
-        "matched tokens: def, messages, only, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
-      "confidence": 0.83,
-      "reasons": [
-        "matched tokens: def, messages, hit, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR_REFINEMENT.md",
-      "confidence": 0.83,
-      "reasons": [
-        "matched tokens: def, only, the, panel"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR_RESEARCH.md",
-      "confidence": 0.83,
-      "reasons": [
-        "matched tokens: def, only, hit, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "PROJECT_PROFILE.md",
-      "confidence": 0.83,
-      "reasons": [
-        "matched tokens: def, only, hit, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "ROUTING.md",
-      "confidence": 0.83,
-      "reasons": [
-        "matched tokens: def, would, only, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "SDD_OPERATING_MODEL.md",
-      "confidence": 0.83,
-      "reasons": [
-        "matched tokens: def, only, hit, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "OBSERVABILITY.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: def, only, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "RECOMMENDATION.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: would, only, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "SECURITY_AND_KEYS.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: def, only, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "SECURITY_AND_SECRETS.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: def, only, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "SPEC_GOVERNANCE.md",
-      "confidence": 0.71,
-      "reasons": [
-        "matched tokens: def, only, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "COST.md",
       "confidence": 0.59,
       "reasons": [
-        "matched tokens: def, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "GLOBAL_SECURITY.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "MODEL_DISCOVERY.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, the"
-      ]
-    },
-    {
-      "entity_id": "code:function:4ab7c369097e70ef",
-      "entity_name": "fake_routed",
-      "entity_kind": "function",
-      "spec_filename": "TOKENOMICS.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, the"
+        "matched tokens: async, def"
       ]
     },
     {
@@ -6286,6 +6350,26 @@
       ]
     },
     {
+      "entity_id": "code:function:553f438dbdc40194",
+      "entity_name": "test_accept_flag_below_threshold_cannot_reward_hack",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:553f438dbdc40194",
+      "entity_name": "test_accept_flag_below_threshold_cannot_reward_hack",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
       "entity_id": "code:function:55736fc09e20e801",
       "entity_name": "worker",
       "entity_kind": "function",
@@ -6411,6 +6495,26 @@
       ]
     },
     {
+      "entity_id": "code:function:55753a8281773447",
+      "entity_name": "test_panel_calls_share_concurrency_and_call_limits",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:55753a8281773447",
+      "entity_name": "test_panel_calls_share_concurrency_and_call_limits",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
       "entity_id": "code:function:55892822b1315cd7",
       "entity_name": "save_models",
       "entity_kind": "function",
@@ -6454,6 +6558,60 @@
     {
       "entity_id": "code:function:5684fb5b527bd362",
       "entity_name": "fake_route",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:56b77ad3adef226a",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, async, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:56b77ad3adef226a",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:56b77ad3adef226a",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_REFINEMENT.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:56b77ad3adef226a",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_RESEARCH.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:56b77ad3adef226a",
+      "entity_name": "complete",
       "entity_kind": "function",
       "spec_filename": "PARKOUR.md",
       "confidence": 0.59,
@@ -6923,6 +7081,196 @@
       ]
     },
     {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.83,
+      "reasons": [
+        "matched tokens: def, mapping, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_REFINEMENT.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_RESEARCH.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: def, str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "COST.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "GLOBAL_SECURITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "OBSERVABILITY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "PROJECT_PROFILE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "RECOMMENDATION.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: str, any"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "SDD_OPERATING_MODEL.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_KEYS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "SECURITY_AND_SECRETS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:5933b149ef9d1b7f",
+      "entity_name": "_message_transcript",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_GOVERNANCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, str"
+      ]
+    },
+    {
       "entity_id": "code:function:594e9f458aeee5fd",
       "entity_name": "_sse",
       "entity_kind": "function",
@@ -7020,6 +7368,180 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, dict"
+      ]
+    },
+    {
+      "entity_id": "code:function:5959eb3e8e3e0679",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, async, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:5959eb3e8e3e0679",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:5959eb3e8e3e0679",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_REFINEMENT.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:5959eb3e8e3e0679",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_RESEARCH.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:5959eb3e8e3e0679",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:59787ff4bb326198",
+      "entity_name": "fake_routed",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
       ]
     },
     {
@@ -7715,17 +8237,6 @@
       ]
     },
     {
-      "entity_id": "code:function:5e00642a00549af4",
-      "entity_name": "_routed_completion_with_cost",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR_REFINEMENT.md",
-      "confidence": 1,
-      "reasons": [
-        "explicit @spec annotation",
-        "section: Requirements"
-      ]
-    },
-    {
       "entity_id": "code:function:5e03507100234b9a",
       "entity_name": "render_prometheus",
       "entity_kind": "function",
@@ -8385,6 +8896,26 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, provider"
+      ]
+    },
+    {
+      "entity_id": "code:function:62f808473fff5106",
+      "entity_name": "test_synthesis_is_anchored_to_original_conversation",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:62f808473fff5106",
+      "entity_name": "test_synthesis_is_anchored_to_original_conversation",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
       ]
     },
     {
@@ -10312,6 +10843,26 @@
       ]
     },
     {
+      "entity_id": "code:function:7b4576dbf6bd40dc",
+      "entity_name": "test_disabled_panel_is_identical_to_single_model_path",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:7b4576dbf6bd40dc",
+      "entity_name": "test_disabled_panel_is_identical_to_single_model_path",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
       "entity_id": "code:function:7ba5f7373249ea66",
       "entity_name": "fake_line_stream",
       "entity_kind": "function",
@@ -10509,6 +11060,26 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, tests/test_features.py"
+      ]
+    },
+    {
+      "entity_id": "code:function:7da2d25a63a4c77f",
+      "entity_name": "test_direct_run_passes_original_role_sequence",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:7da2d25a63a4c77f",
+      "entity_name": "test_direct_run_passes_original_role_sequence",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
       ]
     },
     {
@@ -10850,6 +11421,50 @@
       "entity_id": "code:function:81308fc68216d6ac",
       "entity_name": "complete",
       "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:81308fc68216d6ac",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, async, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:81308fc68216d6ac",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_REFINEMENT.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete, extra"
+      ]
+    },
+    {
+      "entity_id": "code:function:81308fc68216d6ac",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_RESEARCH.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:81308fc68216d6ac",
+      "entity_name": "complete",
+      "entity_kind": "function",
       "spec_filename": "PARKOUR_RESEARCH.md",
       "confidence": 0.91,
       "reasons": [
@@ -10865,6 +11480,36 @@
       "confidence": 0.83,
       "reasons": [
         "matched tokens: def, messages, max_tokens, temperature"
+      ]
+    },
+    {
+      "entity_id": "code:function:81308fc68216d6ac",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.83,
+      "reasons": [
+        "matched tokens: def, messages, max_tokens, temperature"
+      ]
+    },
+    {
+      "entity_id": "code:function:81308fc68216d6ac",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:81308fc68216d6ac",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "ROUTING.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, task_type"
       ]
     },
     {
@@ -12423,6 +13068,112 @@
       ]
     },
     {
+      "entity_id": "code:function:8cf71a2b5f638d0c",
+      "entity_name": "operation",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: operation, def, operation"
+      ]
+    },
+    {
+      "entity_id": "code:function:8cf71a2b5f638d0c",
+      "entity_name": "operation",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: operation, def, operation"
+      ]
+    },
+    {
+      "entity_id": "code:function:8cf71a2b5f638d0c",
+      "entity_name": "operation",
+      "entity_kind": "function",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: operation, operation"
+      ]
+    },
+    {
+      "entity_id": "code:function:8cf71a2b5f638d0c",
+      "entity_name": "operation",
+      "entity_kind": "function",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: operation, operation"
+      ]
+    },
+    {
+      "entity_id": "code:function:8cf71a2b5f638d0c",
+      "entity_name": "operation",
+      "entity_kind": "function",
+      "spec_filename": "AGENT_OPERATING_RULES.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: operation, operation"
+      ]
+    },
+    {
+      "entity_id": "code:function:8cf71a2b5f638d0c",
+      "entity_name": "operation",
+      "entity_kind": "function",
+      "spec_filename": "TRACEABILITY_AND_OBSERVABILITY.md",
+      "confidence": 0.79,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: operation, operation"
+      ]
+    },
+    {
+      "entity_id": "code:function:8cf71a2b5f638d0c",
+      "entity_name": "operation",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:8cf71a2b5f638d0c",
+      "entity_name": "operation",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:8cf71a2b5f638d0c",
+      "entity_name": "operation",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:8cf71a2b5f638d0c",
+      "entity_name": "operation",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
       "entity_id": "code:function:8d6d6eab0d0bdeaf",
       "entity_name": "_node",
       "entity_kind": "function",
@@ -13597,6 +14348,26 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, int"
+      ]
+    },
+    {
+      "entity_id": "code:function:9bf7508788c24994",
+      "entity_name": "test_oscillating_scores_return_best_observed_candidate",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:9bf7508788c24994",
+      "entity_name": "test_oscillating_scores_return_best_observed_candidate",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
       ]
     },
     {
@@ -14835,6 +15606,26 @@
       ]
     },
     {
+      "entity_id": "code:function:b4b565eec5dba806",
+      "entity_name": "test_upstream_budget_enforces_token_and_cost_limits",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:b4b565eec5dba806",
+      "entity_name": "test_upstream_budget_enforces_token_and_cost_limits",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
       "entity_id": "code:function:b504fa1d0d21f623",
       "entity_name": "recommend_endpoint",
       "entity_kind": "function",
@@ -15735,6 +16526,26 @@
       ]
     },
     {
+      "entity_id": "code:function:c74ca36c05a6a289",
+      "entity_name": "test_upstream_budget_releases_slot_on_cancellation",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:c74ca36c05a6a289",
+      "entity_name": "test_upstream_budget_releases_slot_on_cancellation",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
       "entity_id": "code:function:c98141c1e6467bec",
       "entity_name": "health_check",
       "entity_kind": "function",
@@ -16505,6 +17316,72 @@
       ]
     },
     {
+      "entity_id": "code:function:cfea587b8350abbf",
+      "entity_name": "result",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: result, async, def, result"
+      ]
+    },
+    {
+      "entity_id": "code:function:cfea587b8350abbf",
+      "entity_name": "result",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: result, async, def, result"
+      ]
+    },
+    {
+      "entity_id": "code:function:cfea587b8350abbf",
+      "entity_name": "result",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: result, def, result"
+      ]
+    },
+    {
+      "entity_id": "code:function:cfea587b8350abbf",
+      "entity_name": "result",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_RESEARCH.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: result, def, result"
+      ]
+    },
+    {
+      "entity_id": "code:function:cfea587b8350abbf",
+      "entity_name": "result",
+      "entity_kind": "function",
+      "spec_filename": "SPEC_AUTHORING_STANDARD.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: result, def, result"
+      ]
+    },
+    {
+      "entity_id": "code:function:cfea587b8350abbf",
+      "entity_name": "result",
+      "entity_kind": "function",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: result, def, result"
+      ]
+    },
+    {
       "entity_id": "code:function:d085818023e354cf",
       "entity_name": "_emit",
       "entity_kind": "function",
@@ -16692,6 +17569,60 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:function:d1bd73c068fc4178",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.95,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, async, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:d1bd73c068fc4178",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:d1bd73c068fc4178",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_REFINEMENT.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:d1bd73c068fc4178",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_RESEARCH.md",
+      "confidence": 0.91,
+      "reasons": [
+        "entity name appears in spec",
+        "matched tokens: complete, def, complete"
+      ]
+    },
+    {
+      "entity_id": "code:function:d1bd73c068fc4178",
+      "entity_name": "complete",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
       ]
     },
     {
@@ -16983,17 +17914,6 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, tests/test_features.py"
-      ]
-    },
-    {
-      "entity_id": "code:function:d6b2da528b7acec9",
-      "entity_name": "_refine",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR_REFINEMENT.md",
-      "confidence": 1,
-      "reasons": [
-        "explicit @spec annotation",
-        "section: Requirements"
       ]
     },
     {
@@ -17324,6 +18244,46 @@
     {
       "entity_id": "code:function:df525c88fcc7fc86",
       "entity_name": "test_telemetry_snapshot_shape",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:e0902a487f531e10",
+      "entity_name": "route_request",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:e0902a487f531e10",
+      "entity_name": "route_request",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:e0902a487f531e10",
+      "entity_name": "route_request",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:e0902a487f531e10",
+      "entity_name": "route_request",
       "entity_kind": "function",
       "spec_filename": "PARKOUR.md",
       "confidence": 0.59,
@@ -19144,6 +20104,46 @@
       ]
     },
     {
+      "entity_id": "code:function:ee84f118a88c8c48",
+      "entity_name": "route_request",
+      "entity_kind": "function",
+      "spec_filename": "GATEWAY_API.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:ee84f118a88c8c48",
+      "entity_name": "route_request",
+      "entity_kind": "function",
+      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, messages"
+      ]
+    },
+    {
+      "entity_id": "code:function:ee84f118a88c8c48",
+      "entity_name": "route_request",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:ee84f118a88c8c48",
+      "entity_name": "route_request",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
       "entity_id": "code:function:ef03b7fd85d3b3b3",
       "entity_name": "fake_chat",
       "entity_kind": "function",
@@ -19724,6 +20724,46 @@
       ]
     },
     {
+      "entity_id": "code:function:f0c0dc358713339b",
+      "entity_name": "limited_verify",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.71,
+      "reasons": [
+        "matched tokens: async, def, candidate"
+      ]
+    },
+    {
+      "entity_id": "code:function:f0c0dc358713339b",
+      "entity_name": "limited_verify",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_REFINEMENT.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, candidate"
+      ]
+    },
+    {
+      "entity_id": "code:function:f0c0dc358713339b",
+      "entity_name": "limited_verify",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:f0c0dc358713339b",
+      "entity_name": "limited_verify",
+      "entity_kind": "function",
+      "spec_filename": "TOKENOMICS.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, candidate"
+      ]
+    },
+    {
       "entity_id": "code:function:f16b8873829dc084",
       "entity_name": "test_health_polling_does_not_inflate_total_requests",
       "entity_kind": "function",
@@ -19934,56 +20974,6 @@
       ]
     },
     {
-      "entity_id": "code:function:f679fe6bdf0f5919",
-      "entity_name": "_request_text",
-      "entity_kind": "function",
-      "spec_filename": "GATEWAY_API.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, list"
-      ]
-    },
-    {
-      "entity_id": "code:function:f679fe6bdf0f5919",
-      "entity_name": "_request_text",
-      "entity_kind": "function",
-      "spec_filename": "IMPLEMENTATION_EVIDENCE.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, list"
-      ]
-    },
-    {
-      "entity_id": "code:function:f679fe6bdf0f5919",
-      "entity_name": "_request_text",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR_ENSEMBLE.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, list"
-      ]
-    },
-    {
-      "entity_id": "code:function:f679fe6bdf0f5919",
-      "entity_name": "_request_text",
-      "entity_kind": "function",
-      "spec_filename": "PARKOUR_RESEARCH.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, list"
-      ]
-    },
-    {
-      "entity_id": "code:function:f679fe6bdf0f5919",
-      "entity_name": "_request_text",
-      "entity_kind": "function",
-      "spec_filename": "SPEC_GOVERNANCE.md",
-      "confidence": 0.59,
-      "reasons": [
-        "matched tokens: def, list"
-      ]
-    },
-    {
       "entity_id": "code:function:f68e7c13531ca3a8",
       "entity_name": "test_chat_completion_autoscales_multistep_code",
       "entity_kind": "function",
@@ -20116,6 +21106,26 @@
     {
       "entity_id": "code:function:f78fdc452a5e4281",
       "entity_name": "test_single_survivor_no_combine",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:f7cafd2bd0936284",
+      "entity_name": "test_shared_run_limit_stops_refinement_as_resource_limit",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:f7cafd2bd0936284",
+      "entity_name": "test_shared_run_limit_stops_refinement_as_resource_limit",
       "entity_kind": "function",
       "spec_filename": "PARKOUR.md",
       "confidence": 0.59,
@@ -20367,6 +21377,26 @@
     {
       "entity_id": "code:function:fba4ec3fad1eb89b",
       "entity_name": "test_verifier_call_limit_stop",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:fd40b273f3f9b31f",
+      "entity_name": "succeeding",
+      "entity_kind": "function",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: async, def"
+      ]
+    },
+    {
+      "entity_id": "code:function:fd40b273f3f9b31f",
+      "entity_name": "succeeding",
       "entity_kind": "function",
       "spec_filename": "PARKOUR.md",
       "confidence": 0.59,
@@ -26105,6 +27135,66 @@
       ]
     },
     {
+      "entity_id": "code:method:69c31b0ce75cea7a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "COST.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:69c31b0ce75cea7a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "MODEL_DISCOVERY.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:69c31b0ce75cea7a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:69c31b0ce75cea7a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "PARKOUR_REFINEMENT.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:69c31b0ce75cea7a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "PARKOUR_RESEARCH.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
+      "entity_id": "code:method:69c31b0ce75cea7a",
+      "entity_name": "__init__",
+      "entity_kind": "method",
+      "spec_filename": "PARKOUR.md",
+      "confidence": 0.59,
+      "reasons": [
+        "matched tokens: def, self"
+      ]
+    },
+    {
       "entity_id": "code:method:6a4d5b1cd0aab67a",
       "entity_name": "_compose",
       "entity_kind": "method",
@@ -29803,6 +30893,17 @@
       "confidence": 0.59,
       "reasons": [
         "matched tokens: def, str"
+      ]
+    },
+    {
+      "entity_id": "code:method:a63aaf3e581b9103",
+      "entity_name": "parkour_ensemble_configured_panel",
+      "entity_kind": "method",
+      "spec_filename": "PARKOUR_ENSEMBLE.md",
+      "confidence": 1,
+      "reasons": [
+        "explicit @spec annotation",
+        "section: Requirements"
       ]
     },
     {
@@ -34699,7 +35800,7 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "DependencyContext",
       "signature": "class DependencyContext:",
-      "start_line": 16
+      "start_line": 21
     },
     {
       "id": "code:class:9539c09fcc7d7290",
@@ -34707,7 +35808,7 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "WorkerResult",
       "signature": "class WorkerResult:",
-      "start_line": 23
+      "start_line": 28
     },
     {
       "id": "code:class:0e628bafd68e6b56",
@@ -34715,7 +35816,7 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "NodeResult",
       "signature": "class NodeResult:",
-      "start_line": 34
+      "start_line": 39
     },
     {
       "id": "code:class:0a07dffb42fd94a1",
@@ -34723,7 +35824,7 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "SchedulerLimits",
       "signature": "class SchedulerLimits:",
-      "start_line": 48
+      "start_line": 53
     },
     {
       "id": "code:class:2c1019178b8d4ad1",
@@ -34731,7 +35832,15 @@
       "path": "nvidia_smartroute/parkour/scheduler.py",
       "name": "SchedulerResult",
       "signature": "class SchedulerResult:",
-      "start_line": 71
+      "start_line": 131
+    },
+    {
+      "id": "code:function:17f6ee32886d4db4",
+      "kind": "function",
+      "path": "nvidia_smartroute/parkour/service.py",
+      "name": "_conductor_prompt",
+      "signature": "def _conductor_prompt(research_available: bool, panel_available: bool) -> str:",
+      "start_line": 62
     },
     {
       "id": "code:class:eea73553a192b637",
@@ -34875,7 +35984,7 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_panel_dedup_excludes_parkour_and_caps",
       "signature": "def test_panel_dedup_excludes_parkour_and_caps():",
-      "start_line": 20
+      "start_line": 30
     },
     {
       "id": "code:function:69a2e4bad04d2754",
@@ -34883,7 +35992,7 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_panel_empty_and_single",
       "signature": "def test_panel_empty_and_single():",
-      "start_line": 25
+      "start_line": 36
     },
     {
       "id": "code:function:9b797e8942c10fa9",
@@ -34891,7 +36000,7 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_panel_only_parkour_yields_empty",
       "signature": "def test_panel_only_parkour_yields_empty():",
-      "start_line": 30
+      "start_line": 41
     },
     {
       "id": "code:function:2624cdf2753a549b",
@@ -34899,7 +36008,7 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_ensemble_disabled_by_default",
       "signature": "def test_ensemble_disabled_by_default():",
-      "start_line": 34
+      "start_line": 45
     },
     {
       "id": "code:function:329112b57b1b7305",
@@ -34907,7 +36016,7 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "test_subtaskspec_panel_defaults_false",
       "signature": "def test_subtaskspec_panel_defaults_false():",
-      "start_line": 38
+      "start_line": 49
     },
     {
       "id": "code:class:aa8a2109443ad964",
@@ -34915,7 +36024,7 @@
       "path": "tests/test_parkour_ensemble.py",
       "name": "_Decision",
       "signature": "class _Decision:",
-      "start_line": 167
+      "start_line": 240
     },
     {
       "id": "code:function:0956af002a9e1331",
@@ -34966,6 +36075,30 @@
       "start_line": 135
     },
     {
+      "id": "code:function:b2534d6622468c0a",
+      "kind": "function",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "test_direct_plan_labels_prior_assistant_output",
+      "signature": "def test_direct_plan_labels_prior_assistant_output():",
+      "start_line": 10
+    },
+    {
+      "id": "code:function:ceee8db88aea63a1",
+      "kind": "function",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "test_request_context_retains_roles_and_bounds",
+      "signature": "def test_request_context_retains_roles_and_bounds():",
+      "start_line": 24
+    },
+    {
+      "id": "code:function:c78aaa61b548490c",
+      "kind": "function",
+      "path": "tests/test_parkour_grounding.py",
+      "name": "test_conductor_advertises_only_available_capabilities",
+      "signature": "def test_conductor_advertises_only_available_capabilities():",
+      "start_line": 110
+    },
+    {
       "id": "code:function:1721c523cde43c85",
       "kind": "function",
       "path": "tests/test_parkour_refinement.py",
@@ -34982,12 +36115,20 @@
       "start_line": 59
     },
     {
+      "id": "code:class:a5b89af9ec954568",
+      "kind": "class",
+      "path": "tests/test_parkour_refinement.py",
+      "name": "SharedLimitError",
+      "signature": "class SharedLimitError(RuntimeError):",
+      "start_line": 228
+    },
+    {
       "id": "code:function:0fccc8ac0b8a94ac",
       "kind": "function",
       "path": "tests/test_parkour_refinement.py",
       "name": "test_refinement_disabled_by_default_leaves_trace_absent",
       "signature": "def test_refinement_disabled_by_default_leaves_trace_absent(monkeypatch):",
-      "start_line": 250
+      "start_line": 298
     },
     {
       "id": "code:class:181bbef53977b8f7",
@@ -35083,7 +36224,7 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_dependencies_execute_in_order_and_context_is_typed",
       "signature": "def test_dependencies_execute_in_order_and_context_is_typed():",
-      "start_line": 44
+      "start_line": 45
     },
     {
       "id": "code:function:b02450fa04e1844f",
@@ -35091,7 +36232,7 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_ready_nodes_run_concurrently_under_semaphore",
       "signature": "def test_ready_nodes_run_concurrently_under_semaphore():",
-      "start_line": 64
+      "start_line": 65
     },
     {
       "id": "code:function:9c5dbe3bc14efe40",
@@ -35099,7 +36240,7 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_deadline_cancels_worker",
       "signature": "def test_deadline_cancels_worker():",
-      "start_line": 108
+      "start_line": 109
     },
     {
       "id": "code:function:5cac978eb602d4eb",
@@ -35107,7 +36248,7 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_recursive_worker_model_is_rejected",
       "signature": "def test_recursive_worker_model_is_rejected():",
-      "start_line": 128
+      "start_line": 129
     },
     {
       "id": "code:function:2095d3727ec3b093",
@@ -35115,7 +36256,15 @@
       "path": "tests/test_parkour_scheduler.py",
       "name": "test_gateway_worker_uses_router_and_existing_fallback_path",
       "signature": "def test_gateway_worker_uses_router_and_existing_fallback_path(monkeypatch):",
-      "start_line": 140
+      "start_line": 141
+    },
+    {
+      "id": "code:function:c62595e109c6ebed",
+      "kind": "function",
+      "path": "tests/test_parkour_scheduler.py",
+      "name": "test_gateway_worker_preserves_direct_message_roles",
+      "signature": "def test_gateway_worker_preserves_direct_message_roles(monkeypatch):",
+      "start_line": 183
     },
     {
       "id": "code:function:bc28a9c96e89b28f",
@@ -35232,26 +36381,26 @@
   ],
   "aliases": [],
   "coverage": {
-    "governed_entity_count": 610,
-    "linked_entity_count": 527,
-    "unlinked_entity_count": 83,
-    "coverage_ratio": 0.8639,
+    "governed_entity_count": 642,
+    "linked_entity_count": 553,
+    "unlinked_entity_count": 89,
+    "coverage_ratio": 0.8614,
     "linked_by_kind": {
-      "class": 54,
-      "method": 152,
-      "function": 310,
+      "class": 55,
+      "method": 154,
+      "function": 333,
       "route": 11
     },
     "unlinked_by_kind": {
-      "class": 24,
-      "function": 59
+      "class": 25,
+      "function": 64
     }
   },
   "drift": {
-    "score": 0.1361,
+    "score": 0.1386,
     "severity": "low",
     "signals": [
-      "83 of 610 governable code entities have no local spec link",
+      "89 of 642 governable code entities have no local spec link",
       "22 local spec documents scanned"
     ]
   },

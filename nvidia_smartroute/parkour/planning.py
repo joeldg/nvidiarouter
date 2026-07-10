@@ -237,6 +237,27 @@ def _message_text(messages: Iterable[Mapping[str, Any]]) -> str:
     return "\n".join(part for part in parts if part).strip()
 
 
+def _message_transcript(messages: Iterable[Mapping[str, Any]]) -> str:
+    """Render a role-labelled fallback transcript without changing authority."""
+    parts: List[str] = []
+    for message in messages:
+        role = str(message.get("role", "unknown")).upper()
+        content = message.get("content", "")
+        if isinstance(content, str):
+            text = content
+        elif isinstance(content, list):
+            text = "\n".join(
+                str(item.get("text", ""))
+                for item in content
+                if isinstance(item, Mapping) and item.get("type") == "text"
+            )
+        else:
+            text = ""
+        if text:
+            parts.append(f"[{role}]\n{text}")
+    return "\n\n".join(parts).strip()
+
+
 # @spec[PARKOUR.md#Requirements]
 def should_decompose(messages: Iterable[Mapping[str, Any]]) -> bool:
     """Return whether local evidence justifies paying for conductor decomposition."""
@@ -252,7 +273,7 @@ def build_direct_plan(
     task_type: TaskType = TaskType.CHAT,
 ) -> ExecutionPlan:
     """Build the single-worker, no-synthesis plan used for simple requests."""
-    prompt = _message_text(messages)
+    prompt = _message_transcript(messages)
     if not prompt:
         raise PlanValidationError("cannot build a direct plan from empty messages")
     return ExecutionPlan(

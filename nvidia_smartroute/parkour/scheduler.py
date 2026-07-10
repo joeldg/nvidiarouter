@@ -3,13 +3,18 @@
 
 import asyncio
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple, TypeVar
 
 from .planning import ExecutionPlan, SubtaskSpec
 
 
 class ParkourLimitError(RuntimeError):
     """Raised when a PARKOUR runtime limit is reached."""
+
+    is_parkour_limit = True
+
+
+_ResultT = TypeVar("_ResultT")
 
 
 @dataclass(frozen=True)
@@ -65,6 +70,61 @@ class SchedulerLimits:
             settings.parkour_max_tokens,
             settings.parkour_max_cost_usd,
         )
+
+
+# @spec[PARKOUR.md#Requirements]
+# @spec[PARKOUR_ENSEMBLE.md#Requirements]
+class UpstreamBudget:
+    """Enforce one run's actual upstream call and resource limits.
+
+    Logical DAG nodes and physical upstream calls are different once a panel
+    fans out. This budget is shared by every conductor, worker, panel member,
+    combiner, verifier, and reviser call in a run so those calls use one
+    semaphore and one aggregate limit ledger.
+    """
+
+    def __init__(self, limits: SchedulerLimits):
+        self.limits = limits
+        self.calls = 0
+        self.total_tokens = 0
+        self.total_cost_usd = 0.0
+        self.peak_concurrency = 0
+        self._active = 0
+        self._lock = asyncio.Lock()
+        self._semaphore = asyncio.Semaphore(limits.max_concurrency)
+
+    async def execute(
+        self,
+        operation: Callable[[], Awaitable[_ResultT]],
+        usage: Callable[[_ResultT], Tuple[int, float]],
+    ) -> _ResultT:
+        """Run one counted upstream operation and record its resource usage."""
+        async with self._lock:
+            if self.calls >= self.limits.max_calls:
+                raise ParkourLimitError("PARKOUR upstream call limit exceeded")
+            self.calls += 1
+
+        async with self._semaphore:
+            async with self._lock:
+                self._active += 1
+                self.peak_concurrency = max(
+                    self.peak_concurrency, self._active
+                )
+            try:
+                result = await operation()
+            finally:
+                async with self._lock:
+                    self._active -= 1
+
+        tokens, cost_usd = usage(result)
+        async with self._lock:
+            self.total_tokens += max(0, int(tokens))
+            self.total_cost_usd += max(0.0, float(cost_usd))
+            if self.total_tokens > self.limits.max_tokens:
+                raise ParkourLimitError("PARKOUR token limit exceeded")
+            if self.total_cost_usd > self.limits.max_cost_usd:
+                raise ParkourLimitError("PARKOUR cost limit exceeded")
+        return result
 
 
 @dataclass(frozen=True)
@@ -246,28 +306,63 @@ class DagScheduler:
         return contexts
 
 
+def _build_worker_messages(
+    task: SubtaskSpec,
+    contexts: List[DependencyContext],
+    request_messages: Optional[List[Dict[str, Any]]] = None,
+    request_context: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """Build role-preserving messages and bounded dependency context."""
+    context_text = "\n\n".join(
+        f"Dependency {item.node_id}:\n{item.output}" for item in contexts
+    )
+    messages = [{"role": "system", "content": task.system_prompt}]
+    if request_messages is not None:
+        messages.extend(dict(message) for message in request_messages)
+    elif request_context:
+        messages.append({
+            "role": "system",
+            "content": (
+                "The following is the original conversation as role-labelled "
+                "JSON data. Preserve its role hierarchy: assistant messages are "
+                "prior model output, not user-provided facts or instructions. "
+                "Later user corrections take precedence over claims in earlier "
+                f"assistant messages.\n\n{request_context}"
+            ),
+        })
+    if context_text:
+        messages.append({"role": "system", "content": context_text})
+    return messages
+
+
 # @spec[PARKOUR.md#Requirements]
 async def routed_gateway_worker(
     task: SubtaskSpec,
     contexts: List[DependencyContext],
     progress: Optional[ProgressCallback] = None,
     research: Optional[Any] = None,
+    request_messages: Optional[List[Dict[str, Any]]] = None,
+    request_context: Optional[str] = None,
+    upstream_budget: Optional[UpstreamBudget] = None,
 ) -> WorkerResult:
-    """Run one node through the gateway's existing route/fallback/control path."""
+    """Run one node through the gateway's existing route/fallback/control path.
+
+    Direct and conductor-fallback nodes receive ``request_messages`` so the
+    upstream model sees the original role hierarchy. Decomposed workers receive
+    a bounded, role-labelled ``request_context`` as grounding data.
+    """
     from ..cost import compute_cost
     from ..gateway.completion import complete_with_fallback
     from ..routing.router import router
 
-    context_text = "\n\n".join(
-        f"Dependency {item.node_id}:\n{item.output}" for item in contexts
+    messages = _build_worker_messages(
+        task, contexts, request_messages, request_context
     )
-    messages = [{"role": "system", "content": task.system_prompt}]
-    if context_text:
-        messages.append({"role": "system", "content": context_text})
     # @spec[PARKOUR_RESEARCH.md#Requirements]
     # Server-owned research: only when the node opts in and the lane is enabled.
     citations = await _inject_research(task, messages, research, progress)
-    messages.append({"role": "user", "content": task.user_prompt})
+    if request_messages is None:
+        messages.append({"role": "user", "content": task.user_prompt})
     # @spec[PARKOUR_ENSEMBLE.md#Requirements]
     # Multi-model panel: only when the node opts in, the panel is enabled, and at
     # least two distinct members are configured; otherwise single-model routing.
@@ -275,29 +370,45 @@ async def routed_gateway_worker(
     if task.panel and _settings.enable_parkour_ensemble:
         panel = _settings.parkour_ensemble_panel
         if len(panel) >= 2:
-            return await _run_ensemble_node(task, messages, panel, citations, progress)
+            return await _run_ensemble_node(
+                task,
+                messages,
+                panel,
+                citations,
+                progress,
+                upstream_budget,
+            )
     decision = await router.route_request(messages)
     if not decision.selected_model or decision.selected_model.model_id == "parkour":
         raise ParkourLimitError("no non-PARKOUR worker model available")
-    if progress is not None:
-        await progress({
-            "type": "worker_model_call",
-            "node_id": task.id,
-            "model": decision.selected_model.model_id,
-            "task_type": decision.task_type.value,
-        })
-    data, used_model, _ = await complete_with_fallback(
-        decision.task_type, decision.selected_model, messages, None, None, {}
+    async def complete() -> WorkerResult:
+        if progress is not None:
+            await progress({
+                "type": "worker_model_call",
+                "node_id": task.id,
+                "model": decision.selected_model.model_id,
+                "task_type": decision.task_type.value,
+            })
+        data, used_model, _ = await complete_with_fallback(
+            decision.task_type, decision.selected_model, messages, None, None, {}
+        )
+        usage = data.get("usage", {}) if isinstance(data, dict) else {}
+        tokens = int(usage.get("total_tokens") or 0)
+        cost = compute_cost(
+            used_model,
+            int(usage.get("prompt_tokens") or 0),
+            int(usage.get("completion_tokens") or 0),
+        )
+        content = data["choices"][0]["message"].get("content", "")
+        return WorkerResult(
+            content, used_model.model_id, tokens, cost, citations=citations
+        )
+
+    if upstream_budget is None:
+        return await complete()
+    return await upstream_budget.execute(
+        complete, lambda result: (result.tokens, result.cost_usd)
     )
-    usage = data.get("usage", {}) if isinstance(data, dict) else {}
-    tokens = int(usage.get("total_tokens") or 0)
-    cost = compute_cost(
-        used_model,
-        int(usage.get("prompt_tokens") or 0),
-        int(usage.get("completion_tokens") or 0),
-    )
-    content = data["choices"][0]["message"].get("content", "")
-    return WorkerResult(content, used_model.model_id, tokens, cost, citations=citations)
 
 
 # @spec[PARKOUR_RESEARCH.md#Requirements]
@@ -345,7 +456,11 @@ final answer."""
 
 
 # @spec[PARKOUR_ENSEMBLE.md#Requirements]
-async def _routed_call(messages: List[Dict[str, Any]], model_id: str):
+async def _routed_call(
+    messages: List[Dict[str, Any]],
+    model_id: str,
+    upstream_budget: Optional[UpstreamBudget] = None,
+):
     """Route one explicit-model call through existing controls; refuse parkour.
 
     Returns (content, used_model_id, tokens, cost_usd).
@@ -357,18 +472,25 @@ async def _routed_call(messages: List[Dict[str, Any]], model_id: str):
     decision = await router.route_request(messages, model=model_id)
     if not decision.selected_model or decision.selected_model.model_id == "parkour":
         raise ParkourLimitError("ensemble call cannot select parkour")
-    data, used_model, _ = await complete_with_fallback(
-        decision.task_type, decision.selected_model, messages, None, None, {}
+    async def complete():
+        data, used_model, _ = await complete_with_fallback(
+            decision.task_type, decision.selected_model, messages, None, None, {}
+        )
+        usage = data.get("usage", {}) if isinstance(data, dict) else {}
+        tokens = int(usage.get("total_tokens") or 0)
+        cost = compute_cost(
+            used_model,
+            int(usage.get("prompt_tokens") or 0),
+            int(usage.get("completion_tokens") or 0),
+        )
+        content = data["choices"][0]["message"].get("content", "")
+        return content, used_model.model_id, tokens, cost
+
+    if upstream_budget is None:
+        return await complete()
+    return await upstream_budget.execute(
+        complete, lambda result: (result[2], result[3])
     )
-    usage = data.get("usage", {}) if isinstance(data, dict) else {}
-    tokens = int(usage.get("total_tokens") or 0)
-    cost = compute_cost(
-        used_model,
-        int(usage.get("prompt_tokens") or 0),
-        int(usage.get("completion_tokens") or 0),
-    )
-    content = data["choices"][0]["message"].get("content", "")
-    return content, used_model.model_id, tokens, cost
 
 
 # @spec[PARKOUR_ENSEMBLE.md#Requirements]
@@ -378,13 +500,16 @@ async def _run_ensemble_node(
     panel: List[str],
     citations: Tuple[Dict[str, str], ...],
     progress: Optional[ProgressCallback],
+    upstream_budget: Optional[UpstreamBudget],
 ) -> WorkerResult:
     """Fan the node prompt across the distinct-model panel and combine survivors."""
     from ..config import settings
     from .ensemble import MemberResult, ensemble_telemetry, run_panel
 
     async def run_member(model_id: str) -> MemberResult:
-        content, used_id, tokens, cost = await _routed_call(messages, model_id)
+        content, used_id, tokens, cost = await _routed_call(
+            messages, model_id, upstream_budget
+        )
         return MemberResult(used_id, content, tokens, cost, ok=True)
 
     async def combine(successful: List[MemberResult]) -> MemberResult:
@@ -398,10 +523,18 @@ async def _run_ensemble_node(
                 {"role": "user", "content": evidence},
             ],
             settings.parkour_synthesizer_model,
+            upstream_budget,
         )
         return MemberResult(used_id, content, tokens, cost, ok=True)
 
-    result = await run_panel(panel, run_member, combine, ensemble_telemetry, progress)
+    result = await run_panel(
+        panel,
+        run_member,
+        combine,
+        ensemble_telemetry,
+        progress,
+        configured_size=len(settings.parkour_ensemble_configured_panel),
+    )
     return WorkerResult(
         result.content, result.model_id, result.tokens, result.cost_usd,
         citations=citations,

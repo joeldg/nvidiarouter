@@ -60,24 +60,24 @@ The verifier and reviser are ordinary routed calls; they MUST NOT select
 
 ## Phase 0 — Spec Review and Interface Freeze
 
-- [ ] Submit `PARKOUR_REFINEMENT.md` as a project-scoped draft.
-- [ ] Obtain human approval and publication; `specreg sync` the bundle.
-- [ ] Freeze the verdict schema (score range, accept/revise, bounded feedback)
+- [x] Submit `PARKOUR_REFINEMENT.md` as a project-scoped draft.
+- [x] Obtain human approval and publication; `specreg sync` the bundle.
+- [x] Freeze the verdict schema (score range, accept/revise, bounded feedback)
       and the settings/flag names.
-- [ ] Confirm disabled-by-default is byte-for-byte identical to current PARKOUR.
+- [x] Confirm disabled-by-default is byte-for-byte identical to current PARKOUR.
 
 Acceptance evidence: registry review ID + published version; `specreg check`
 reports the local bundle current.
 
 ## Phase 1 — Configuration and Roles
 
-- [ ] Add `ENABLE_PARKOUR_REFINEMENT` (default off), independent of
+- [x] Add `ENABLE_PARKOUR_REFINEMENT` (default off), independent of
       `ENABLE_PARKOUR` and `ENABLE_PARKOUR_RESEARCH`.
-- [ ] Add `PARKOUR_VERIFIER_MODEL` (defaulting to the synthesizer/conductor
+- [x] Add `PARKOUR_VERIFIER_MODEL` (defaulting to the synthesizer/conductor
       model) and an acceptance threshold, no-improvement margin, and hard limits:
       max iterations, max verifier calls, max revision calls, added wall-clock,
       added tokens, and added cost.
-- [ ] Document every setting in `.env.example` and `README.md`, including the
+- [x] Document every setting in `.env.example` and `README.md`, including the
       latency/cost amplification disclosure.
 
 Verification: default-off and validation tests; disabled-path regression proving
@@ -85,13 +85,13 @@ normal PARKOUR is unchanged.
 
 ## Phase 2 — Verifier Verdict Schema and Call
 
-- [ ] Add a Pydantic `Verdict` model (score in fixed range, accept/revise,
+- [x] Add a Pydantic `Verdict` model (score in fixed range, accept/revise,
       bounded structured feedback) with `extra="forbid"`.
-- [ ] Parse native structured output first; fenced-JSON fallback only, matching
+- [x] Parse native structured output first; fenced-JSON fallback only, matching
       the conductor-plan parsing approach.
-- [ ] Treat malformed/unparseable/out-of-range verdicts as a verifier failure —
+- [x] Treat malformed/unparseable/out-of-range verdicts as a verifier failure —
       never an implicit accept.
-- [ ] Implement a server-owned verifier call routed through existing controls
+- [x] Implement a server-owned verifier call routed through existing controls
       that cannot select `parkour`.
 
 Verification: valid/malformed/out-of-range verdict tests; recursion-prevention
@@ -99,13 +99,13 @@ test.
 
 ## Phase 3 — Bounded Refinement Loop
 
-- [ ] Implement the loop over the synthesized candidate: verify -> (revise ->
+- [x] Implement the loop over the synthesized candidate: verify -> (revise ->
       re-verify)\* under all Phase 1 limits, enforced during execution.
-- [ ] Reviser is a routed worker call receiving only the prior candidate and
+- [x] Reviser is a routed worker call receiving only the prior candidate and
       bounded, deterministically truncated verifier feedback (record truncation).
-- [ ] Track every candidate's score; return the best observed candidate, ties to
+- [x] Track every candidate's score; return the best observed candidate, ties to
       the earlier one.
-- [ ] Record the terminating condition (accept | max-iterations | resource-limit
+- [x] Record the terminating condition (accept | max-iterations | resource-limit
       | no-improvement).
 
 Verification: termination tests for each stop condition; best-candidate
@@ -114,22 +114,22 @@ barriers, not timing alone.
 
 ## Phase 4 — Accounting and Failure Semantics
 
-- [ ] Roll verifier/reviser tokens and cost into the PARKOUR aggregate and daily
+- [x] Roll verifier/reviser tokens and cost into the PARKOUR aggregate and daily
       budget without double counting; retain per-role internal accounting.
-- [ ] On verifier or reviser failure, return the best prior candidate marked
+- [x] On verifier or reviser failure, return the best prior candidate marked
       unverified/partially-verified — never an error, never inappropriate
       fan-out.
-- [ ] Ensure cancellation/deadline releases any held concurrency and gauges.
+- [x] Ensure cancellation/deadline releases any held concurrency and gauges.
 
 Verification: cost-reconciliation test (per-call sum == aggregate); failure
 matrix; cancellation cleanup test.
 
 ## Phase 5 — Gateway Contract and Metadata
 
-- [ ] Add bounded, namespaced streaming events (`verification_started`,
+- [x] Add bounded, namespaced streaming events (`verification_started`,
       `verification_completed`, `revision_started`, `revision_completed`,
       `refinement_stopped`) with no full prompts/candidates/secrets.
-- [ ] Extend the opt-in `parkour_trace` block with a compact refinement summary
+- [x] Extend the opt-in `parkour_trace` block with a compact refinement summary
       (iterations, returned score, stop reason, verified flag); keep default
       responses OpenAI-compatible and headers compact.
 
@@ -138,10 +138,10 @@ tests; disabled-path parity test.
 
 ## Phase 6 — Observability, Cost, and Operator UI
 
-- [ ] Record loop invocations, total iterations, accepts, rejects,
+- [x] Record loop invocations, total iterations, accepts, rejects,
       no-improvement stops, limit stops, verifier failures, returned score, and
       added verifier/reviser token/cost figures.
-- [ ] Expose equivalent JSON and Prometheus signals (`nsr_parkour_refine_*`).
+- [x] Expose equivalent JSON and Prometheus signals (`nsr_parkour_refine_*`).
 - [ ] Emit redacted structured run events; add a bounded refinement summary to
       `/explain`, the web dashboard, and the TUI.
 
@@ -150,14 +150,14 @@ redaction tests; dashboard tests for accept, no-improvement, and limit-stop.
 
 ## Phase 7 — Hardening and Release
 
-- [ ] Run unit, integration, lint, type, and full regression suites.
-- [ ] Add adversarial verifier-output tests (reward-hacking scores, always-accept,
+- [x] Run unit, integration, lint, type, and full regression suites.
+- [x] Add adversarial verifier-output tests (reward-hacking scores, always-accept,
       always-revise) and prove bounded, terminating behavior.
 - [ ] Load-test added concurrency; prove no key-budget bypass and no
       non-termination.
-- [ ] Document expected latency/cost amplification and tuning guidance.
+- [x] Document expected latency/cost amplification and tuning guidance.
 - [ ] Ship disabled by default; enable in an opt-in preview.
-- [ ] Capture SpecRegistry traceability; run `finish_task` / `specreg comply`
+- [x] Capture SpecRegistry traceability; run `finish_task` / `specreg comply`
       before commit.
 
 Release gates: no implementation before published specs are synced; no unbounded

@@ -559,9 +559,8 @@ class Settings(BaseSettings):
 
     # @spec[PARKOUR_ENSEMBLE.md#Requirements]
     @property
-    def parkour_ensemble_panel(self) -> List[str]:
-        """The effective ensemble panel: distinct model IDs, `parkour` excluded,
-        order-preserving, truncated to the configured maximum panel size."""
+    def parkour_ensemble_configured_panel(self) -> List[str]:
+        """Configured distinct ensemble models before the effective-size cap."""
         raw = self.parkour_ensemble_models or ""
         panel: List[str] = []
         seen = set()
@@ -570,7 +569,15 @@ class Settings(BaseSettings):
                 continue
             seen.add(model_id)
             panel.append(model_id)
-        return panel[: self.parkour_ensemble_max_size]
+        return panel
+
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    @property
+    def parkour_ensemble_panel(self) -> List[str]:
+        """Return the deterministic effective panel after the size cap."""
+        return self.parkour_ensemble_configured_panel[
+            : self.parkour_ensemble_max_size
+        ]
 
 
 # @spec[GATEWAY_API.md#Requirements]
