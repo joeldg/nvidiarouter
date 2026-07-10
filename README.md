@@ -217,6 +217,20 @@ All settings are environment variables (see [.env.example](./.env.example)):
 | `PARKOUR_MAX_CALLS` / `PARKOUR_TIMEOUT_SECONDS` | `12` / `300` | PARKOUR call and wall-clock bounds |
 | `PARKOUR_MAX_CONTEXT_CHARS` / `PARKOUR_MAX_OUTPUT_CHARS` | `24000` / `24000` | PARKOUR per-node context/output bounds |
 | `PARKOUR_MAX_TOKENS` / `PARKOUR_MAX_COST_USD` | `64000` / `1.0` | PARKOUR aggregate token and estimated-cost bounds |
+| `ENABLE_PARKOUR_RESEARCH` | `False` | Allow PARKOUR workers to use the built-in web-research lane |
+| `PARKOUR_RESEARCH_ENDPOINT` / `PARKOUR_RESEARCH_API_KEY` | – / – | HTTPS search-provider endpoint and key (key masked wherever surfaced) |
+| `PARKOUR_RESEARCH_MAX_SEARCHES_PER_RUN` / `..._PER_NODE` | `6` / `2` | Research search-count bounds |
+| `PARKOUR_RESEARCH_MAX_QUERY_CHARS` / `..._MAX_RESULTS` / `..._SNIPPET_CHARS` | `256` / `5` / `500` | Per-query, per-result, and snippet bounds |
+| `PARKOUR_RESEARCH_MAX_BYTES` / `..._TIMEOUT_SECONDS` | `200000` / `15` | Research bytes-retained and wall-clock bounds |
+| `PARKOUR_RESEARCH_COST_PER_SEARCH_USD` / `..._MAX_COST_USD` | `0.005` / `0.1` | Estimated per-search and per-run research spend (rolled into PARKOUR cost) |
+| `PARKOUR_RESEARCH_ALLOW_DOMAINS` / `..._BLOCK_DOMAINS` | – / – | Comma-separated research domain allow/block lists (block wins) |
+| `ENABLE_PARKOUR_REFINEMENT` | `False` | Verify the PARKOUR answer and iteratively refine it under bounds |
+| `PARKOUR_VERIFIER_MODEL` | `meta/llama-3.1-70b-instruct` | Model that scores/verifies candidate answers |
+| `PARKOUR_REFINE_MAX_ITERATIONS` / `..._MAX_VERIFIER_CALLS` / `..._MAX_REVISION_CALLS` | `2` / `3` / `2` | Refinement loop call bounds |
+| `PARKOUR_REFINE_TIMEOUT_SECONDS` / `..._MAX_ADDED_TOKENS` / `..._MAX_ADDED_COST_USD` | `120` / `32000` / `0.5` | Added wall-clock, token, and cost bounds (rolled into PARKOUR budget) |
+| `PARKOUR_REFINE_ACCEPT_THRESHOLD` / `..._MIN_IMPROVEMENT` / `..._FEEDBACK_CHARS` | `0.8` / `0.02` / `2000` | Accept score, no-improvement margin, injected-feedback bound |
+| `ENABLE_PARKOUR_ENSEMBLE` | `False` | Fan a node's prompt across a distinct-model panel and combine |
+| `PARKOUR_ENSEMBLE_MODELS` / `PARKOUR_ENSEMBLE_MAX_SIZE` | – / `3` | Panel member model IDs (≥2 distinct) and max members per node |
 | `DEFAULT_EMBEDDING_MODEL` | `nvidia/nv-embedqa-e5-v5` | Embeddings model |
 | `LOG_LEVEL` / `LOG_JSON` | `INFO` / `False` | Logging level / JSON output |
 
@@ -271,6 +285,72 @@ usually takes longer than a normal completion. Tune `PARKOUR_MAX_NODES`,
 streaming progress events, but it does not provide true upstream token streaming
 for internal worker calls. It still rejects tool execution. Keep the feature
 disabled for clients that do not explicitly opt into that tradeoff.
+
+### PARKOUR governed research lane
+
+A separate, server-owned web-research capability lets PARKOUR workers ground
+answers in current sources. It is disabled by default and independent of
+`ENABLE_PARKOUR`. Set `ENABLE_PARKOUR_RESEARCH=True` and configure
+`PARKOUR_RESEARCH_ENDPOINT` (plus `PARKOUR_RESEARCH_API_KEY` if the provider
+needs one) to enable it. Arbitrary client-supplied `tools` are still rejected;
+only the built-in, bounded `parkour_web_search` capability is available, and
+only to server-selected research nodes.
+
+All research egress passes through one adapter that blocks private, loopback,
+link-local, and other non-public targets (SSRF protection, including after DNS
+resolution), enforces the `PARKOUR_RESEARCH_ALLOW_DOMAINS` /
+`PARKOUR_RESEARCH_BLOCK_DOMAINS` lists, and never exposes the provider key or
+`Authorization` header to workers, logs, or streaming events. Every run is
+bounded by the `PARKOUR_RESEARCH_*` search-count, query-length, result-count,
+snippet, bytes, wall-clock, and cost limits above; research spend rolls into the
+PARKOUR aggregate cost and budget. Identical queries are deduplicated within a
+run, and research telemetry is exposed in both JSON `/metrics` and
+`/metrics/prometheus` (`nsr_parkour_research_*`).
+
+**Privacy and freshness:** enabling research sends generated search queries to
+the configured provider, and answer quality depends on that provider's coverage
+and recency. Workers using search return bounded citations; synthesis preserves
+cited claims where possible and marks uncited claims as model-derived.
+
+### PARKOUR verify-and-refine loop
+
+An opt-in loop (disabled by default, independent of `ENABLE_PARKOUR`) scores the
+synthesized answer with a server-owned verifier and, when it falls short and
+budget remains, revises it with the verifier's feedback and re-scores — a
+bounded Thinker/Worker/Verifier-style pass inspired by verify-and-refine
+coordinators. Set `ENABLE_PARKOUR_REFINEMENT=True` to enable it.
+
+The loop is **guaranteed to terminate**: it stops on the first of verifier
+acceptance (score ≥ `PARKOUR_REFINE_ACCEPT_THRESHOLD`), the iteration limit, any
+resource limit, or a no-improvement stop when a revision fails to raise the
+score by `PARKOUR_REFINE_MIN_IMPROVEMENT`. It returns the **best-scored**
+candidate observed (a worse revision never replaces a better earlier answer), a
+malformed verdict is treated as a verifier failure rather than an implicit
+accept, and any verifier/revision failure is non-fatal — PARKOUR returns the
+best answer so far marked *unverified* instead of erroring. Added verifier and
+revision tokens/cost roll into the PARKOUR aggregate and daily budget; the loop
+adds latency and cost proportional to the iteration and call limits. Refinement
+telemetry is exposed in JSON `/metrics` and `/metrics/prometheus`
+(`nsr_parkour_refine_*`).
+
+### PARKOUR multi-model ensemble panel
+
+An opt-in panel (disabled by default, independent of `ENABLE_PARKOUR`) gives a
+node genuine model diversity: it fans one prompt across an explicit, server-
+configured set of **≥2 distinct models in parallel** — bypassing the usual
+single-model-per-task routing — and combines their answers. Set
+`ENABLE_PARKOUR_ENSEMBLE=True` and list members in `PARKOUR_ENSEMBLE_MODELS`
+(deduplicated, `parkour` excluded, capped at `PARKOUR_ENSEMBLE_MAX_SIZE`).
+
+Membership is server-configured only — clients cannot specify it. Each member
+routes through the existing key pool, retries, fallback, and circuit breaker,
+and cannot select `parkour`. The panel tolerates partial failure (it proceeds on
+surviving members and fails only if all fail), combines survivors with the
+synthesizer, and rolls all member and combination tokens/cost into the PARKOUR
+aggregate. Cost and latency scale roughly with panel size. Ensemble telemetry is
+exposed in JSON `/metrics` and `/metrics/prometheus` (`nsr_parkour_ensemble_*`).
+If fewer than two distinct members are configured, the node falls back to
+ordinary single-model routing.
 
 ## Governance
 

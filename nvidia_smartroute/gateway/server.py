@@ -35,6 +35,9 @@ from ..parkour.engine import ParkourExecutionError
 from ..parkour.scheduler import ParkourLimitError
 from ..parkour.service import run_parkour
 from ..parkour.telemetry import parkour_telemetry
+from ..parkour.research import research_telemetry
+from ..parkour.refinement import refinement_telemetry
+from ..parkour.ensemble import ensemble_telemetry
 from ..web import DASHBOARD_HTML
 from .. import logging_config  # noqa: F401  (configures structlog on import)
 from . import runtime
@@ -88,6 +91,12 @@ def _parkour_chunk(
                 "type", "node_id", "task_type", "model", "tokens", "status",
                 "reason", "error", "node_count", "partial",
                 "context_truncated", "output_truncated",
+                # @spec[PARKOUR_RESEARCH.md#Requirements] bounded research fields
+                "query_chars", "results", "truncated",
+                # @spec[PARKOUR_REFINEMENT.md#Requirements] bounded refine fields
+                "iteration", "score", "accepted",
+                # @spec[PARKOUR_ENSEMBLE.md#Requirements] bounded panel fields
+                "size", "successes", "failures", "combined", "ok",
             }
         }
     return chunk
@@ -254,10 +263,17 @@ async def _handle_parkour(body: dict, request_id: str):
             "nodes": [
                 {"id": node.node_id, "status": node.status,
                  "model": node.model_id or None,
-                 "context_truncated": node.context_truncated}
+                 "context_truncated": node.context_truncated,
+                 "citations": len(node.citations)}
                 for node in result.scheduler.nodes.values()
             ],
         }
+        # @spec[PARKOUR_RESEARCH.md#Requirements]
+        if result.research:
+            response["parkour"]["research"] = result.research
+        # @spec[PARKOUR_REFINEMENT.md#Requirements]
+        if result.refinement:
+            response["parkour"]["refinement"] = result.refinement
     return JSONResponse(
         content=response,
         headers={"X-Request-ID": request_id, "X-Selected-Model": "parkour",
@@ -647,6 +663,12 @@ def _full_snapshot() -> dict:
     snapshot["budget"] = budget.snapshot()
     snapshot["adaptive_routing"] = adaptive_router.snapshot()
     snapshot["parkour"] = parkour_telemetry.snapshot()
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    snapshot["parkour"]["research"] = research_telemetry.snapshot()
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    snapshot["parkour"]["refinement"] = refinement_telemetry.snapshot()
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    snapshot["parkour"]["ensemble"] = ensemble_telemetry.snapshot()
     return snapshot
 
 

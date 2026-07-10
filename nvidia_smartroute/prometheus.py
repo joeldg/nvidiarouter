@@ -64,6 +64,49 @@ def render_prometheus(snapshot: Dict[str, Any]) -> str:
     ]:
         _metric(lines, name, mtype, help_text, parkour.get(key, 0))
 
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    research = parkour.get("research") or {}
+    for name, mtype, help_text, key in [
+        ("nsr_parkour_research_searches", "counter", "PARKOUR research searches", "searches"),
+        ("nsr_parkour_research_failures", "counter", "PARKOUR research failures", "failures"),
+        ("nsr_parkour_research_cache_hits", "counter", "PARKOUR research cache hits", "cache_hits"),
+        ("nsr_parkour_research_limit_stops", "counter", "PARKOUR research limit stops", "limit_stops"),
+        ("nsr_parkour_research_results", "counter", "PARKOUR research results retained", "results_retained"),
+        ("nsr_parkour_research_bytes", "counter", "PARKOUR research bytes retained", "bytes_retained"),
+        ("nsr_parkour_research_truncations", "counter", "PARKOUR research truncations", "truncations"),
+        ("nsr_parkour_research_domains", "gauge", "PARKOUR research distinct domains", "distinct_domains"),
+        ("nsr_parkour_research_cost_usd", "gauge", "PARKOUR research cost", "total_cost_usd"),
+    ]:
+        _metric(lines, name, mtype, help_text, research.get(key, 0))
+
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    refine = parkour.get("refinement") or {}
+    for name, mtype, help_text, key in [
+        ("nsr_parkour_refine_loops", "counter", "PARKOUR refinement loops", "loops"),
+        ("nsr_parkour_refine_iterations", "counter", "PARKOUR refinement iterations", "iterations"),
+        ("nsr_parkour_refine_accepts", "counter", "PARKOUR refinement accepts", "accepts"),
+        ("nsr_parkour_refine_rejects", "counter", "PARKOUR refinement rejects", "rejects"),
+        ("nsr_parkour_refine_no_improvement", "counter", "PARKOUR refinement no-improvement stops", "no_improvement_stops"),
+        ("nsr_parkour_refine_limit_stops", "counter", "PARKOUR refinement limit stops", "limit_stops"),
+        ("nsr_parkour_refine_verifier_failures", "counter", "PARKOUR verifier failures", "verifier_failures"),
+        ("nsr_parkour_refine_avg_score", "gauge", "PARKOUR refinement avg returned score", "avg_returned_score"),
+        ("nsr_parkour_refine_added_tokens", "counter", "PARKOUR refinement added tokens", "added_tokens"),
+        ("nsr_parkour_refine_added_cost_usd", "gauge", "PARKOUR refinement added cost", "added_cost_usd"),
+    ]:
+        _metric(lines, name, mtype, help_text, refine.get(key, 0))
+
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    ensemble = parkour.get("ensemble") or {}
+    for name, mtype, help_text, key in [
+        ("nsr_parkour_ensemble_panels", "counter", "PARKOUR ensemble panels", "panels"),
+        ("nsr_parkour_ensemble_member_successes", "counter", "PARKOUR ensemble member successes", "member_successes"),
+        ("nsr_parkour_ensemble_member_failures", "counter", "PARKOUR ensemble member failures", "member_failures"),
+        ("nsr_parkour_ensemble_all_failed", "counter", "PARKOUR ensemble all-members-failed", "all_failed"),
+        ("nsr_parkour_ensemble_distinct_models", "gauge", "PARKOUR ensemble distinct models", "distinct_models"),
+        ("nsr_parkour_ensemble_added_cost_usd", "gauge", "PARKOUR ensemble added cost", "added_cost_usd"),
+    ]:
+        _metric(lines, name, mtype, help_text, ensemble.get(key, 0))
+
     # Per-model gauges/counters (labelled by model).
     models = snapshot.get("models") or []
     for family, mtype, help_text, key in [

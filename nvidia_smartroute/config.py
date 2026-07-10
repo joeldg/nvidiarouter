@@ -206,6 +206,144 @@ class Settings(BaseSettings):
         default=1.0, gt=0, description="Maximum estimated upstream cost per run"
     )
 
+    # PARKOUR governed research lane (server-owned web search; disabled by
+    # default and independent of ENABLE_PARKOUR). See PARKOUR_RESEARCH.md.
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    enable_parkour_research: bool = Field(
+        default=False,
+        description="Allow PARKOUR workers to use the built-in parkour_web_search lane",
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_endpoint: Optional[str] = Field(
+        default=None,
+        description="HTTPS search-provider endpoint for the research lane",
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_api_key: Optional[str] = Field(
+        default=None,
+        description="Provider API key for the research lane (masked wherever surfaced)",
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_max_searches_per_run: int = Field(
+        default=6, ge=1, le=64, description="Maximum research searches per PARKOUR run"
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_max_searches_per_node: int = Field(
+        default=2, ge=1, le=32, description="Maximum research searches per graph node"
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_max_query_chars: int = Field(
+        default=256, ge=1, description="Maximum research query length in characters"
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_max_results: int = Field(
+        default=5, ge=1, le=20, description="Maximum results retained per search"
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_snippet_chars: int = Field(
+        default=500, ge=1, description="Maximum characters retained per result snippet"
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_max_bytes: int = Field(
+        default=200_000, ge=1, description="Maximum total result bytes retained per run"
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_timeout_seconds: float = Field(
+        default=15.0, gt=0, le=120,
+        description="Wall-clock budget (seconds) for all research in one run",
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_cost_per_search_usd: float = Field(
+        default=0.005, ge=0,
+        description="Estimated provider cost per research search (rolled into PARKOUR cost)",
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_max_cost_usd: float = Field(
+        default=0.1, gt=0, description="Maximum estimated research spend per run"
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    # Comma-separated registrable-domain suffixes. When allow is non-empty, only
+    # matching domains are reachable; block always wins over allow.
+    parkour_research_allow_domains: Optional[str] = Field(
+        default=None, description="Comma-separated allowed research domains (empty = any public)"
+    )
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    parkour_research_block_domains: Optional[str] = Field(
+        default=None, description="Comma-separated blocked research domains"
+    )
+
+    # PARKOUR verifier + iterative refinement loop (opt-in; disabled by default
+    # and independent of ENABLE_PARKOUR / ENABLE_PARKOUR_RESEARCH). See
+    # PARKOUR_REFINEMENT.md.
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    enable_parkour_refinement: bool = Field(
+        default=False,
+        description="Verify the PARKOUR answer and iteratively refine it under bounds",
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_verifier_model: str = Field(
+        default="meta/llama-3.1-70b-instruct",
+        min_length=1,
+        description="Upstream model used to verify/score PARKOUR candidate answers",
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_max_iterations: int = Field(
+        default=2, ge=1, le=10, description="Maximum refinement iterations per run"
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_max_verifier_calls: int = Field(
+        default=3, ge=1, le=20, description="Maximum verifier calls per run"
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_max_revision_calls: int = Field(
+        default=2, ge=1, le=20, description="Maximum revision (worker) calls per run"
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_timeout_seconds: float = Field(
+        default=120.0, gt=0, le=1800,
+        description="Added wall-clock budget (seconds) for the refinement loop",
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_max_added_tokens: int = Field(
+        default=32_000, ge=1, description="Maximum added tokens for the refinement loop"
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_max_added_cost_usd: float = Field(
+        default=0.5, gt=0, description="Maximum added estimated cost for the loop"
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_accept_threshold: float = Field(
+        default=0.8, ge=0.0, le=1.0,
+        description="Verifier score (0..1) at/above which an answer is accepted",
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_min_improvement: float = Field(
+        default=0.02, ge=0.0, le=1.0,
+        description="Minimum score gain a revision must add or the loop stops",
+    )
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    parkour_refine_feedback_chars: int = Field(
+        default=2_000, ge=1,
+        description="Maximum verifier-feedback characters injected into a revision",
+    )
+
+    # PARKOUR multi-model ensemble panel (opt-in; disabled by default and
+    # independent of the other PARKOUR flags). See PARKOUR_ENSEMBLE.md.
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    enable_parkour_ensemble: bool = Field(
+        default=False,
+        description="Let a PARKOUR node fan one prompt across a distinct-model panel",
+    )
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    parkour_ensemble_models: Optional[str] = Field(
+        default=None,
+        description="Comma-separated distinct model IDs forming the ensemble panel",
+    )
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    parkour_ensemble_max_size: int = Field(
+        default=3, ge=2, le=8, description="Maximum panel members run for one node"
+    )
+
     # Response cache
     # @spec[GATEWAY_API.md#Requirements]
     enable_cache: bool = Field(
@@ -404,6 +542,35 @@ class Settings(BaseSettings):
                 seen.add(k)
                 ordered.append(k)
         return ordered
+
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    @property
+    def parkour_research_allowlist(self) -> List[str]:
+        """Parsed, lowercased research allow-domains (empty = any public host)."""
+        raw = self.parkour_research_allow_domains or ""
+        return [d.strip().lower() for d in raw.split(",") if d.strip()]
+
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    @property
+    def parkour_research_blocklist(self) -> List[str]:
+        """Parsed, lowercased research block-domains (block wins over allow)."""
+        raw = self.parkour_research_block_domains or ""
+        return [d.strip().lower() for d in raw.split(",") if d.strip()]
+
+    # @spec[PARKOUR_ENSEMBLE.md#Requirements]
+    @property
+    def parkour_ensemble_panel(self) -> List[str]:
+        """The effective ensemble panel: distinct model IDs, `parkour` excluded,
+        order-preserving, truncated to the configured maximum panel size."""
+        raw = self.parkour_ensemble_models or ""
+        panel: List[str] = []
+        seen = set()
+        for model_id in (m.strip() for m in raw.split(",")):
+            if not model_id or model_id == "parkour" or model_id in seen:
+                continue
+            seen.add(model_id)
+            panel.append(model_id)
+        return panel[: self.parkour_ensemble_max_size]
 
 
 # @spec[GATEWAY_API.md#Requirements]

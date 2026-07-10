@@ -2,7 +2,7 @@
 """PARKOUR failure policy, partial synthesis, and aggregate accounting."""
 
 from dataclasses import dataclass
-from typing import Awaitable, Callable, List, Union, Mapping, Any, Optional
+from typing import Awaitable, Callable, Dict, List, Union, Mapping, Any, Optional
 
 from .planning import (
     ExecutionPlan,
@@ -49,6 +49,12 @@ class EngineResult:
     partial: bool
     conductor_fallback: bool
     conductor: Optional[WorkerResult] = None
+    # Bounded research-lane summary; None when the research lane is inactive.
+    # @spec[PARKOUR_RESEARCH.md#Requirements]
+    research: Optional[Dict[str, Any]] = None
+    # Bounded refinement-loop summary; None when the loop is inactive.
+    # @spec[PARKOUR_REFINEMENT.md#Requirements]
+    refinement: Optional[Dict[str, Any]] = None
 
 
 # @spec[PARKOUR.md#Requirements]
